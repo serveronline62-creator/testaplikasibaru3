@@ -76,6 +76,8 @@
         .btn-locked i { font-size:11px; }
         .btn-success { background:rgba(16,185,129,0.15);color:var(--accent);padding:6px 14px;border-radius:7px;border:1px solid rgba(16,185,129,0.3);font-weight:500;font-size:12px;cursor:pointer;transition:all 0.2s;font-family:inherit;display:inline-flex;align-items:center;gap:5px; }
         .btn-success:hover { background:rgba(16,185,129,0.25);transform:translateY(-1px); }
+        .btn-whatsapp { background:rgba(37,211,102,0.15);color:#25D366;padding:6px 14px;border-radius:7px;border:1px solid rgba(37,211,102,0.3);font-weight:500;font-size:12px;cursor:pointer;transition:all 0.2s;font-family:inherit;display:inline-flex;align-items:center;gap:5px; }
+        .btn-whatsapp:hover { background:rgba(37,211,102,0.25);transform:translateY(-1px); }
         .form-input { width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;font-family:inherit;transition:border-color 0.2s,background 0.3s;outline:none; }
         .form-input:focus { border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,0.1); }
         .form-input::placeholder { color:var(--muted); }
@@ -84,6 +86,8 @@
         select.form-input { appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px; }
         .badge { padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:inline-block; }
         .badge-masuk { background:rgba(6,182,212,0.15);color:#06B6D4; } .badge-diperiksa { background:rgba(245,158,11,0.15);color:#F59E0B; } .badge-proses { background:rgba(139,92,246,0.15);color:#A78BFA; } .badge-selesai { background:rgba(16,185,129,0.15);color:#10B981; } .badge-diambil { background:rgba(100,116,139,0.15);color:#94A3B8; }
+        .badge-garansi { background:rgba(16,185,129,0.15);color:#10B981; }
+        .badge-garansi-habis { background:rgba(239,68,68,0.15);color:#EF4444; }
         .badge-masuk-stok { background:rgba(16,185,129,0.15);color:#10B981; }
         table { width:100%;border-collapse:collapse; }
         thead th { background:var(--bg2);padding:12px 16px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);text-align:left;border-bottom:1px solid var(--border); }
@@ -353,7 +357,35 @@
                         <div class="p-4 sm:p-5 flex justify-end" id="riwayatStokTotal"></div>
                     </div>
                 </section>
-                <section class="page-section" id="page-riwayat"><div class="data-card"><div class="p-4 sm:p-5 border-b flex flex-wrap items-center justify-between gap-3" style="border-color:var(--border)"><div class="flex items-center gap-3 flex-wrap"><input type="date" class="form-input" style="width:150px;max-width:100%" id="riwayatDari" onchange="renderRiwayat()"><span class="text-sm" style="color:var(--muted)">s/d</span><input type="date" class="form-input" style="width:150px;max-width:100%" id="riwayatSampai" onchange="renderRiwayat()"><input type="text" class="form-input" style="width:170px;max-width:100%" placeholder="Cari..." id="searchRiwayat" oninput="renderRiwayat()"></div></div><div class="overflow-x-auto"><table><thead><tr><th>No. Service</th><th>Tgl Masuk</th><th>Tgl Ambil</th><th>Pelanggan</th><th>Barang</th><th>Total Biaya</th><th>Struk</th></tr></thead><tbody id="riwayatTable"></tbody></table></div></div></section>
+                <section class="page-section" id="page-riwayat">
+                    <div class="data-card">
+                        <div class="p-4 sm:p-5 border-b flex flex-wrap items-center justify-between gap-3" style="border-color:var(--border)">
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <input type="date" class="form-input" style="width:150px;max-width:100%" id="riwayatDari" onchange="renderRiwayat()">
+                                <span class="text-sm" style="color:var(--muted)">s/d</span>
+                                <input type="date" class="form-input" style="width:150px;max-width:100%" id="riwayatSampai" onchange="renderRiwayat()">
+                                <input type="text" class="form-input" style="width:170px;max-width:100%" placeholder="Cari..." id="searchRiwayat" oninput="renderRiwayat()">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>No. Service</th>
+                                        <th>Tgl Masuk</th>
+                                        <th>Tgl Ambil</th>
+                                        <th>Tgl Jatuh Tempo Garansi</th>
+                                        <th>Pelanggan</th>
+                                        <th>Barang</th>
+                                        <th>Total Biaya</th>
+                                        <th>Struk</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="riwayatTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
                 <section class="page-section" id="page-laporan"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-4 sm:mb-6" id="laporanStats"></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-6"><div class="data-card"><div class="p-4 sm:p-5 border-b" style="border-color:var(--border)"><h3 class="font-semibold text-sm">Pendapatan Bulanan</h3></div><div class="p-4 sm:p-5"><canvas id="monthlyChart" height="250"></canvas></div></div><div class="data-card"><div class="p-4 sm:p-5 border-b" style="border-color:var(--border)"><h3 class="font-semibold text-sm">Jenis Barang Terbanyak</h3></div><div class="p-4 sm:p-5"><canvas id="jenisChart" height="250"></canvas></div></div></div><div class="data-card"><div class="p-4 sm:p-5 border-b flex flex-wrap items-center justify-between gap-3" style="border-color:var(--border)"><h3 class="font-semibold text-sm">Detail Laporan</h3><div class="flex gap-2 flex-wrap"><input type="month" class="form-input" style="width:160px;max-width:100%" id="laporanBulan" onchange="renderLaporan()"><button class="btn-primary btn-sm" onclick="exportLaporanExcel()"><i class="fas fa-file-excel"></i> Download Excel</button></div></div><div class="overflow-x-auto"><table><thead><tr><th>No</th><th>No. Service</th><th>Tanggal</th><th>Pelanggan</th><th>Barang</th><th>Biaya Service</th><th>Sparepart</th><th>Total</th></tr></thead><tbody id="laporanTable"></tbody></table></div><div class="p-4 sm:p-5 flex justify-end" id="laporanTotal"></div></div></section>
             </div>
         </main>
@@ -603,6 +635,7 @@
             'No': data.indexOf(s)+1,
             'No. Service': s.noService || '',
             'Tanggal Ambil': formatDate(s.tanggalAmbil),
+            'Tanggal Jatuh Tempo Garansi': formatDate(s.tanggalJatuhTempoGaransi),
             'Pelanggan': s.namaPelanggan || '',
             'Telepon': s.noTelp || '',
             'Alamat': s.alamat || '',
@@ -756,6 +789,74 @@
         showToast('File Excel Riwayat Stok berhasil diunduh!', 'success');
     }
 
+    // ===== WHATSAPP =====
+    function kirimWhatsApp(id){
+        const s = allServices.find(x => x.id === id);
+        if(!s){
+            showToast('Data tidak ditemukan','error');
+            return;
+        }
+        
+        // Cek nomor telepon
+        let noTelp = s.noTelp || '';
+        noTelp = noTelp.replace(/\D/g, ''); // Hanya angka
+        
+        if(!noTelp){
+            showToast('Nomor telepon pelanggan tidak tersedia!','error');
+            return;
+        }
+        
+        // Format nomor untuk WhatsApp (62 untuk Indonesia)
+        if(noTelp.startsWith('0')){
+            noTelp = '62' + noTelp.substring(1);
+        } else if(!noTelp.startsWith('62') && !noTelp.startsWith('+62')){
+            noTelp = '62' + noTelp;
+        }
+        noTelp = noTelp.replace(/^\+/, '');
+        
+        // Format pesan
+        const tglMasuk = s.tanggalMasuk ? formatDate(s.tanggalMasuk) : '-';
+        const totalBiaya = formatRupiah((Number(s.biayaService)||0) + (Number(s.biayaSparepart)||0));
+        
+        const pesan = `*SERVICE ELEKTRONIK - PEMBERITAHUAN*
+        
+Yth. Bapak/Ibu *${s.namaPelanggan || '-'}*
+
+Dengan hormat,
+Kami informasikan bahwa barang service Bapak/Ibu sudah *SELESAI* dikerjakan.
+
+Berikut detailnya:
+━━━━━━━━━━━━━━━━━
+📋 *No. Service* : ${s.noService || '-'}
+📅 *Tanggal Masuk* : ${tglMasuk}
+👤 *Pelanggan* : ${s.namaPelanggan || '-'}
+📱 *Telepon* : ${s.noTelp || '-'}
+📦 *Barang* : ${s.jenisBarang || '-'} - ${s.merek || '-'}
+🔧 *Type* : ${s.typeBarang || '-'}
+🔢 *No. Seri* : ${s.noSeri || '-'}
+📎 *Kelengkapan* : ${s.kelengkapan || '-'}
+📝 *Keluhan* : ${s.keluhan || '-'}
+💰 *Total Biaya* : ${totalBiaya}
+📊 *Status* : ${s.status ? s.status.toUpperCase() : '-'}
+━━━━━━━━━━━━━━━━━
+
+Silakan datang ke bengkel untuk mengambil barang.
+
+Terima kasih atas kepercayaan Anda.
+
+*Service Elektronik*
+Jl. R.W. Monginsidi - Bhoanawa - Ende
+Hp: 085333071119`;
+        
+        // Encode pesan untuk URL
+        const encodedPesan = encodeURIComponent(pesan);
+        const url = `https://wa.me/${noTelp}?text=${encodedPesan}`;
+        
+        // Buka di tab baru
+        window.open(url, '_blank');
+        showToast(`Membuka WhatsApp untuk ${s.namaPelanggan}...`, 'info');
+    }
+
     // ===== NAVIGASI =====
     function navigate(page){currentPage=page;document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));const section=document.getElementById(`page-${page}`);if(section)section.classList.add('active');const navItem=document.querySelector(`.nav-item[data-page="${page}"]`);if(navItem)navItem.classList.add('active');const titles={dashboard:'Dashboard',terima:'Terima Barang',daftar:'Daftar Barang Service',administrasi:'Administrasi',selesai:'Service Selesai',jenis:'Jenis Barang & Biaya Service',stok:'Stok Sparepart',riwayatstok:'Riwayat Stok Masuk',riwayat:'Riwayat Service',laporan:'Laporan'};document.getElementById('pageTitle').textContent=titles[page]||'Dashboard';document.getElementById('sidebar').classList.remove('open');refreshCurrentPage();}
 
@@ -830,7 +931,11 @@
         try{
             const updateData={status:ns};
             if(ns==='diambil'){
-                updateData.tanggalAmbil=firebase.firestore.FieldValue.serverTimestamp();
+                const now = new Date();
+                const jatuhTempo = new Date(now);
+                jatuhTempo.setDate(jatuhTempo.getDate() + 31);
+                updateData.tanggalAmbil = firebase.firestore.FieldValue.serverTimestamp();
+                updateData.tanggalJatuhTempoGaransi = firebase.firestore.Timestamp.fromDate(jatuhTempo);
             }
             await db.collection('services').doc(id).update(updateData);
             showToast(`Status diubah ke: ${ns.toUpperCase()}`);
@@ -1029,6 +1134,7 @@
                 <td>${statusBadge(s.status)}</td>
                 <td>
                     <div class="flex gap-1 flex-wrap">
+                        <button class="btn-whatsapp btn-sm" onclick="kirimWhatsApp('${s.id}')" title="Kirim WhatsApp"><i class="fab fa-whatsapp"></i> WA</button>
                         <button class="btn-primary btn-sm" onclick="if(confirm('Ambil barang ini?')){ubahStatus('${s.id}','${s.status}')}" title="Ambil (Status Diambil)"><i class="fas fa-hand-holding"></i> Ambil</button>
                         <button class="btn-secondary btn-sm" onclick="editService('${s.id}')" title="Edit Data"><i class="fas fa-pen"></i></button>
                         <button class="btn-secondary btn-sm" onclick="lihatStrukRiwayat('${s.id}')" title="Lihat Struk"><i class="fas fa-receipt"></i></button>
@@ -1217,7 +1323,80 @@
     }
 
     // ===== RIWAYAT SERVICE =====
-    function renderRiwayat(){const dari=document.getElementById('riwayatDari')?.value,sampai=document.getElementById('riwayatSampai')?.value,search=(document.getElementById('searchRiwayat')?.value||'').toLowerCase();let data=allServices.filter(s=>s.status==='diambil');if(dari){const d=new Date(dari);data=data.filter(s=>{const t=s.tanggalAmbil?.toDate?s.tanggalAmbil.toDate():null;return t&&t>=d;});}if(sampai){const d=new Date(sampai);d.setDate(d.getDate()+1);data=data.filter(s=>{const t=s.tanggalAmbil?.toDate?s.tanggalAmbil.toDate():null;return t&&t<d;});}if(search)data=data.filter(s=>(s.noService||'').toLowerCase().includes(search)||(s.namaPelanggan||'').toLowerCase().includes(search));const tb=document.getElementById('riwayatTable');if(data.length===0){tb.innerHTML='<tr><td colspan="7" class="text-center py-8" style="color:var(--muted)">Tidak ada riwayat</td></tr>';}else{tb.innerHTML=data.map(s=>{const tl=Number(s.biayaService||0)+Number(s.biayaSparepart||0);return`<tr><td class="font-mono text-xs" style="color:var(--accent)">${s.noService}</td><td class="text-xs">${formatDate(s.tanggalMasuk)}</td><td class="text-xs">${formatDate(s.tanggalAmbil)}</td><td>${s.namaPelanggan}</td><td>${s.jenisBarang} - ${s.merek}</td><td class="font-mono font-semibold">${formatRupiah(tl)}</td><td><div class="flex gap-1"><button class="btn-secondary btn-sm" onclick="lihatStrukRiwayat('${s.id}')" title="Lihat"><i class="fas fa-receipt"></i></button><button class="btn-info-sm" onclick="downloadStrukRiwayatPDF('${s.id}')" title="PDF"><i class="fas fa-file-pdf"></i></button></div></td></tr>`;}).join('');}}
+    function renderRiwayat(){
+        const dari=document.getElementById('riwayatDari')?.value;
+        const sampai=document.getElementById('riwayatSampai')?.value;
+        const search=(document.getElementById('searchRiwayat')?.value||'').toLowerCase();
+        let data=allServices.filter(s=>s.status==='diambil');
+        
+        if(dari){
+            const d=new Date(dari);
+            data=data.filter(s=>{
+                const t=s.tanggalAmbil?.toDate?s.tanggalAmbil.toDate():null;
+                return t&&t>=d;
+            });
+        }
+        if(sampai){
+            const d=new Date(sampai);
+            d.setDate(d.getDate()+1);
+            data=data.filter(s=>{
+                const t=s.tanggalAmbil?.toDate?s.tanggalAmbil.toDate():null;
+                return t&&t<d;
+            });
+        }
+        if(search){
+            data=data.filter(s=>(s.noService||'').toLowerCase().includes(search)||(s.namaPelanggan||'').toLowerCase().includes(search));
+        }
+        
+        const tb=document.getElementById('riwayatTable');
+        if(data.length===0){
+            tb.innerHTML='<tr><td colspan="8" class="text-center py-8" style="color:var(--muted)">Tidak ada riwayat</td></tr>';
+            return;
+        }
+        
+        tb.innerHTML=data.map(s=>{
+            const tl=Number(s.biayaService||0)+Number(s.biayaSparepart||0);
+            
+            // Hitung tanggal jatuh tempo garansi (31 hari dari tanggal ambil)
+            let tglJatuhTempo = '-';
+            let badgeGaransi = '';
+            if(s.tanggalAmbil){
+                const tglAmbil = s.tanggalAmbil.toDate ? s.tanggalAmbil.toDate() : new Date(s.tanggalAmbil);
+                const jatuhTempo = new Date(tglAmbil);
+                jatuhTempo.setDate(jatuhTempo.getDate() + 31);
+                tglJatuhTempo = formatDate(jatuhTempo);
+                
+                // Cek apakah masih dalam garansi
+                const now = new Date();
+                const selisihHari = Math.ceil((now - jatuhTempo) / (1000 * 60 * 60 * 24));
+                if(selisihHari <= 0){
+                    badgeGaransi = `<span class="badge badge-garansi" style="margin-left:6px">Aktif</span>`;
+                } else {
+                    badgeGaransi = `<span class="badge badge-garansi-habis" style="margin-left:6px">Habis</span>`;
+                }
+            }
+            
+            return `<tr>
+                <td class="font-mono text-xs" style="color:var(--accent)">${s.noService}</td>
+                <td class="text-xs">${formatDate(s.tanggalMasuk)}</td>
+                <td class="text-xs">${formatDate(s.tanggalAmbil)}</td>
+                <td class="text-xs">
+                    <span style="font-weight:600">${tglJatuhTempo}</span>
+                    ${badgeGaransi}
+                </td>
+                <td>${s.namaPelanggan}</td>
+                <td>${s.jenisBarang} - ${s.merek}</td>
+                <td class="font-mono font-semibold">${formatRupiah(tl)}</td>
+                <td>
+                    <div class="flex gap-1">
+                        <button class="btn-secondary btn-sm" onclick="lihatStrukRiwayat('${s.id}')" title="Lihat"><i class="fas fa-receipt"></i></button>
+                        <button class="btn-info-sm" onclick="downloadStrukRiwayatPDF('${s.id}')" title="PDF"><i class="fas fa-file-pdf"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
     function lihatStrukRiwayat(id){const s=allServices.find(x=>x.id===id);if(!s)return;const tl=Number(s.biayaService||0)+Number(s.biayaSparepart||0);let sd='';if(s.sparepartDigunakan&&s.sparepartDigunakan.length>0){sd='<div class="divider"></div><p style="font-weight:bold;margin-bottom:4px">Sparepart:</p>';s.sparepartDigunakan.forEach(sp=>{sd+=`<p>- ${sp.nama} x${sp.qty} = ${formatRupiah(sp.subtotal)}</p>`;});}openModal('Struk Service',`<div class="receipt-box"><h3>SERVICE ELEKTRONIK</h3><p style="text-align:center;font-size:10px;color:#666">Jl. R.W. Monginsidi - Bhoanawa - Ende - Hp : 085333071119</p><div class="divider"></div><p>No : ${s.noService}</p><p>Tgl: ${formatDate(s.tanggalAmbil)}</p><div class="divider"></div><p>Pelanggan: ${s.namaPelanggan}</p><p>Alamat   : ${s.alamat||'-'}</p><p>Barang   : ${s.jenisBarang}</p><p>Merek    : ${s.merek}</p><p>Type     : ${s.typeBarang||'-'}</p><p>No. Seri : ${s.noSeri||'-'}</p><p>Kelengkapan: ${s.kelengkapan||'-'}</p><p>Keluhan  : ${s.keluhan}</p>${s.catatanTeknisi?`<p>Catatan  : ${s.catatanTeknisi}</p>`:''}${sd}<div class="divider"></div><p>Biaya Service  : ${formatRupiah(s.biayaService)}</p><p>Biaya Sparepart: ${formatRupiah(s.biayaSparepart)}</p><div class="divider"></div><p style="font-size:14px;font-weight:bold">TOTAL: ${formatRupiah(tl)}</p><div class="divider"></div><p style="text-align:center;font-size:10px;color:#666">Terima kasih atas kepercayaan Anda</p></div>`);}
 
     // ===== LAPORAN =====
