@@ -1,1 +1,677 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pembelian Barang District · Upload & Tampilkan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <!-- SheetJS untuk membaca file Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f4f7fb;
+            padding: 2rem 1.5rem;
+            color: #0f1a2e;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 2rem 2rem 2.5rem;
+            margin-bottom: 2rem;
+            border: 2px dashed #d0dbe8;
+            text-align: center;
+            transition: border-color 0.2s, background 0.2s;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: #1a4b7a;
+            background: #fafcff;
+        }
+
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+
+        .upload-zone .icon-upload {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-zone h3 {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1a2d4e;
+        }
+
+        .upload-zone p {
+            font-size: 0.85rem;
+            color: #6a7b99;
+            margin-top: 0.25rem;
+        }
+
+        .upload-zone .file-name {
+            font-weight: 600;
+            color: #0f3b7a;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            padding: 2rem 2rem 2.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e9eef5;
+        }
+
+        .header-top {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 2px solid #f0f4fa;
+            margin-bottom: 1.5rem;
+        }
+
+        .header-top h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #0a1a33;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-top h1 .badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            background: #dcf0e7;
+            color: #0b6b47;
+            padding: 0.2rem 0.8rem;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .header-top .meta {
+            font-size: 0.82rem;
+            color: #5a6b89;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+        }
+
+        .header-top .meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .header-top .meta .label {
+            font-weight: 500;
+            color: #2d3f62;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #e9eef5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            min-width: 1200px;
+        }
+
+        thead {
+            background: #f4f8fe;
+            border-bottom: 2px solid #e0e7f0;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 0.6rem 0.6rem;
+            font-weight: 600;
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #3a4b6b;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            background: #f4f8fe;
+            z-index: 2;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #edf2f8;
+            transition: background 0.1s;
+        }
+
+        tbody tr:hover {
+            background: #f8fcff;
+        }
+
+        tbody td {
+            padding: 0.6rem 0.6rem;
+            color: #1c2945;
+            vertical-align: middle;
+            word-break: break-word;
+            max-width: 200px;
+        }
+
+        .text-muted {
+            color: #8a9bb8;
+        }
+
+        .chip-status {
+            display: inline-block;
+            background: #dcf0e7;
+            color: #0b6b47;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.15rem 0.7rem;
+            border-radius: 100px;
+        }
+
+        .chip-row {
+            display: inline-block;
+            background: #e9f0fa;
+            color: #1f4f8a;
+            font-size: 0.7rem;
+            font-weight: 500;
+            padding: 0.1rem 0.6rem;
+            border-radius: 100px;
+        }
+
+        .serial-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e9eef5;
+        }
+
+        .serial-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0a1a33;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .serial-section h3 .badge {
+            font-size: 0.65rem;
+            background: #e6f0fa;
+            color: #1a4b7a;
+            padding: 0.15rem 0.7rem;
+            border-radius: 100px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            padding: 1.5rem;
+            text-align: center;
+            color: #7a8aa8;
+            background: #fafcfe;
+            border-radius: 12px;
+            border: 1px dashed #d8e1ee;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 0.74rem;
+            color: #8a9bb8;
+            padding-top: 0.5rem;
+            border-top: 1px solid #eaeef6;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.75rem;
+            }
+            .card,
+            .upload-zone {
+                padding: 1.25rem 1rem;
+            }
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .header-top h1 {
+                font-size: 1.2rem;
+            }
+            table {
+                font-size: 0.7rem;
+                min-width: 900px;
+            }
+            thead th,
+            tbody td {
+                padding: 0.4rem 0.4rem;
+            }
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0.3in;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                padding: 1rem;
+            }
+            .upload-zone {
+                display: none;
+            }
+            .table-wrapper {
+                border: 1px solid #ccc;
+            }
+            thead {
+                background: #eee !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            thead th {
+                background: #eee !important;
+            }
+            .chip-status,
+            .chip-row {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        /* Sembunyikan sementara saat loading */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- ============================================================ -->
+        <!--  UPLOAD ZONE                                                  -->
+        <!-- ============================================================ -->
+        <div class="upload-zone" id="uploadZone">
+            <span class="icon-upload">📂</span>
+            <h3>Klik atau seret file Excel di sini</h3>
+            <p>Support .xlsx, .xls · otomatis membaca sheet <strong>Detail</strong> atau sheet pertama</p>
+            <div class="file-name" id="fileNameDisplay">Belum ada file dipilih</div>
+            <input type="file" id="fileInput" accept=".xlsx,.xls" />
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  CARD UTAMA – Hasil Parse                                     -->
+        <!-- ============================================================ -->
+        <div id="resultContainer">
+            <!-- Akan diisi oleh JavaScript -->
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <span>Data diunduh dari sistem · <span id="footerDate">27/08/2026 07:18:16</span> · oleh <span id="footerUser">GREGORIUS.B.SALE@POLYTRON.CO.ID</span></span>
+            <br>
+            <span style="opacity:0.6;">PT Polytron · Purchase Receipt · District</span>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadZone = document.getElementById('uploadZone');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const resultContainer = document.getElementById('resultContainer');
+
+            // ============================================================
+            //  DATA SAMPLE (DEFAULT) – seperti file pertama
+            // ============================================================
+            const sampleTitle = 'PEMBELIAN BARANG DISTRICT';
+            const sampleDownloadedBy = 'GREGORIUS.B.SALE@POLYTRON.CO.ID';
+            const sampleDownloadedDate = '27/08/2026 07:18:16';
+            const sampleHeaders = [
+                'No', 'Kode Perusahaan', 'Site', 'Nomor Dokumen', 'Nomor Referensi',
+                'Lokasi Tujuan', 'Nik Tujuan', 'Tipe Transaksi', 'Status', 'Baris',
+                'Part', 'Deskripsi', 'Lot', 'Attribute', 'Qty', 'Satuan',
+                'Conversion Qty', 'Conversion UM', 'Conversion Value', 'Nomor Permintaan',
+                'Price Per Unit', 'Total Value', 'Mata Uang', 'Site Parent',
+                'Dibuat Oleh', 'Dibuat Pada', 'Dikonfirmasi Oleh', 'Dikonfirmasi Pada',
+                'Diubah Oleh', 'Diubah Pada'
+            ];
+            const sampleData = [
+                ['1', 'SKM', 'KPG', 'MSK/KPG/SV/26/08/015', '1240201523', 'SVRMBKPG', '', 'PURCHASE', 'CONFIRMED', '10',
+                    'NJ-060411-0NA', 'SPINNER BELOW ASSY 12KG', '', '', '2.0', 'EA', '0.0', '', '0.0', 'ORD6KPG803TS',
+                    '0.0', '0.0', '', 'LPT', 'Gregorius Berlin Sale', '10/08/2026', 'Gregorius Berlin Sale',
+                    '10/08/2026', 'Gregorius Berlin Sale', '10/08/2026'
+                ]
+            ];
+            const sampleSerial = []; // kosong
+
+            // ============================================================
+            //  FUNGSI RENDER
+            // ============================================================
+            function renderData(title, downloadedBy, downloadedDate, headers, dataRows, serialRows) {
+                // Update footer
+                document.getElementById('footerDate').textContent = downloadedDate || '27/08/2026 07:18:16';
+                document.getElementById('footerUser').textContent = downloadedBy || 'GREGORIUS.B.SALE@POLYTRON.CO.ID';
+
+                // Status badge
+                let status = 'CONFIRMED';
+                if (dataRows.length > 0) {
+                    const statusIdx = headers.indexOf('Status');
+                    if (statusIdx !== -1 && dataRows[0][statusIdx]) {
+                        status = dataRows[0][statusIdx];
+                    }
+                }
+                const statusBadge = status.toUpperCase() === 'CONFIRMED' ?
+                    '<span class="badge">CONFIRMED</span>' :
+                    `<span class="badge" style="background:#f0e6dc;color:#7a4b0b;">${status}</span>`;
+
+                // Build table rows
+                let tableRows = '';
+                dataRows.forEach((row, idx) => {
+                    // Ensure row length matches headers
+                    const cols = headers.map((h, i) => {
+                        const val = (row[i] !== undefined && row[i] !== null && row[i] !== '') ? row[i] :
+                        '—';
+                        // Formatting khusus
+                        if (headers[i] === 'Status') {
+                            return `<td><span class="chip-status">${val}</span></td>`;
+                        }
+                        if (headers[i] === 'Baris') {
+                            return `<td><span class="chip-row">${val}</span></td>`;
+                        }
+                        if (headers[i] === 'Nomor Dokumen') {
+                            return `<td><strong>${val}</strong></td>`;
+                        }
+                        return `<td>${val}</td>`;
+                    });
+                    tableRows += `<tr>${cols.join('')}</tr>`;
+                });
+
+                // Build table header
+                let headerCells = headers.map(h => `<th>${h}</th>`).join('');
+
+                // Serial number
+                let serialHtml = '';
+                if (serialRows && serialRows.length > 0) {
+                    // ambil header serial dari baris pertama (anggap sama dengan sample)
+                    const serialHeaders = ['No', 'Kode Perusahaan', 'Site', 'No Bukti', 'No Urut', 'Part Demand', 'Lot',
+                        'Attribute', 'No Seri', 'Part Supply', 'BOM Sales', 'Master Box', 'Qty', 'Reff1', 'Reff2',
+                        'Reff3'
+                    ];
+                    let serialTableRows = '';
+                    serialRows.forEach((row) => {
+                        const cols = serialHeaders.map((h, i) => `<td>${row[i] || '—'}</td>`);
+                        serialTableRows += `<tr>${cols.join('')}</tr>`;
+                    });
+                    serialHtml = `
+                        <div class="serial-section">
+                            <h3>🔢 Serial Number <span class="badge">${serialRows.length} data</span></h3>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead><tr>${serialHeaders.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+                                    <tbody>${serialTableRows}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    serialHtml = `
+                        <div class="serial-section">
+                            <h3>🔢 Serial Number <span class="badge">0 data</span></h3>
+                            <div class="empty-state">
+                                <span style="display:block; font-size:1.8rem; margin-bottom:0.25rem;">📭</span>
+                                Tidak ada data serial number untuk transaksi ini.
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Compile full card
+                const html = `
+                    <div class="card">
+                        <div class="header-top">
+                            <h1>
+                                ${title || 'PEMBELIAN BARANG DISTRICT'}
+                                ${statusBadge}
+                            </h1>
+                            <div class="meta">
+                                <span>
+                                    <span class="label">Diunduh oleh</span>
+                                    ${downloadedBy || '—'}
+                                </span>
+                                <span>
+                                    <span class="label">Tanggal</span>
+                                    ${downloadedDate || '—'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead><tr>${headerCells}</tr></thead>
+                                <tbody>${tableRows}</tbody>
+                            </table>
+                        </div>
+
+                        ${serialHtml}
+                    </div>
+                `;
+
+                resultContainer.innerHTML = html;
+            }
+
+            // ============================================================
+            //  FUNGSI PARSE EXCEL
+            // ============================================================
+            function parseExcelFile(arrayBuffer) {
+                try {
+                    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+                    // Pilih sheet: cari "Detail" dulu, lalu "Sheet1", lalu sheet pertama
+                    let sheetName = 'Detail';
+                    if (!workbook.SheetNames.includes('Detail')) {
+                        sheetName = workbook.SheetNames[0];
+                    }
+                    // Jika sheetName adalah "Sheet1" tapi kosong, coba cari yang lain
+                    const sheet = workbook.Sheets[sheetName];
+                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+                    let headerIndex = -1;
+                    let downloadedBy = '';
+                    let downloadedDate = '';
+                    let title = '';
+
+                    // Scan 20 baris pertama untuk metadata & header
+                    for (let i = 0; i < Math.min(rows.length, 30); i++) {
+                        const row = rows[i];
+                        if (!row || row.length === 0) continue;
+                        const rowStr = row.join(' ');
+
+                        // Cari "Diunduh oleh"
+                        if (rowStr.includes('Diunduh oleh')) {
+                            for (let j = 0; j < row.length; j++) {
+                                if (typeof row[j] === 'string' && row[j].includes('Diunduh oleh')) {
+                                    if (j + 1 < row.length && row[j + 1] && row[j + 1].trim() !== '') downloadedBy = row[j +
+                                    1];
+                                    else if (j + 2 < row.length && row[j + 2] && row[j + 2].trim() !== '') downloadedBy =
+                                        row[j + 2];
+                                    break;
+                                }
+                            }
+                        }
+                        // Cari "Tanggal di unduh"
+                        if (rowStr.includes('Tanggal di unduh')) {
+                            for (let j = 0; j < row.length; j++) {
+                                if (typeof row[j] === 'string' && row[j].includes('Tanggal di unduh')) {
+                                    if (j + 1 < row.length && row[j + 1] && row[j + 1].trim() !== '') downloadedDate = row[
+                                        j + 1];
+                                    else if (j + 2 < row.length && row[j + 2] && row[j + 2].trim() !== '') downloadedDate =
+                                        row[j + 2];
+                                    break;
+                                }
+                            }
+                        }
+                        // Cari "Judul"
+                        if (rowStr.includes('Judul')) {
+                            for (let j = 0; j < row.length; j++) {
+                                if (typeof row[j] === 'string' && row[j].includes('Judul')) {
+                                    if (j + 1 < row.length && row[j + 1] && row[j + 1].trim() !== '') title = row[j + 1];
+                                    else if (j + 2 < row.length && row[j + 2] && row[j + 2].trim() !== '') title = row[j +
+                                    2];
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Cari header: mengandung "No" dan "Kode Perusahaan" dan "Site"
+                        if (row.includes('No') && row.includes('Kode Perusahaan') && row.includes('Site')) {
+                            headerIndex = i;
+                            break;
+                        }
+                    }
+
+                    // Fallback: jika header tidak ditemukan, cari baris yang mengandung "No" dan "Kode Perusahaan"
+                    if (headerIndex === -1) {
+                        for (let i = 0; i < Math.min(rows.length, 20); i++) {
+                            if (rows[i].includes('No') && rows[i].includes('Kode Perusahaan')) {
+                                headerIndex = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (headerIndex === -1) {
+                        alert('Tidak dapat menemukan header tabel. Pastikan file memiliki kolom "No", "Kode Perusahaan", "Site".');
+                        return false;
+                    }
+
+                    const headers = rows[headerIndex];
+                    // Ambil data di bawah header, filter baris yang benar-benar kosong
+                    const dataRows = rows.slice(headerIndex + 1).filter(row =>
+                        row.some(cell => cell && cell.trim() !== '')
+                    );
+
+                    // Parsing Serial Number
+                    let serialRows = [];
+                    if (workbook.SheetNames.includes('Details Serial Number')) {
+                        const serialSheet = workbook.Sheets['Details Serial Number'];
+                        const serialData = XLSX.utils.sheet_to_json(serialSheet, { header: 1, defval: '' });
+                        let serialHeaderIdx = -1;
+                        for (let i = 0; i < Math.min(serialData.length, 20); i++) {
+                            if (serialData[i].includes('No') && serialData[i].includes('No Bukti') && serialData[i]
+                                .includes('No Seri')) {
+                                serialHeaderIdx = i;
+                                break;
+                            }
+                        }
+                        if (serialHeaderIdx !== -1) {
+                            serialRows = serialData.slice(serialHeaderIdx + 1).filter(row =>
+                                row.some(c => c && c.trim() !== '')
+                            );
+                        }
+                    }
+
+                    // Set default jika metadata kosong
+                    if (!title) title = 'PEMBELIAN BARANG DISTRICT';
+                    if (!downloadedBy) downloadedBy = 'GREGORIUS.B.SALE@POLYTRON.CO.ID';
+                    if (!downloadedDate) downloadedDate = '27/08/2026 07:18:16';
+
+                    // Render
+                    renderData(title, downloadedBy, downloadedDate, headers, dataRows, serialRows);
+                    return true;
+                } catch (e) {
+                    console.error(e);
+                    alert('Gagal membaca file: ' + e.message);
+                    return false;
+                }
+            }
+
+            // ============================================================
+            //  EVENT LISTENER UPLOAD
+            // ============================================================
+            uploadZone.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'INPUT') {
+                    fileInput.click();
+                }
+            });
+
+            uploadZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#1a4b7a';
+                this.style.background = '#f2f6fe';
+            });
+
+            uploadZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#d0dbe8';
+                this.style.background = '#ffffff';
+            });
+
+            uploadZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#d0dbe8';
+                this.style.background = '#ffffff';
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFile(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    handleFile(this.files[0]);
+                }
+            });
+
+            function handleFile(file) {
+                fileNameDisplay.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(loadEvent) {
+                    const data = new Uint8Array(loadEvent.target.result);
+                    parseExcelFile(data);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            // ============================================================
+            //  RENDER SAMPLE PERTAMA KALI
+            // ============================================================
+            renderData(sampleTitle, sampleDownloadedBy, sampleDownloadedDate, sampleHeaders, sampleData, sampleSerial);
+        });
+    </script>
+
+</body>
+</html>
