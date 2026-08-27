@@ -311,6 +311,32 @@
             margin-top: 1rem;
         }
 
+        /* Tombol hapus */
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #b13a3a;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0.2rem 0.4rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+            line-height: 1;
+        }
+
+        .btn-delete:hover {
+            background: #fee8e8;
+            color: #8f2a2a;
+        }
+
+        .btn-delete:active {
+            transform: scale(0.9);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 1rem 0.75rem;
@@ -374,6 +400,15 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+            .btn-delete {
+                display: none;
+            }
+            thead th:last-child {
+                display: none;
+            }
+            tbody td:last-child {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -425,11 +460,20 @@
             const toast = document.getElementById('toastMessage');
 
             // ============================================================
+            //  STATE GLOBAL
+            // ============================================================
+            let currentState = {
+                title: 'PEMBELIAN BARANG DISTRICT',
+                downloadedBy: 'GREGORIUS.B.SALE@POLYTRON.CO.ID',
+                downloadedDate: '27/08/2026 07:18:16',
+                headers: [],
+                dataRows: [],
+                serialRows: []
+            };
+
+            // ============================================================
             //  DATA SAMPLE (seperti file pertama)
             // ============================================================
-            const sampleTitle = 'PEMBELIAN BARANG DISTRICT';
-            const sampleDownloadedBy = 'GREGORIUS.B.SALE@POLYTRON.CO.ID';
-            const sampleDownloadedDate = '27/08/2026 07:18:16';
             const sampleHeaders = [
                 'No', 'Kode Perusahaan', 'Site', 'Nomor Dokumen', 'Nomor Referensi',
                 'Lokasi Tujuan', 'Nik Tujuan', 'Tipe Transaksi', 'Status', 'Baris',
@@ -449,9 +493,17 @@
             const sampleSerial = [];
 
             // ============================================================
-            //  FUNGSI RENDER
+            //  FUNGSI RENDER (dengan kolom hapus)
             // ============================================================
             function renderData(title, downloadedBy, downloadedDate, headers, dataRows, serialRows) {
+                // Simpan state
+                currentState.title = title;
+                currentState.downloadedBy = downloadedBy;
+                currentState.downloadedDate = downloadedDate;
+                currentState.headers = headers;
+                currentState.dataRows = dataRows;
+                currentState.serialRows = serialRows;
+
                 document.getElementById('footerDate').textContent = downloadedDate || '27/08/2026 07:18:16';
                 document.getElementById('footerUser').textContent = downloadedBy || 'GREGORIUS.B.SALE@POLYTRON.CO.ID';
 
@@ -466,8 +518,12 @@
                     '<span class="badge">CONFIRMED</span>' :
                     `<span class="badge" style="background:#f0e6dc;color:#7a4b0b;">${status}</span>`;
 
+                // Buat header + kolom Aksi
+                let headerCells = headers.map(h => `<th>${h}</th>`).join('');
+                headerCells += `<th style="text-align:center; min-width:50px;">Aksi</th>`;
+
                 let tableRows = '';
-                dataRows.forEach((row) => {
+                dataRows.forEach((row, rowIndex) => {
                     const cols = headers.map((h, i) => {
                         const val = (row[i] !== undefined && row[i] !== null && row[i] !== '') ? row[i] :
                         '—';
@@ -482,11 +538,14 @@
                         }
                         return `<td>${val}</td>`;
                     });
+                    // Tambahkan tombol hapus
+                    cols.push(
+                        `<td class="text-center"><button class="btn-delete" data-row="${rowIndex}" title="Hapus baris ini">🗑️</button></td>`
+                        );
                     tableRows += `<tr>${cols.join('')}</tr>`;
                 });
 
-                let headerCells = headers.map(h => `<th>${h}</th>`).join('');
-
+                // Serial number
                 let serialHtml = '';
                 if (serialRows && serialRows.length > 0) {
                     const serialHeaders = ['No', 'Kode Perusahaan', 'Site', 'No Bukti', 'No Urut', 'Part Demand', 'Lot',
@@ -522,7 +581,7 @@
                 }
 
                 const html = `
-                    <div class="card">
+                    <div class="card" id="resultCard">
                         <div class="header-top">
                             <h1>
                                 ${title || 'PEMBELIAN BARANG DISTRICT'}
@@ -552,6 +611,39 @@
                 `;
 
                 resultContainer.innerHTML = html;
+
+                // Event listener untuk tombol hapus (delegasi)
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        const rowIndex = parseInt(this.getAttribute('data-row'), 10);
+                        if (!isNaN(rowIndex)) {
+                            deleteRow(rowIndex);
+                        }
+                    });
+                });
+            }
+
+            // ============================================================
+            //  FUNGSI HAPUS BARIS
+            // ============================================================
+            function deleteRow(index) {
+                if (currentState.dataRows.length === 0) return;
+                if (index < 0 || index >= currentState.dataRows.length) return;
+
+                // Hapus baris
+                currentState.dataRows.splice(index, 1);
+
+                // Re-render dengan state terbaru
+                renderData(
+                    currentState.title,
+                    currentState.downloadedBy,
+                    currentState.downloadedDate,
+                    currentState.headers,
+                    currentState.dataRows,
+                    currentState.serialRows
+                );
+
+                toast.innerHTML = `<span class="toast success">🗑️ Baris ke-${index+1} berhasil dihapus.</span>`;
             }
 
             // ============================================================
@@ -565,12 +657,10 @@
                     let title = 'PEMBELIAN BARANG DISTRICT';
                     let downloadedBy = 'GREGORIUS.B.SALE@POLYTRON.CO.ID';
                     let downloadedDate = '27/08/2026 07:18:16';
-                    let headerData = {}; // untuk menyimpan field tambahan jika perlu
 
                     if (workbook.SheetNames.includes('Header')) {
                         const headerSheet = workbook.Sheets['Header'];
                         const headerRows = XLSX.utils.sheet_to_json(headerSheet, { header: 1, defval: '' });
-                        // Cari metadata
                         for (let i = 0; i < Math.min(headerRows.length, 20); i++) {
                             const row = headerRows[i];
                             if (!row || row.length === 0) continue;
@@ -614,11 +704,9 @@
                     // --- 2. Baca sheet Detail (harus ada) ---
                     let detailSheetName = 'Detail';
                     if (!workbook.SheetNames.includes('Detail')) {
-                        // coba cari sheet pertama yang memiliki banyak kolom
                         for (let name of workbook.SheetNames) {
                             const sheet = workbook.Sheets[name];
                             const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
-                            // cari baris header yang mengandung "No", "Kode Perusahaan", "Site"
                             for (let i = 0; i < Math.min(rows.length, 30); i++) {
                                 const row = rows[i];
                                 if (row && row.includes('No') && row.includes('Kode Perusahaan') && row.includes('Site')) {
@@ -633,7 +721,6 @@
                     const detailSheet = workbook.Sheets[detailSheetName];
                     const detailRows = XLSX.utils.sheet_to_json(detailSheet, { header: 1, defval: '' });
 
-                    // Cari header di sheet Detail (30 kolom)
                     let headerIndex = -1;
                     for (let i = 0; i < Math.min(detailRows.length, 30); i++) {
                         const row = detailRows[i];
@@ -643,7 +730,6 @@
                             break;
                         }
                     }
-                    // Fallback: cari yang mengandung "No" dan "Kode Perusahaan"
                     if (headerIndex === -1) {
                         for (let i = 0; i < Math.min(detailRows.length, 20); i++) {
                             if (detailRows[i].includes('No') && detailRows[i].includes('Kode Perusahaan')) {
@@ -659,12 +745,10 @@
                     }
 
                     const headers = detailRows[headerIndex];
-                    // Pastikan headers memiliki 30 kolom, jika kurang tambahkan placeholder
                     while (headers.length < 30) {
                         headers.push('');
                     }
 
-                    // Ambil data di bawah header (baris data)
                     const dataRows = detailRows.slice(headerIndex + 1).filter(row =>
                         row.some(cell => cell && cell.trim() !== '')
                     );
@@ -771,14 +855,15 @@
                 fileInput.value = '';
                 fileNameDisplay.textContent = 'Belum ada file dipilih';
                 toast.innerHTML = '';
-                renderData(sampleTitle, sampleDownloadedBy, sampleDownloadedDate, sampleHeaders, sampleData,
-                sampleSerial);
+                renderData('PEMBELIAN BARANG DISTRICT', 'GREGORIUS.B.SALE@POLYTRON.CO.ID', '27/08/2026 07:18:16',
+                    sampleHeaders, sampleData, sampleSerial);
             });
 
             // ============================================================
-            //  RENDER SAMPLE PERTAMA KALI (contoh dari file pertama)
+            //  RENDER SAMPLE PERTAMA KALI
             // ============================================================
-            renderData(sampleTitle, sampleDownloadedBy, sampleDownloadedDate, sampleHeaders, sampleData, sampleSerial);
+            renderData('PEMBELIAN BARANG DISTRICT', 'GREGORIUS.B.SALE@POLYTRON.CO.ID', '27/08/2026 07:18:16',
+                sampleHeaders, sampleData, sampleSerial);
         });
     </script>
 
