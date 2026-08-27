@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pembelian Barang District · Upload & Tampilkan</title>
+    <title>Pembelian Barang District · Upload & Convert</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-    <!-- SheetJS untuk membaca file Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
@@ -29,12 +28,11 @@
             margin: 0 auto;
         }
 
-        /* Upload Zone */
         .upload-zone {
             background: #ffffff;
             border-radius: 20px;
-            padding: 2rem 2rem 2.5rem;
-            margin-bottom: 2rem;
+            padding: 2rem 2rem 1.5rem;
+            margin-bottom: 1.5rem;
             border: 2px dashed #d0dbe8;
             text-align: center;
             transition: border-color 0.2s, background 0.2s;
@@ -73,6 +71,47 @@
             color: #0f3b7a;
             margin-top: 0.5rem;
             font-size: 0.9rem;
+        }
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            background: #1a4b7a;
+            color: #fff;
+            border: none;
+            border-radius: 40px;
+            padding: 0.7rem 2rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(26, 75, 122, 0.2);
+        }
+
+        .btn:hover {
+            background: #0f3b66;
+            transform: scale(1.02);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #e9eef5;
+            color: #1a2d4e;
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: #d5dee9;
         }
 
         .card {
@@ -276,6 +315,14 @@
             tbody td {
                 padding: 0.4rem 0.4rem;
             }
+            .action-row {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
         }
 
         @media print {
@@ -309,9 +356,18 @@
             }
         }
 
-        /* Sembunyikan sementara saat loading */
         .hidden {
             display: none !important;
+        }
+
+        .toast {
+            background: #1a2d4e;
+            color: #fff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
@@ -320,7 +376,7 @@
     <div class="container">
 
         <!-- ============================================================ -->
-        <!--  UPLOAD ZONE                                                  -->
+        <!--  UPLOAD ZONE + TOMBOL START CONVERT                           -->
         <!-- ============================================================ -->
         <div class="upload-zone" id="uploadZone">
             <span class="icon-upload">📂</span>
@@ -328,6 +384,13 @@
             <p>Support .xlsx, .xls · otomatis membaca sheet <strong>Detail</strong> atau sheet pertama</p>
             <div class="file-name" id="fileNameDisplay">Belum ada file dipilih</div>
             <input type="file" id="fileInput" accept=".xlsx,.xls" />
+
+            <!-- Tombol aksi -->
+            <div class="action-row">
+                <button class="btn" id="startConvertBtn">🚀 START CONVERT</button>
+                <button class="btn btn-secondary" id="resetBtn">↺ Reset ke contoh</button>
+            </div>
+            <div id="toastMessage" style="min-height: 1.8rem; margin-top: 0.5rem;"></div>
         </div>
 
         <!-- ============================================================ -->
@@ -352,6 +415,9 @@
             const uploadZone = document.getElementById('uploadZone');
             const fileNameDisplay = document.getElementById('fileNameDisplay');
             const resultContainer = document.getElementById('resultContainer');
+            const startConvertBtn = document.getElementById('startConvertBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const toast = document.getElementById('toastMessage');
 
             // ============================================================
             //  DATA SAMPLE (DEFAULT) – seperti file pertama
@@ -381,11 +447,9 @@
             //  FUNGSI RENDER
             // ============================================================
             function renderData(title, downloadedBy, downloadedDate, headers, dataRows, serialRows) {
-                // Update footer
                 document.getElementById('footerDate').textContent = downloadedDate || '27/08/2026 07:18:16';
                 document.getElementById('footerUser').textContent = downloadedBy || 'GREGORIUS.B.SALE@POLYTRON.CO.ID';
 
-                // Status badge
                 let status = 'CONFIRMED';
                 if (dataRows.length > 0) {
                     const statusIdx = headers.indexOf('Status');
@@ -397,14 +461,11 @@
                     '<span class="badge">CONFIRMED</span>' :
                     `<span class="badge" style="background:#f0e6dc;color:#7a4b0b;">${status}</span>`;
 
-                // Build table rows
                 let tableRows = '';
-                dataRows.forEach((row, idx) => {
-                    // Ensure row length matches headers
+                dataRows.forEach((row) => {
                     const cols = headers.map((h, i) => {
                         const val = (row[i] !== undefined && row[i] !== null && row[i] !== '') ? row[i] :
                         '—';
-                        // Formatting khusus
                         if (headers[i] === 'Status') {
                             return `<td><span class="chip-status">${val}</span></td>`;
                         }
@@ -419,13 +480,10 @@
                     tableRows += `<tr>${cols.join('')}</tr>`;
                 });
 
-                // Build table header
                 let headerCells = headers.map(h => `<th>${h}</th>`).join('');
 
-                // Serial number
                 let serialHtml = '';
                 if (serialRows && serialRows.length > 0) {
-                    // ambil header serial dari baris pertama (anggap sama dengan sample)
                     const serialHeaders = ['No', 'Kode Perusahaan', 'Site', 'No Bukti', 'No Urut', 'Part Demand', 'Lot',
                         'Attribute', 'No Seri', 'Part Supply', 'BOM Sales', 'Master Box', 'Qty', 'Reff1', 'Reff2',
                         'Reff3'
@@ -458,7 +516,6 @@
                     `;
                 }
 
-                // Compile full card
                 const html = `
                     <div class="card">
                         <div class="header-top">
@@ -499,12 +556,10 @@
                 try {
                     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
-                    // Pilih sheet: cari "Detail" dulu, lalu "Sheet1", lalu sheet pertama
                     let sheetName = 'Detail';
                     if (!workbook.SheetNames.includes('Detail')) {
                         sheetName = workbook.SheetNames[0];
                     }
-                    // Jika sheetName adalah "Sheet1" tapi kosong, coba cari yang lain
                     const sheet = workbook.Sheets[sheetName];
                     const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
 
@@ -513,13 +568,11 @@
                     let downloadedDate = '';
                     let title = '';
 
-                    // Scan 20 baris pertama untuk metadata & header
                     for (let i = 0; i < Math.min(rows.length, 30); i++) {
                         const row = rows[i];
                         if (!row || row.length === 0) continue;
                         const rowStr = row.join(' ');
 
-                        // Cari "Diunduh oleh"
                         if (rowStr.includes('Diunduh oleh')) {
                             for (let j = 0; j < row.length; j++) {
                                 if (typeof row[j] === 'string' && row[j].includes('Diunduh oleh')) {
@@ -531,7 +584,6 @@
                                 }
                             }
                         }
-                        // Cari "Tanggal di unduh"
                         if (rowStr.includes('Tanggal di unduh')) {
                             for (let j = 0; j < row.length; j++) {
                                 if (typeof row[j] === 'string' && row[j].includes('Tanggal di unduh')) {
@@ -543,7 +595,6 @@
                                 }
                             }
                         }
-                        // Cari "Judul"
                         if (rowStr.includes('Judul')) {
                             for (let j = 0; j < row.length; j++) {
                                 if (typeof row[j] === 'string' && row[j].includes('Judul')) {
@@ -555,14 +606,12 @@
                             }
                         }
 
-                        // Cari header: mengandung "No" dan "Kode Perusahaan" dan "Site"
                         if (row.includes('No') && row.includes('Kode Perusahaan') && row.includes('Site')) {
                             headerIndex = i;
                             break;
                         }
                     }
 
-                    // Fallback: jika header tidak ditemukan, cari baris yang mengandung "No" dan "Kode Perusahaan"
                     if (headerIndex === -1) {
                         for (let i = 0; i < Math.min(rows.length, 20); i++) {
                             if (rows[i].includes('No') && rows[i].includes('Kode Perusahaan')) {
@@ -573,17 +622,15 @@
                     }
 
                     if (headerIndex === -1) {
-                        alert('Tidak dapat menemukan header tabel. Pastikan file memiliki kolom "No", "Kode Perusahaan", "Site".');
+                        toast.innerHTML = '<span class="toast">❌ Header tidak ditemukan. Pastikan file memiliki kolom yang sesuai.</span>';
                         return false;
                     }
 
                     const headers = rows[headerIndex];
-                    // Ambil data di bawah header, filter baris yang benar-benar kosong
                     const dataRows = rows.slice(headerIndex + 1).filter(row =>
                         row.some(cell => cell && cell.trim() !== '')
                     );
 
-                    // Parsing Serial Number
                     let serialRows = [];
                     if (workbook.SheetNames.includes('Details Serial Number')) {
                         const serialSheet = workbook.Sheets['Details Serial Number'];
@@ -603,26 +650,38 @@
                         }
                     }
 
-                    // Set default jika metadata kosong
                     if (!title) title = 'PEMBELIAN BARANG DISTRICT';
                     if (!downloadedBy) downloadedBy = 'GREGORIUS.B.SALE@POLYTRON.CO.ID';
                     if (!downloadedDate) downloadedDate = '27/08/2026 07:18:16';
 
-                    // Render
                     renderData(title, downloadedBy, downloadedDate, headers, dataRows, serialRows);
+                    toast.innerHTML = '<span class="toast" style="background:#0b6b47;">✅ Konversi berhasil!</span>';
                     return true;
                 } catch (e) {
                     console.error(e);
-                    alert('Gagal membaca file: ' + e.message);
+                    toast.innerHTML = `<span class="toast" style="background:#b13a3a;">❌ Gagal membaca file: ${e.message}</span>`;
                     return false;
                 }
+            }
+
+            // ============================================================
+            //  FUNGSI HANDLE FILE
+            // ============================================================
+            function handleFile(file) {
+                fileNameDisplay.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(loadEvent) {
+                    const data = new Uint8Array(loadEvent.target.result);
+                    parseExcelFile(data);
+                };
+                reader.readAsArrayBuffer(file);
             }
 
             // ============================================================
             //  EVENT LISTENER UPLOAD
             // ============================================================
             uploadZone.addEventListener('click', function(e) {
-                if (e.target.tagName !== 'INPUT') {
+                if (e.target.tagName !== 'INPUT' && e.target.id !== 'startConvertBtn' && e.target.id !== 'resetBtn') {
                     fileInput.click();
                 }
             });
@@ -656,15 +715,29 @@
                 }
             });
 
-            function handleFile(file) {
-                fileNameDisplay.textContent = file.name;
-                const reader = new FileReader();
-                reader.onload = function(loadEvent) {
-                    const data = new Uint8Array(loadEvent.target.result);
-                    parseExcelFile(data);
-                };
-                reader.readAsArrayBuffer(file);
-            }
+            // ============================================================
+            //  TOMBOL START CONVERT
+            // ============================================================
+            startConvertBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (fileInput.files.length > 0) {
+                    handleFile(fileInput.files[0]);
+                } else {
+                    toast.innerHTML = '<span class="toast" style="background:#b13a3a;">⚠️ Belum ada file dipilih. Silakan upload file Excel terlebih dahulu.</span>';
+                }
+            });
+
+            // ============================================================
+            //  TOMBOL RESET KE CONTOH
+            // ============================================================
+            resetBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                fileInput.value = '';
+                fileNameDisplay.textContent = 'Belum ada file dipilih';
+                toast.innerHTML = '';
+                renderData(sampleTitle, sampleDownloadedBy, sampleDownloadedDate, sampleHeaders, sampleData,
+                sampleSerial);
+            });
 
             // ============================================================
             //  RENDER SAMPLE PERTAMA KALI
