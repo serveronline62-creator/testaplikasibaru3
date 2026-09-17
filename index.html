@@ -124,7 +124,7 @@
     display:inline-flex;align-items:center;gap:4px;margin:0 2px;
   }
   .main-table .btn-icon:hover{background:#eff6ff;border-color:var(--brand);color:var(--brand)}
-  /* ======= EDITABLE CELL (INPUT MANUAL) ======= */
+  /* ======= EDITABLE CELL ======= */
   .main-table td.editable-cell{
     cursor:pointer;position:relative;min-width:130px;
     transition:background .12s;
@@ -182,7 +182,7 @@
   .field input:focus,.field select:focus,.field textarea:focus{
     border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
   .field textarea{resize:vertical;min-height:64px}
-  /* META MODAL BANNER */
+  /* META BANNER */
   .meta-banner{
     padding:12px 16px;border-radius:10px;background:#dbeafe;border:1px solid #bfdbfe;
     color:#1e40af;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;
@@ -352,7 +352,7 @@
   </div>
 </div>
 
-<!-- ================= MODAL META (INFO PENGIRIMAN - BATCH) ================= -->
+<!-- ================= MODAL META ================= -->
 <div class="overlay" id="metaOverlay">
   <div class="modal medium">
     <div class="modal-head">
@@ -760,7 +760,6 @@ function renderTable(){
       </tr>`;
     }).join('');
 
-    // Row click → detail (kecuali klik pada editable-cell dan tombol)
     tbody.querySelectorAll('tr[data-key]').forEach(tr=>{
       tr.addEventListener('click', (e)=>{
         if(e.target.closest('.editable-cell')) return;
@@ -769,7 +768,6 @@ function renderTable(){
       });
     });
 
-    // Tombol Form → modal batch
     tbody.querySelectorAll('.meta-btn').forEach(b=>{
       b.addEventListener('click', e=>{
         e.stopPropagation();
@@ -777,7 +775,6 @@ function renderTable(){
       });
     });
 
-    // Tombol Detail
     tbody.querySelectorAll('.view-btn').forEach(b=>{
       b.addEventListener('click', e=>{
         e.stopPropagation();
@@ -785,7 +782,6 @@ function renderTable(){
       });
     });
 
-    // ===== INLINE EDIT (INPUT MANUAL) =====
     tbody.querySelectorAll('.editable-cell').forEach(td=>{
       td.addEventListener('click', e=>{
         e.stopPropagation();
@@ -798,7 +794,7 @@ function renderTable(){
 }
 
 /* =========================================================
-   INLINE CELL EDIT — INPUT MANUAL
+   INLINE CELL EDIT
    ========================================================= */
 function startEditCell(td){
   if(td.classList.contains('editing')) return;
@@ -811,7 +807,6 @@ function startEditCell(td){
   const curVal   = meta[fieldKey] || '';
   const prevHtml = td.innerHTML;
 
-  // Render input
   let inputType = 'text';
   if(type === 'date') inputType = 'date';
   else if(type === 'datetime-local') inputType = 'datetime-local';
@@ -826,7 +821,6 @@ function startEditCell(td){
   try{ inp.select(); }catch(e){}
 
   const finish = (save)=>{
-    // Lepas mode edit
     td.classList.remove('editing');
 
     if(save){
@@ -839,7 +833,6 @@ function startEditCell(td){
       }
       setMeta(key, m);
 
-      // Update tampilan sel
       let disp;
       if(newVal === '') disp = '<span class="meta-empty">—</span>';
       else if(type === 'datetime-local') disp = esc(String(newVal).replace('T',' '));
@@ -860,15 +853,12 @@ function startEditCell(td){
       ev.preventDefault();
       finish(false);
     }else if(ev.key === 'Tab'){
-      // Pindah ke sel berikutnya: commit dulu, biarkan default Tab berpindah
       finish(true);
     }
   });
   inp.addEventListener('blur', ()=>{
-    // jika masih dalam mode editing → commit
     if(td.classList.contains('editing')) finish(true);
   });
-  // Klik dalam input tidak men-trigger apapun ke atas
   inp.addEventListener('click', ev=> ev.stopPropagation());
 }
 
@@ -893,7 +883,7 @@ function refreshSiteFilter(){
 }
 
 /* =========================================================
-   META MODAL (FORM LENGKAP)
+   META MODAL
    ========================================================= */
 function buildMetaForm(){
   $('#metaForm').innerHTML = GROUP_FIELDS.map(f=>{
@@ -1121,18 +1111,19 @@ function deleteRecord(){
 }
 
 /* =========================================================
-   EXCEL EXPORT
+   EXCEL EXPORT — METADATA DI PALING KANAN (SETELAH Analisis SA)
    ========================================================= */
 function getExportFields(){
+  /* Urutan kolom Excel:
+     1. Semua 21 kolom FIELDS (… diakhiri "Analisis SA")
+     2. Baru 9 kolom GROUP_FIELDS di paling kanan
+  */
   const out = [];
-  FIELDS.forEach(f=>{
-    out.push(f);
-    if(f.key === 'buktiTransaksiKirim'){
-      GROUP_FIELDS.forEach(gf => out.push({ ...gf, isMeta:true }));
-    }
-  });
+  FIELDS.forEach(f => out.push(f));
+  GROUP_FIELDS.forEach(gf => out.push({ ...gf, isMeta:true }));
   return out;
 }
+
 function recordToLabeled(d){
   const meta = getMeta(groupKey(d));
   const o = {};
@@ -1185,10 +1176,12 @@ function exportExcel(){
     ['Total Grup Bukti Transaksi', new Set(filtered.map(groupKey)).size],
     ['Filter Site', $('#siteFilter').value || 'Semua'],
     ['Filter Status', $('#statusFilter').value || 'Semua'],
-    ['Kata Kunci', $('#searchInput').value.trim() || '-']
+    ['Kata Kunci', $('#searchInput').value.trim() || '-'],
+    [''],
+    ['Catatan', 'Kolom info pengiriman berada di paling kanan (setelah Analisis SA)']
   ];
   const wsInfo = XLSX.utils.aoa_to_sheet(info);
-  wsInfo['!cols'] = [{wch:26},{wch:36}];
+  wsInfo['!cols'] = [{wch:26},{wch:56}];
   XLSX.utils.book_append_sheet(wb, wsInfo, 'Info');
 
   const tgl = new Date().toISOString().slice(0,10);
@@ -1251,11 +1244,12 @@ function downloadTemplateExcel(){
     ['1. Isi data mulai dari baris ke-2 (baris ke-1 adalah header).'],
     ['2. Jangan mengubah nama kolom pada baris pertama.'],
     ['3. Kolom "Bukti Transaksi Kirim" berfungsi sebagai kunci pengelompokan.'],
-    ['4. Kolom INFO PENGIRIMAN (Nomor Surat Jalan s/d TCODE) berlaku PER GRUP'],
-    ['   Bukti Transaksi Kirim — cukup isi di salah satu baris.'],
+    ['4. Kolom INFO PENGIRIMAN ada di PALING KANAN (setelah Analisis SA):'],
+    ['   Nomor Surat Jalan s/d TCODE — berlaku PER GRUP Bukti Transaksi Kirim.'],
+    ['   Cukup isi di salah satu baris, sistem memakai nilai pertama non-kosong.'],
     ['5. Format tanggal: YYYY-MM-DD. Untuk "Diubah Pada": YYYY-MM-DD HH:MM.'],
     [''],
-    ['Daftar Kolom:'],
+    ['Daftar Kolom (urutan di file Excel):'],
     ...headers.map((h,i)=>[`${i+1}. ${h}`])
   ];
   const wsGuide = XLSX.utils.aoa_to_sheet(guide);
@@ -1552,7 +1546,6 @@ function init(){
   $('#siteFilter').addEventListener('change', renderTable);
   $('#statusFilter').addEventListener('change', renderTable);
 
-  // CRUD record
   $('#addBtn').addEventListener('click', ()=> openModal(null));
   $('#closeX').addEventListener('click', closeModal);
   $('#cancelBtn').addEventListener('click', closeModal);
@@ -1560,13 +1553,11 @@ function init(){
   $('#deleteBtn').addEventListener('click', deleteRecord);
   $('#overlay').addEventListener('click', e=>{ if(e.target.id === 'overlay') closeModal(); });
 
-  // Meta modal
   $('#metaCloseX').addEventListener('click', closeMetaModal);
   $('#metaCancelBtn').addEventListener('click', closeMetaModal);
   $('#metaSaveBtn').addEventListener('click', saveMetaRecord);
   $('#metaOverlay').addEventListener('click', e=>{ if(e.target.id === 'metaOverlay') closeMetaModal(); });
 
-  // Detail modal
   $('#detailCloseX').addEventListener('click', closeDetail);
   $('#detailOverlay').addEventListener('click', e=>{ if(e.target.id === 'detailOverlay') closeDetail(); });
   $('#detailAddBtn').addEventListener('click', ()=>{
@@ -1584,7 +1575,6 @@ function init(){
   $('#exportBtn').addEventListener('click', exportExcel);
   $('#templateBtn').addEventListener('click', downloadTemplateExcel);
 
-  // Import
   $('#importBtn').addEventListener('click', openImportModal);
   $('#importCloseX').addEventListener('click', closeImportModal);
   $('#importCancelBtn').addEventListener('click', closeImportModal);
@@ -1617,10 +1607,8 @@ function init(){
     $('#importConfirmBtn').disabled = true;
   });
 
-  // Keyboard escape
   document.addEventListener('keydown', e=>{
     if(e.key === 'Escape'){
-      // jangan tutup modal jika ada sel yang sedang diedit
       if(document.querySelector('.editable-cell.editing')) return;
       if($('#importOverlay').classList.contains('show')) closeImportModal();
       else if($('#metaOverlay').classList.contains('show')) closeMetaModal();
