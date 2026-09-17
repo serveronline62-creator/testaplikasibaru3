@@ -8,95 +8,219 @@
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{
-    --bg:#eef2f7;
-    --panel:#ffffff;
-    --ink:#0f172a;
-    --muted:#64748b;
-    --line:#e2e8f0;
-    --brand:#2563eb;
-    --brand-dark:#1d4ed8;
-    --dark:#0f172a;
-    --green:#16a34a;
-    --amber:#d97706;
-    --red:#dc2626;
+    --bg:#eef2f7; --panel:#ffffff; --ink:#0f172a; --muted:#64748b;
+    --line:#e2e8f0; --brand:#2563eb; --brand-dark:#1d4ed8;
+    --green:#16a34a; --amber:#d97706; --red:#dc2626;
   }
-  body{
-    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-    background:var(--bg); color:var(--ink); font-size:13px; padding:18px;
-  }
-  /* ---------- HEADER ---------- */
-  .page-head{
-    background:linear-gradient(120deg,#0f172a,#1e3a8a);
-    color:#fff; border-radius:14px; padding:20px 24px;
-    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
-    box-shadow:0 8px 24px rgba(15,23,42,.18);
-  }
-  .logo{
-    width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.14);
-    display:grid;place-items:center;font-size:22px;flex:none;
-  }
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:var(--bg); color:var(--ink); font-size:13px; padding:18px}
+  /* HEADER */
+  .page-head{background:linear-gradient(120deg,#0f172a,#1e3a8a);color:#fff;border-radius:14px;
+    padding:20px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    box-shadow:0 8px 24px rgba(15,23,42,.18)}
+  .logo{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.14);
+    display:grid;place-items:center;font-size:22px;flex:none}
   .page-head h1{font-size:19px;font-weight:700;letter-spacing:.2px}
   .page-head p{font-size:12px;color:#c7d2fe;margin-top:3px}
-  .head-badge{
-    margin-left:auto;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
-    padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600;
-  }
-  /* ---------- STATS ---------- */
+  .head-badge{margin-left:auto;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+    padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600}
+  /* STATS */
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0}
   .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
   .stat .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
   .stat .val{font-size:22px;font-weight:700;margin-top:5px}
   .stat.b .val{color:var(--brand)} .stat.g .val{color:var(--green)}
   .stat.a .val{color:var(--amber)} .stat.r .val{color:var(--red)}
-  /* ---------- TOOLBAR ---------- */
-  .toolbar{
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    padding:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;
-  }
+  /* TOOLBAR */
+  .toolbar{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
   .search{position:relative;flex:1;min-width:200px}
-  .search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:9px;font-size:13px;outline:none;background:#f8fafc}
+  .search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:9px;
+    font-size:13px;outline:none;background:#f8fafc}
   .search input:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
   .search::before{content:"🔍";position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:12px;opacity:.6}
-  select.filter{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:13px;background:#f8fafc;outline:none;cursor:pointer}
+  select.filter{padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:13px;
+    background:#f8fafc;outline:none;cursor:pointer}
   select.filter:focus{border-color:var(--brand)}
-  .btn{
-    border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600;
-    cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
-  }
+  .btn{border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600;
+    cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
   .btn.primary{background:var(--brand);color:#fff}
   .btn.primary:hover{background:var(--brand-dark)}
   .btn.ghost{background:#f1f5f9;color:#334155;border:1px solid var(--line)}
   .btn.ghost:hover{background:#e2e8f0}
   .btn.green{background:var(--green);color:#fff}
   .btn.green:hover{background:#15803d}
+  .btn.excel{background:#107c41;color:#fff}
+  .btn.excel:hover{background:#0c5e31}
   .btn.danger{background:#fee2e2;color:var(--red)}
   .btn.danger:hover{background:#fecaca}
-  /* ---------- TABLE ---------- */
+  /* ======= MAIN LIST — TABEL LENGKAP ======= */
   .table-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .table-wrap{overflow:auto;max-height:calc(100vh - 330px);min-height:220px}
-  table{border-collapse:separate;border-spacing:0;width:100%;min-width:max-content}
-  thead th{
+  .table-wrap{overflow:auto;max-height:calc(100vh - 330px);min-height:280px}
+  .table-wrap::-webkit-scrollbar{width:12px;height:12px}
+  .table-wrap::-webkit-scrollbar-track{background:#e2e8f0}
+  .table-wrap::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:6px}
+  .table-wrap::-webkit-scrollbar-thumb:hover{background:#64748b}
+  .main-table{border-collapse:separate;border-spacing:0;min-width:max-content;width:100%}
+  .main-table thead th{
     position:sticky;top:0;z-index:2;
     background:#1e293b;color:#e2e8f0;
-    font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;
-    padding:11px 12px;text-align:left;white-space:nowrap;
-    border-right:1px solid #334155;
+    font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;
+    padding:11px 14px;text-align:left;white-space:nowrap;
+    border-right:1px solid #334155;border-bottom:2px solid #0f172a;
   }
-  thead th:last-child{border-right:none}
-  tbody td{
-    padding:10px 12px;border-bottom:1px solid var(--line);border-right:1px solid #f1f5f9;
-    white-space:nowrap;background:#fff;vertical-align:middle;
+  .main-table thead th:last-child{border-right:none}
+  .main-table thead th:first-child{left:0;z-index:4;background:#0f172a}
+  .main-table tbody td{
+    padding:11px 14px;border-bottom:1px solid var(--line);border-right:1px solid #f1f5f9;
+    background:#fff;white-space:nowrap;vertical-align:middle;font-size:12.5px;
   }
-  tbody td:last-child{border-right:none}
-  tbody tr{cursor:pointer}
-  tbody tr:hover td{background:#eff6ff}
-  thead th:first-child{position:sticky;left:0;z-index:3;min-width:64px}
-  tbody td:first-child{
-    position:sticky;left:0;z-index:1;background:#fff;font-weight:700;color:var(--brand);
+  .main-table tbody td:last-child{border-right:none}
+  .main-table tbody tr{cursor:pointer;transition:.12s}
+  .main-table tbody tr:nth-child(even) td{background:#f8fafc}
+  .main-table tbody tr:hover td{background:#eff6ff}
+  .main-table tbody td:first-child{
+    position:sticky;left:0;z-index:1;background:#fff;
+    font-weight:700;color:var(--brand);
     border-right:1px solid var(--line);
   }
-  .cell-desc{max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
-  .cell-ana{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;color:#475569}
+  .main-table tbody tr:nth-child(even) td:first-child{background:#f8fafc}
+  .main-table tbody tr:hover td:first-child{background:#eff6ff}
+  .main-table .btk-cell{
+    display:flex;align-items:center;gap:10px;min-width:220px;
+  }
+  .main-table .btk-icon{
+    width:30px;height:30px;border-radius:8px;background:#dbeafe;color:var(--brand);
+    display:grid;place-items:center;font-size:14px;flex:none;
+  }
+  .main-table .btk-text{font-weight:700;color:#1e293b;letter-spacing:.2px}
+  .main-table .btk-sub{font-size:10.5px;color:#64748b;font-weight:500;margin-top:2px}
+  .main-table .item-cell{text-align:center}
+  .main-table .item-badge{
+    display:inline-block;padding:3px 10px;border-radius:20px;
+    background:#dbeafe;color:#1e40af;font-size:11px;font-weight:700;
+  }
+  .main-table .meta-empty{color:#cbd5e1}
+  .main-table .tcode-cell{
+    font-family:'Consolas','Monaco',monospace;font-weight:600;
+    color:#334155;font-size:12px;
+  }
+  .main-table .aksi-col{
+    position:sticky;right:0;z-index:2;background:#f1f5f9;
+    border-left:1px solid var(--line);border-right:none;text-align:center;
+  }
+  .main-table thead th.aksi-col{
+    background:#0f172a;border-left:1px solid #334155;border-right:none;
+  }
+  .main-table tbody tr:hover td.aksi-col{background:#dbeafe}
+  .main-table .btn-icon{
+    padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:#fff;
+    cursor:pointer;font-size:11px;font-weight:600;color:#334155;transition:.12s;
+    display:inline-flex;align-items:center;gap:4px;margin:0 2px;
+  }
+  .main-table .btn-icon:hover{background:#eff6ff;border-color:var(--brand);color:var(--brand)}
+  .main-table .btn-icon.warn{color:#92400e}
+  .main-table .btn-icon.warn:hover{background:#fef3c7;border-color:#d97706;color:#92400e}
+  .empty{padding:60px 20px;text-align:center;color:var(--muted)}
+  .empty .big{font-size:38px;margin-bottom:10px}
+  /* MODAL */
+  .overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);
+    display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:16px;width:min(1080px,100%);max-height:92vh;
+    display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:pop .18s ease}
+  .modal.small{width:min(680px,100%)}
+  .modal.medium{width:min(900px,100%)}
+  .modal.wide{width:min(1600px,100%)}
+  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal-head{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+  .modal-head h2{font-size:16px;font-weight:700}
+  .modal-head .sub{font-size:11px;color:var(--muted);margin-top:3px}
+  .close-x{margin-left:auto;background:#f1f5f9;border:none;width:32px;height:32px;border-radius:8px;
+    cursor:pointer;font-size:15px;color:#475569;flex:none}
+  .close-x:hover{background:#e2e8f0}
+  .modal-body{padding:20px 22px;overflow-y:auto}
+  .modal-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .spacer{flex:1}
+  /* FORM */
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field.full{grid-column:1/-1}
+  .field label{font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.4px}
+  .field input,.field select,.field textarea{padding:9px 11px;border:1px solid var(--line);border-radius:8px;
+    font-size:13px;font-family:inherit;outline:none;background:#f8fafc;width:100%}
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .field textarea{resize:vertical;min-height:64px}
+  /* META MODAL */
+  .meta-banner{
+    padding:12px 16px;border-radius:10px;background:#dbeafe;border:1px solid #bfdbfe;
+    color:#1e40af;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;
+  }
+  .meta-banner .icon{font-size:18px}
+  /* DETAIL MODAL */
+  .detail-title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .detail-title-row .key{font-size:16px;font-weight:700;color:#1e293b;letter-spacing:.2px}
+  .detail-title-row .count-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;
+    background:#dbeafe;color:#1e40af}
+  .detail-hint{font-size:11px;color:var(--muted);margin-top:4px}
+  .detail-sheet-wrap{
+    flex:1; overflow:auto; background:#f8fafc;
+    min-height:340px; max-height:calc(92vh - 200px);
+  }
+  .detail-sheet-wrap::-webkit-scrollbar{width:12px;height:12px}
+  .detail-sheet-wrap::-webkit-scrollbar-track{background:#e2e8f0}
+  .detail-sheet-wrap::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:6px}
+  .detail-sheet-wrap::-webkit-scrollbar-thumb:hover{background:#64748b}
+  .detail-sheet{
+    border-collapse:separate; border-spacing:0;
+    min-width:max-content; width:100%;
+    font-size:12.5px;
+  }
+  .detail-sheet thead th{
+    position:sticky; top:0; z-index:2;
+    background:#1e293b; color:#e2e8f0;
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    padding:11px 14px; text-align:left; white-space:nowrap;
+    border-right:1px solid #334155; border-bottom:2px solid #0f172a;
+  }
+  .detail-sheet thead th:last-child{border-right:none}
+  .detail-sheet thead th:first-child{left:0;z-index:4;background:#0f172a}
+  .detail-sheet tbody td{
+    padding:11px 14px;border-bottom:1px solid var(--line);border-right:1px solid #f1f5f9;
+    background:#fff;white-space:nowrap;vertical-align:middle;
+  }
+  .detail-sheet tbody td:last-child{border-right:none}
+  .detail-sheet tbody tr:nth-child(even) td{background:#f8fafc}
+  .detail-sheet tbody tr:hover td{background:#eff6ff}
+  .detail-sheet tbody td:first-child{
+    position:sticky; left:0; z-index:1;
+    background:#fff; font-weight:700; color:var(--brand);
+    border-right:1px solid var(--line);
+  }
+  .detail-sheet tbody tr:nth-child(even) td:first-child{background:#f8fafc}
+  .detail-sheet tbody tr:hover td:first-child{background:#eff6ff}
+  .detail-sheet .col-aksi{
+    text-align:center;white-space:nowrap;
+    background:#f1f5f9 !important;
+    position:sticky; right:0; z-index:2;
+    border-left:1px solid var(--line);border-right:none;
+  }
+  .detail-sheet thead th.col-aksi{background:#0f172a !important;color:#fff;border-left:1px solid #334155}
+  .detail-sheet tbody tr:hover td.col-aksi{background:#dbeafe !important}
+  .detail-sheet .qty-cell{text-align:center;font-weight:700}
+  .detail-sheet .pn-cell,.detail-sheet .po-cell{font-weight:600;color:#1e293b}
+  .detail-sheet .desc-cell{color:#334155;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+  .detail-sheet .ana-cell{color:#475569;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+  .detail-summary{font-size:12px;color:#475569;font-weight:600}
+  .detail-summary b{color:#1e293b}
+  .btn-icon{padding:5px 11px;border-radius:7px;border:1px solid var(--line);background:#fff;
+    cursor:pointer;font-size:11.5px;font-weight:600;color:#334155;transition:.12s;
+    display:inline-flex;align-items:center;gap:4px;margin:0 2px}
+  .btn-icon:hover{background:#eff6ff;border-color:var(--brand);color:var(--brand)}
+  .btn-icon.danger{color:var(--red)}
+  .btn-icon.danger:hover{background:#fee2e2;border-color:var(--red);color:var(--red)}
+  /* PILL */
   .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
   .pill.open{background:#fef3c7;color:#92400e}
   .pill.proses{background:#dbeafe;color:#1e40af}
@@ -105,68 +229,28 @@
   .yn{font-weight:700}
   .yn.ya{color:var(--green)}
   .yn.tidak{color:#94a3b8}
-  .empty{padding:60px 20px;text-align:center;color:var(--muted)}
-  .empty .big{font-size:38px;margin-bottom:10px}
-  /* ---------- MODAL ---------- */
-  .overlay{
-    position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);
-    display:none;align-items:center;justify-content:center;padding:20px;z-index:50;
-  }
-  .overlay.show{display:flex}
-  .modal{
-    background:#fff;border-radius:16px;width:min(1080px,100%);max-height:92vh;
-    display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:pop .18s ease;
-  }
-  .modal.small{width:min(680px,100%)}
-  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
-  .modal-head{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
-  .modal-head h2{font-size:16px;font-weight:700}
-  .modal-head .sub{font-size:11px;color:var(--muted);margin-top:2px}
-  .close-x{margin-left:auto;background:#f1f5f9;border:none;width:32px;height:32px;border-radius:8px;
-    cursor:pointer;font-size:15px;color:#475569}
-  .close-x:hover{background:#e2e8f0}
-  .modal-body{padding:20px 22px;overflow-y:auto}
-  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
-  .field{display:flex;flex-direction:column;gap:5px}
-  .field.full{grid-column:1/-1}
-  .field label{font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.4px}
-  .field input,.field select,.field textarea{
-    padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;
-    font-family:inherit;outline:none;background:#f8fafc;width:100%;
-  }
-  .field input:focus,.field select:focus,.field textarea:focus{
-    border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12);
-  }
-  .field textarea{resize:vertical;min-height:64px}
-  .modal-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
-  .spacer{flex:1}
-  /* ---------- IMPORT MODAL ---------- */
-  .drop-zone{
-    border:2px dashed #cbd5e1;border-radius:14px;padding:34px 20px;text-align:center;
-    background:#f8fafc;cursor:pointer;transition:.15s;
-  }
+  /* IMPORT MODAL */
+  .drop-zone{border:2px dashed #cbd5e1;border-radius:14px;padding:34px 20px;text-align:center;
+    background:#f8fafc;cursor:pointer;transition:.15s}
   .drop-zone:hover,.drop-zone.drag{border-color:var(--brand);background:#eff6ff}
   .drop-zone .icon{font-size:42px;margin-bottom:10px}
   .drop-zone .ttl{font-size:14px;font-weight:700;color:#1e293b}
   .drop-zone .hint{font-size:12px;color:var(--muted);margin-top:6px}
-  .file-chip{
-    display:none;align-items:center;gap:10px;margin-top:14px;padding:12px 16px;
-    background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;
-  }
+  .file-chip{display:none;align-items:center;gap:10px;margin-top:14px;padding:12px 16px;
+    background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px}
   .file-chip.show{display:flex}
   .file-chip .fc-icon{font-size:22px}
   .file-chip .fc-name{font-weight:700;color:#065f46;font-size:13px}
   .file-chip .fc-meta{font-size:11px;color:#047857;margin-top:2px}
   .file-chip .fc-x{margin-left:auto;background:#d1fae5;border:none;width:28px;height:28px;border-radius:7px;cursor:pointer;color:#065f46}
   .file-chip .fc-x:hover{background:#a7f3d0}
-  .opt-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px;padding:14px;background:#f8fafc;border-radius:10px;border:1px solid var(--line)}
+  .opt-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px;padding:14px;
+    background:#f8fafc;border-radius:10px;border:1px solid var(--line)}
   .opt-row label{font-size:12px;font-weight:600;color:#334155;cursor:pointer;display:flex;align-items:center;gap:6px}
-  .opt-row input[type=radio]{cursor:pointer}
-  .preview-box{
-    margin-top:14px;display:none;border:1px solid var(--line);border-radius:10px;overflow:hidden;
-  }
+  .preview-box{margin-top:14px;display:none;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .preview-box.show{display:block}
-  .preview-head{padding:10px 14px;background:#f1f5f9;font-size:12px;font-weight:700;color:#334155;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .preview-head{padding:10px 14px;background:#f1f5f9;font-size:12px;font-weight:700;color:#334155;
+    border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
   .preview-scroll{max-height:230px;overflow:auto}
   .preview-scroll table{width:100%;font-size:11px;min-width:0}
   .preview-scroll th{position:sticky;top:0;background:#e2e8f0;color:#1e293b;padding:7px 10px;font-size:10px;text-align:left;white-space:nowrap}
@@ -174,17 +258,16 @@
   .mapping-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
   .map-tag{font-size:10.5px;padding:4px 9px;border-radius:6px;background:#dcfce7;color:#166534;font-weight:600}
   .map-tag.miss{background:#fef3c7;color:#92400e}
+  .map-tag.meta{background:#dbeafe;color:#1e40af}
   .alert{padding:10px 14px;border-radius:9px;font-size:12px;margin-top:12px;display:none}
   .alert.show{display:block}
   .alert.info{background:#dbeafe;color:#1e40af}
   .alert.warn{background:#fef3c7;color:#92400e}
   .alert.err{background:#fee2e2;color:#991b1b}
-  /* ---------- TOAST ---------- */
-  .toast{
-    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
     background:#0f172a;color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;
-    opacity:0;transition:.28s;z-index:99;pointer-events:none;max-width:90vw;text-align:center;
-  }
+    opacity:0;transition:.28s;z-index:99;pointer-events:none;max-width:90vw;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   @media(max-width:640px){
     body{padding:10px}
@@ -196,28 +279,25 @@
 </head>
 <body>
 
-<!-- ================= HEADER ================= -->
 <div class="page-head">
   <div class="logo">📦</div>
   <div>
     <h1>Kontrol Pengiriman Sparepart</h1>
-    <p>Sistem monitoring &amp; tracking pengiriman sparepart — reservasi, service call, hingga klaim HIT</p>
+    <p>Klik salah satu <b>Bukti Transaksi Kirim</b> untuk melihat detail seluruh item terkait</p>
   </div>
   <div class="head-badge">📅 <span id="today"></span></div>
 </div>
 
-<!-- ================= STATISTIK ================= -->
 <div class="stats">
-  <div class="stat b"><div class="lbl">Total Data</div><div class="val" id="stTotal">0</div></div>
+  <div class="stat b"><div class="lbl">Total Bukti Transaksi</div><div class="val" id="stTotal">0</div></div>
   <div class="stat g"><div class="lbl">Total Qty</div><div class="val" id="stQty">0</div></div>
   <div class="stat a"><div class="lbl">Status Open / Proses</div><div class="val" id="stOpen">0</div></div>
   <div class="stat r"><div class="lbl">Kembali ke Pabrik</div><div class="val" id="stPabrik">0</div></div>
 </div>
 
-<!-- ================= TOOLBAR ================= -->
 <div class="toolbar">
   <div class="search">
-    <input type="text" id="searchInput" placeholder="Cari part number, site, nomor PO, bukti transaksi...">
+    <input type="text" id="searchInput" placeholder="Cari bukti transaksi, no resi, expedisi, part number, site...">
   </div>
   <select class="filter" id="siteFilter"><option value="">Semua Site</option></select>
   <select class="filter" id="statusFilter">
@@ -225,22 +305,76 @@
     <option>Open</option><option>Proses</option><option>Selesai</option><option>Batal</option>
   </select>
   <button class="btn green" id="importBtn">📥 Upload Excel</button>
-  <button class="btn ghost" id="exportBtn">⬇ Export CSV</button>
-  <button class="btn ghost" id="templateBtn">📄 Template</button>
+  <button class="btn excel" id="exportBtn">⬇ Download Excel</button>
+  <button class="btn ghost" id="templateBtn">📄 Template Excel</button>
   <button class="btn primary" id="addBtn">＋ Tambah Data</button>
 </div>
 
-<!-- ================= TABEL ================= -->
+<!-- ================= MAIN TABLE ================= -->
 <div class="table-card">
   <div class="table-wrap">
-    <table>
-      <thead id="thead"></thead>
-      <tbody id="tbody"></tbody>
+    <table class="main-table">
+      <thead id="mainThead"></thead>
+      <tbody id="mainTbody"></tbody>
     </table>
   </div>
 </div>
 
-<!-- ================= MODAL FORM ================= -->
+<!-- ================= MODAL META (INFO PENGIRIMAN) ================= -->
+<div class="overlay" id="metaOverlay">
+  <div class="modal medium">
+    <div class="modal-head">
+      <div>
+        <h2>✏ Edit Info Pengiriman</h2>
+        <div class="sub">Data logistik &amp; administrasi untuk bukti transaksi kirim</div>
+      </div>
+      <button class="close-x" id="metaCloseX">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="meta-banner">
+        <span class="icon">📄</span>
+        <span>Bukti Transaksi Kirim: <b id="metaKeyDisplay">-</b></span>
+      </div>
+      <form id="metaForm" class="form-grid" style="margin-top:16px" onsubmit="return false"></form>
+    </div>
+    <div class="modal-foot">
+      <div class="spacer"></div>
+      <button class="btn ghost" id="metaCancelBtn">Batal</button>
+      <button class="btn primary" id="metaSaveBtn">💾 Simpan Info</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL DETAIL (SPREADSHEET ITEM) ================= -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal wide">
+    <div class="modal-head">
+      <div style="min-width:0">
+        <div class="detail-title-row">
+          <span class="key" id="detailKey">-</span>
+          <span class="count-pill" id="detailCount">0 item</span>
+        </div>
+        <div class="detail-hint">Tampilan spreadsheet — sama seperti file Excel. Geser ke kanan untuk melihat semua kolom →</div>
+      </div>
+      <button class="close-x" id="detailCloseX">✕</button>
+    </div>
+    <div class="detail-sheet-wrap" id="detailSheetWrap">
+      <table class="detail-sheet">
+        <thead id="detailThead"></thead>
+        <tbody id="detailTbody"></tbody>
+      </table>
+    </div>
+    <div class="modal-foot">
+      <div class="detail-summary" id="detailSummary">-</div>
+      <div class="spacer"></div>
+      <button class="btn ghost" id="detailMetaBtn">✏ Edit Info Pengiriman</button>
+      <button class="btn excel" id="detailExportBtn">⬇ Download Excel Grup Ini</button>
+      <button class="btn primary" id="detailAddBtn">＋ Tambah Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORM MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="modal-head">
@@ -262,13 +396,13 @@
   </div>
 </div>
 
-<!-- ================= MODAL IMPORT EXCEL ================= -->
+<!-- IMPORT MODAL -->
 <div class="overlay" id="importOverlay">
   <div class="modal small">
     <div class="modal-head">
       <div>
         <h2>📥 Upload Data dari Excel</h2>
-        <div class="sub">Format didukung: .xlsx, .xls, .csv — header baris pertama harus sesuai nama kolom</div>
+        <div class="sub">Format: .xlsx, .xls, .csv — header baris pertama harus sesuai nama kolom</div>
       </div>
       <button class="close-x" id="importCloseX">✕</button>
     </div>
@@ -324,7 +458,7 @@
 
 <script>
 /* =========================================================
-   DEFINISI 21 KOLOM / HEADER
+   FIELD DEFINITIONS
    ========================================================= */
 const FIELDS = [
   { key:'nomor',                label:'Nomor',                   type:'text'   },
@@ -350,52 +484,106 @@ const FIELDS = [
   { key:'analisisSA',           label:'Analisis SA',             type:'textarea' }
 ];
 
-const STORAGE_KEY = 'kontrol_sparepart_v1';
+/* Kolom metadata grup — ditampilkan di KANAN "Bukti Transaksi Kirim" */
+const GROUP_FIELDS = [
+  { key:'nomorSuratJalan',      label:'Nomor Surat Jalan',      type:'text'          },
+  { key:'dikonfirmasiTanggal',  label:'Dikonfirmasi Tanggal',   type:'date'          },
+  { key:'tglKirimKpgSby',       label:'Tgl Kirim KPG - SBY',    type:'date'          },
+  { key:'sbyKdsSyg',            label:'SBY-KDS/SYG',            type:'date'          },
+  { key:'namaExpedisi',         label:'NAMA EXPEDISI',          type:'text'          },
+  { key:'noResiExpedisi',       label:'NO. RESI EXPEDISI',      type:'text'          },
+  { key:'diubahOleh',           label:'Diubah Oleh',            type:'text'          },
+  { key:'diubahPada',           label:'Diubah Pada',            type:'datetime-local'},
+  { key:'tcode',                label:'TCODE',                  type:'text'          }
+];
+
+const NO_BUKTI_KEY = '(Tanpa Bukti Transaksi Kirim)';
+const STORAGE_KEY  = 'kontrol_sparepart_v1';
+const META_KEY     = 'kontrol_sparepart_groupmeta_v1';
 
 /* =========================================================
-   DATA AWAL
+   SEED
    ========================================================= */
 function seed(){
   return [
-    {
-      id:1, nomor:'1', site:'JKT-01', buktiTransaksiKirim:'TRX-2024-0011', tanggalReservasi:'2024-06-03',
+    { id:1, nomor:'1', site:'JKT-01', buktiTransaksiKirim:'KKG/KPG/SV/26/08/003', tanggalReservasi:'2024-06-03',
       buktiServiceCall:'SC-88213', buktiServiceJob:'SJ-4421', statusServiceCall:'Selesai',
       partNumber:'PN-AX4510', deskripsiPartNumber:'Fan Cooling Unit 24V', qty:'2',
       nomorSeriMaterial:'SN-778112', kembaliKePabrik:'Tidak', klaimKeHIT:'Ya',
       lokasiReservasi:'Gudang Jakarta', lokasiStok:'Rak A-12', lokasiTujuan:'Site JKT-01',
       buktiReservasi:'RSV-0091', nomorPO:'PO-4500123', invoiceKeHIT:'INV-HIT-0098',
-      buktiTerima:'BA-2201', analisisSA:'Kerusakan bearing, diganti unit baru'
-    },
-    {
-      id:2, nomor:'2', site:'SBY-02', buktiTransaksiKirim:'TRX-2024-0012', tanggalReservasi:'2024-06-07',
-      buktiServiceCall:'SC-88240', buktiServiceJob:'SJ-4430', statusServiceCall:'Proses',
-      partNumber:'PN-BX2201', deskripsiPartNumber:'Hydraulic Hose Assembly', qty:'5',
-      nomorSeriMaterial:'SN-990233', kembaliKePabrik:'Ya', klaimKeHIT:'Ya',
-      lokasiReservasi:'Gudang Surabaya', lokasiStok:'Rak C-04', lokasiTujuan:'Site SBY-02',
-      buktiReservasi:'RSV-0098', nomorPO:'PO-4500141', invoiceKeHIT:'-',
-      buktiTerima:'-', analisisSA:'Menunggu analisa dari pabrik'
-    },
-    {
-      id:3, nomor:'3', site:'MDN-03', buktiTransaksiKirim:'TRX-2024-0013', tanggalReservasi:'2024-06-11',
-      buktiServiceCall:'SC-88255', buktiServiceJob:'SJ-4455', statusServiceCall:'Open',
+      buktiTerima:'BA-2201', analisisSA:'Kerusakan bearing, diganti unit baru' },
+    { id:2, nomor:'2', site:'JKT-01', buktiTransaksiKirim:'KKG/KPG/SV/26/08/003', tanggalReservasi:'2024-06-03',
+      buktiServiceCall:'SC-88213', buktiServiceJob:'SJ-4421', statusServiceCall:'Selesai',
+      partNumber:'PN-BX2201', deskripsiPartNumber:'Hydraulic Hose Assembly', qty:'3',
+      nomorSeriMaterial:'SN-990233', kembaliKePabrik:'Tidak', klaimKeHIT:'Ya',
+      lokasiReservasi:'Gudang Jakarta', lokasiStok:'Rak C-04', lokasiTujuan:'Site JKT-01',
+      buktiReservasi:'RSV-0091', nomorPO:'PO-4500123', invoiceKeHIT:'INV-HIT-0098',
+      buktiTerima:'BA-2201', analisisSA:'Hose bocor, diganti baru' },
+    { id:3, nomor:'3', site:'JKT-01', buktiTransaksiKirim:'KKG/KPG/SV/26/08/003', tanggalReservasi:'2024-06-03',
+      buktiServiceCall:'SC-88213', buktiServiceJob:'SJ-4421', statusServiceCall:'Selesai',
       partNumber:'PN-CZ7788', deskripsiPartNumber:'Control Valve Solenoid', qty:'1',
-      nomorSeriMaterial:'SN-334901', kembaliKePabrik:'Tidak', klaimKeHIT:'Tidak',
-      lokasiReservasi:'Gudang Medan', lokasiStok:'Rak B-07', lokasiTujuan:'Site MDN-03',
+      nomorSeriMaterial:'SN-334901', kembaliKePabrik:'Ya', klaimKeHIT:'Ya',
+      lokasiReservasi:'Gudang Jakarta', lokasiStok:'Rak B-07', lokasiTujuan:'Site JKT-01',
+      buktiReservasi:'RSV-0091', nomorPO:'PO-4500123', invoiceKeHIT:'INV-HIT-0098',
+      buktiTerima:'BA-2201', analisisSA:'Solenoid mati total' },
+    { id:4, nomor:'4', site:'SBY-02', buktiTransaksiKirim:'TRX-2024-0012', tanggalReservasi:'2024-06-07',
+      buktiServiceCall:'SC-88240', buktiServiceJob:'SJ-4430', statusServiceCall:'Proses',
+      partNumber:'PN-DX1122', deskripsiPartNumber:'Drive Belt V-Type', qty:'4',
+      nomorSeriMaterial:'SN-551010', kembaliKePabrik:'Ya', klaimKeHIT:'Ya',
+      lokasiReservasi:'Gudang Surabaya', lokasiStok:'Rak D-01', lokasiTujuan:'Site SBY-02',
+      buktiReservasi:'RSV-0098', nomorPO:'PO-4500141', invoiceKeHIT:'-',
+      buktiTerima:'-', analisisSA:'Menunggu analisa dari pabrik' },
+    { id:5, nomor:'5', site:'MDN-03', buktiTransaksiKirim:'TRX-2024-0013', tanggalReservasi:'2024-06-11',
+      buktiServiceCall:'SC-88255', buktiServiceJob:'SJ-4455', statusServiceCall:'Open',
+      partNumber:'PN-EY3344', deskripsiPartNumber:'Sensor Tekanan Oli', qty:'2',
+      nomorSeriMaterial:'SN-221188', kembaliKePabrik:'Tidak', klaimKeHIT:'Tidak',
+      lokasiReservasi:'Gudang Medan', lokasiStok:'Rak B-09', lokasiTujuan:'Site MDN-03',
       buktiReservasi:'RSV-0102', nomorPO:'PO-4500155', invoiceKeHIT:'-',
-      buktiTerima:'-', analisisSA:'-'
-    }
+      buktiTerima:'-', analisisSA:'-' }
   ];
+}
+
+function seedMeta(){
+  return {
+    'KKG/KPG/SV/26/08/003': {
+      nomorSuratJalan:'SJ-2024-08-0031',
+      dikonfirmasiTanggal:'2024-06-03',
+      tglKirimKpgSby:'2024-06-04',
+      sbyKdsSyg:'2024-06-05',
+      namaExpedisi:'JNE Express',
+      noResiExpedisi:'JNE-88231-00921',
+      diubahOleh:'admin_jkt',
+      diubahPada:'2024-06-03T14:30',
+      tcode:'TCODE-KPG-001'
+    },
+    'TRX-2024-0012': {
+      nomorSuratJalan:'SJ-2024-06-0012',
+      dikonfirmasiTanggal:'2024-06-07',
+      tglKirimKpgSby:'2024-06-08',
+      sbyKdsSyg:'',
+      namaExpedisi:'SiCepat',
+      noResiExpedisi:'SCP-009923',
+      diubahOleh:'admin_sby',
+      diubahPada:'2024-06-07T09:15',
+      tcode:'TCODE-SBY-014'
+    }
+  };
 }
 
 /* =========================================================
    STATE
    ========================================================= */
 let data = [];
+let groupMeta = {};
 let editingId = null;
-let importRows = [];       // hasil parsing excel siap import
-let importMapping = {};    // {fieldKey: headerExcel}
+let currentDetailKey = null;
+let currentMetaKey = null;
+let importRows = [];
+let importMapping = {};
+let importMetaMap = {};
 
-const $ = s => document.querySelector(s);
+const $   = s => document.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function toast(msg){
@@ -406,9 +594,6 @@ function toast(msg){
   t._tm = setTimeout(()=>t.classList.remove('show'), 2600);
 }
 
-/* =========================================================
-   LOAD / SAVE
-   ========================================================= */
 function loadData(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -418,87 +603,157 @@ function loadData(){
 function saveData(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
 }
-
-/* =========================================================
-   RENDER HEADER TABEL
-   ========================================================= */
-function renderHead(){
-  $('#thead').innerHTML = '<tr>' + FIELDS.map(f=>`<th>${esc(f.label)}</th>`).join('') + '</tr>';
+function loadMeta(){
+  try{
+    const raw = localStorage.getItem(META_KEY);
+    groupMeta = raw ? JSON.parse(raw) : seedMeta();
+  }catch(e){ groupMeta = seedMeta(); }
+}
+function saveMeta(){
+  try{ localStorage.setItem(META_KEY, JSON.stringify(groupMeta)); }catch(e){}
 }
 
 /* =========================================================
-   RENDER BODY TABEL
+   GROUPING
    ========================================================= */
-function renderTable(){
+function groupKey(d){
+  const v = String(d.buktiTransaksiKirim || '').trim();
+  return v || NO_BUKTI_KEY;
+}
+function getMeta(key){
+  return groupMeta[key] || {};
+}
+function setMeta(key, obj){
+  groupMeta[key] = obj;
+  saveMeta();
+}
+
+function getFilteredData(){
   const q      = $('#searchInput').value.trim().toLowerCase();
   const site   = $('#siteFilter').value;
   const status = $('#statusFilter').value;
 
-  const rows = data.filter(d=>{
+  return data.filter(d=>{
     if(site   && (d.site || '') !== site) return false;
     if(status && (d.statusServiceCall || '') !== status) return false;
-    if(q) return FIELDS.some(f => String(d[f.key] ?? '').toLowerCase().includes(q));
+    if(q){
+      const hitRow = FIELDS.some(f => String(d[f.key] ?? '').toLowerCase().includes(q));
+      const meta = getMeta(groupKey(d));
+      const hitMeta = GROUP_FIELDS.some(f => String(meta[f.key] ?? '').toLowerCase().includes(q));
+      return hitRow || hitMeta;
+    }
     return true;
   });
+}
+function getGroups(){
+  const filtered = getFilteredData();
+  const map = new Map();
+  filtered.forEach(d=>{
+    const k = groupKey(d);
+    if(!map.has(k)) map.set(k, []);
+    map.get(k).push(d);
+  });
+  return map;
+}
 
-  const tbody = $('#tbody');
+/* =========================================================
+   MAIN TABLE RENDER
+   ========================================================= */
+function buildMainHead(){
+  const th = [
+    '<th style="min-width:240px">Bukti Transaksi Kirim</th>',
+    ...GROUP_FIELDS.map(f=>`<th>${esc(f.label)}</th>`),
+    '<th style="text-align:center">Item</th>',
+    '<th class="aksi-col">Aksi</th>'
+  ].join('');
+  $('#mainThead').innerHTML = `<tr>${th}</tr>`;
+}
 
-  if(!rows.length){
-    tbody.innerHTML = `<tr><td colspan="${FIELDS.length}">
-      <div class="empty"><div class="big">📭</div>
-      <div>Belum ada data yang cocok.<br>Klik <b>＋ Tambah Data</b> atau <b>📥 Upload Excel</b> untuk mulai.</div></div>
+function renderTable(){
+  const groups = getGroups();
+  const tbody  = $('#mainTbody');
+  const totalCols = 1 + GROUP_FIELDS.length + 2;
+
+  if(groups.size === 0){
+    const anyData = data.length > 0;
+    tbody.innerHTML = `<tr><td colspan="${totalCols}">
+      <div class="empty"><div class="big">${anyData ? '🔎' : '📭'}</div>
+      <div>${anyData
+        ? 'Tidak ada data yang cocok dengan pencarian / filter.'
+        : 'Belum ada data. Klik <b>＋ Tambah Data</b> atau <b>📥 Upload Excel</b> untuk mulai.'}</div>
+      </div>
     </td></tr>`;
   }else{
-    tbody.innerHTML = rows.map(d=>{
-      const tds = FIELDS.map(f=>{
-        const v = d[f.key] ?? '';
-        if(f.key === 'statusServiceCall'){
-          const cls = String(v).toLowerCase();
-          return `<td><span class="pill ${cls}">${esc(v || '-')}</span></td>`;
+    const entries = [...groups.entries()].sort((a,b)=> a[0].localeCompare(b[0]));
+    tbody.innerHTML = entries.map(([key, items])=>{
+      const meta = getMeta(key);
+      const totalQty = items.reduce((a,d)=> a + (parseInt(d.qty)||0), 0);
+      const sites = [...new Set(items.map(d=>d.site).filter(Boolean))].join(', ') || '-';
+
+      const metaCells = GROUP_FIELDS.map(f=>{
+        let v = meta[f.key] ?? '';
+        if(v === '') return `<td class="meta-empty">-</td>`;
+        // rapikan format datetime-local
+        if(f.type === 'datetime-local'){
+          v = String(v).replace('T',' ');
         }
-        if(f.key === 'kembaliKePabrik' || f.key === 'klaimKeHIT'){
-          const cls = String(v).toLowerCase() === 'ya' ? 'ya' : 'tidak';
-          return `<td><span class="yn ${cls}">${esc(v || '-')}</span></td>`;
+        if(f.key === 'tcode'){
+          return `<td class="tcode-cell">${esc(v)}</td>`;
         }
-        if(f.key === 'deskripsiPartNumber'){
-          return `<td><span class="cell-desc" title="${esc(v)}">${esc(v || '-')}</span></td>`;
-        }
-        if(f.key === 'analisisSA'){
-          return `<td><span class="cell-ana" title="${esc(v)}">${esc(v || '-')}</span></td>`;
-        }
-        if(f.key === 'qty'){
-          return `<td style="text-align:center;font-weight:700">${esc(v || '0')}</td>`;
-        }
-        if(f.key === 'partNumber' || f.key === 'nomorPO'){
-          return `<td style="font-weight:600;color:#1e293b">${esc(v || '-')}</td>`;
-        }
-        return `<td>${esc(v === '' ? '-' : v)}</td>`;
+        return `<td>${esc(v)}</td>`;
       }).join('');
-      return `<tr data-id="${d.id}" title="Klik untuk edit">${tds}</tr>`;
+
+      return `<tr data-key="${esc(key)}">
+        <td>
+          <div class="btk-cell">
+            <div class="btk-icon">📄</div>
+            <div>
+              <div class="btk-text">${esc(key)}</div>
+              <div class="btk-sub">Site: ${esc(sites)}</div>
+            </div>
+          </div>
+        </td>
+        ${metaCells}
+        <td class="item-cell"><span class="item-badge">${items.length} item · Qty ${totalQty}</span></td>
+        <td class="aksi-col">
+          <button class="btn-icon meta-btn" data-key="${esc(key)}" title="Edit Info Pengiriman">✏ Info</button>
+          <button class="btn-icon view-btn" data-key="${esc(key)}" title="Lihat Detail Item">👁 Detail</button>
+        </td>
+      </tr>`;
     }).join('');
+
+    // Row click → detail
+    tbody.querySelectorAll('tr[data-key]').forEach(tr=>{
+      tr.addEventListener('click', ()=> openDetail(tr.dataset.key));
+    });
+    // Tombol Edit Info
+    tbody.querySelectorAll('.meta-btn').forEach(b=>{
+      b.addEventListener('click', e=>{
+        e.stopPropagation();
+        openMetaModal(b.dataset.key);
+      });
+    });
+    // Tombol Detail (eksplisit)
+    tbody.querySelectorAll('.view-btn').forEach(b=>{
+      b.addEventListener('click', e=>{
+        e.stopPropagation();
+        openDetail(b.dataset.key);
+      });
+    });
   }
-
-  tbody.querySelectorAll('tr[data-id]').forEach(tr=>{
-    tr.addEventListener('click', ()=> openModal(Number(tr.dataset.id)));
-  });
-
-  updateStats(rows);
+  updateStats();
   refreshSiteFilter();
 }
 
-/* =========================================================
-   STATISTIK
-   ========================================================= */
-function updateStats(rows){
-  $('#stTotal').textContent = rows.length;
-  $('#stQty').textContent   = rows.reduce((a,d)=> a + (parseInt(d.qty)||0), 0);
-  $('#stOpen').textContent  = rows.filter(d=>['Open','Proses'].includes(d.statusServiceCall)).length;
-  $('#stPabrik').textContent= rows.filter(d=>d.kembaliKePabrik === 'Ya').length;
+function updateStats(){
+  const filtered = getFilteredData();
+  const groups   = getGroups();
+  $('#stTotal').textContent = groups.size;
+  $('#stQty').textContent   = filtered.reduce((a,d)=> a + (parseInt(d.qty)||0), 0);
+  $('#stOpen').textContent  = filtered.filter(d=>['Open','Proses'].includes(d.statusServiceCall)).length;
+  $('#stPabrik').textContent= filtered.filter(d=>d.kembaliKePabrik === 'Ya').length;
 }
 
-/* =========================================================
-   FILTER SITE
-   ========================================================= */
 function refreshSiteFilter(){
   const sel = $('#siteFilter');
   const cur = sel.value;
@@ -509,7 +764,148 @@ function refreshSiteFilter(){
 }
 
 /* =========================================================
-   BUILD FORM MODAL (TAMBAH/EDIT)
+   META MODAL
+   ========================================================= */
+function buildMetaForm(){
+  $('#metaForm').innerHTML = GROUP_FIELDS.map(f=>{
+    let input;
+    if(f.type === 'select'){
+      input = `<select name="${f.key}"><option value="">-- Pilih --</option>
+        ${(f.options||[]).map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select>`;
+    }else if(f.type === 'textarea'){
+      input = `<textarea name="${f.key}" placeholder="${esc(f.label)}"></textarea>`;
+    }else{
+      input = `<input type="${f.type}" name="${f.key}" placeholder="${esc(f.label)}">`;
+    }
+    return `<div class="field"><label>${esc(f.label)}</label>${input}</div>`;
+  }).join('');
+}
+
+function openMetaModal(key){
+  currentMetaKey = key;
+  $('#metaKeyDisplay').textContent = key;
+  const form = $('#metaForm');
+  form.reset();
+  const meta = getMeta(key);
+  GROUP_FIELDS.forEach(f=>{
+    const el = form.elements[f.key];
+    if(el) el.value = meta[f.key] ?? '';
+  });
+  $('#metaOverlay').classList.add('show');
+  setTimeout(()=>{ const el = form.elements['nomorSuratJalan']; if(el) el.focus(); }, 80);
+}
+function closeMetaModal(){
+  $('#metaOverlay').classList.remove('show');
+  currentMetaKey = null;
+}
+function saveMetaRecord(){
+  if(!currentMetaKey) return;
+  const form = $('#metaForm');
+  const obj = {};
+  GROUP_FIELDS.forEach(f=>{
+    const el = form.elements[f.key];
+    obj[f.key] = el ? el.value.trim() : '';
+  });
+  setMeta(currentMetaKey, obj);
+  renderTable();
+  closeMetaModal();
+  toast('✅ Info pengiriman disimpan');
+}
+
+/* =========================================================
+   DETAIL MODAL (spreadsheet item)
+   ========================================================= */
+function openDetail(key){
+  currentDetailKey = key;
+  renderDetail();
+  $('#detailOverlay').classList.add('show');
+  const wrap = $('#detailSheetWrap');
+  if(wrap) wrap.scrollLeft = 0;
+}
+function closeDetail(){
+  $('#detailOverlay').classList.remove('show');
+  currentDetailKey = null;
+}
+function renderDetail(){
+  if(!currentDetailKey) return;
+  const items = data.filter(d => groupKey(d) === currentDetailKey);
+
+  $('#detailKey').textContent = currentDetailKey;
+  $('#detailCount').textContent = items.length + ' item';
+
+  $('#detailThead').innerHTML =
+    '<tr>' + FIELDS.map(f=>`<th>${esc(f.label)}</th>`).join('') +
+    '<th class="col-aksi">Aksi</th></tr>';
+
+  if(items.length === 0){
+    $('#detailTbody').innerHTML =
+      `<tr><td colspan="${FIELDS.length + 1}"
+        style="padding:40px;text-align:center;color:#64748b">
+        Tidak ada item pada bukti transaksi ini.</td></tr>`;
+    $('#detailSummary').innerHTML = '-';
+    return;
+  }
+
+  $('#detailTbody').innerHTML = items.map(d=>{
+    const tds = FIELDS.map(f=>{
+      const v = d[f.key] ?? '';
+      if(f.key === 'statusServiceCall'){
+        const cls = String(v).toLowerCase();
+        return `<td><span class="pill ${cls}">${esc(v || '-')}</span></td>`;
+      }
+      if(f.key === 'kembaliKePabrik' || f.key === 'klaimKeHIT'){
+        const cls = String(v).toLowerCase() === 'ya' ? 'ya' : 'tidak';
+        return `<td><span class="yn ${cls}">${esc(v || '-')}</span></td>`;
+      }
+      if(f.key === 'qty') return `<td class="qty-cell">${esc(v || '0')}</td>`;
+      if(f.key === 'partNumber') return `<td class="pn-cell">${esc(v || '-')}</td>`;
+      if(f.key === 'nomorPO') return `<td class="po-cell">${esc(v || '-')}</td>`;
+      if(f.key === 'deskripsiPartNumber') return `<td class="desc-cell" title="${esc(v)}">${esc(v || '-')}</td>`;
+      if(f.key === 'analisisSA') return `<td class="ana-cell" title="${esc(v)}">${esc(v || '-')}</td>`;
+      return `<td>${esc(v === '' ? '-' : v)}</td>`;
+    }).join('');
+
+    return `<tr data-id="${d.id}">${tds}
+      <td class="col-aksi">
+        <button class="btn-icon edit-btn" data-id="${d.id}">✏ Edit</button>
+        <button class="btn-icon danger del-btn" data-id="${d.id}">🗑 Hapus</button>
+      </td></tr>`;
+  }).join('');
+
+  $('#detailTbody').querySelectorAll('.edit-btn').forEach(b=>{
+    b.addEventListener('click', e=>{
+      e.stopPropagation();
+      const id = Number(b.dataset.id);
+      closeDetail();
+      openModal(id);
+    });
+  });
+  $('#detailTbody').querySelectorAll('.del-btn').forEach(b=>{
+    b.addEventListener('click', e=>{
+      e.stopPropagation();
+      const id = Number(b.dataset.id);
+      const rec = data.find(x=>x.id===id);
+      if(!rec) return;
+      if(!confirm(`Hapus item "${rec.partNumber}" (#${rec.nomor})?`)) return;
+      data = data.filter(x=>x.id !== id);
+      saveData();
+      renderTable();
+      if(data.filter(d=>groupKey(d)===currentDetailKey).length === 0){
+        closeDetail();
+        toast('🗑 Item dihapus — grup kosong, kembali ke daftar');
+      }else{
+        renderDetail();
+        toast('🗑 Item dihapus');
+      }
+    });
+  });
+
+  const totalQty = items.reduce((a,d)=> a + (parseInt(d.qty)||0), 0);
+  $('#detailSummary').innerHTML = `Total <b>${items.length}</b> item · <b>${totalQty}</b> qty`;
+}
+
+/* =========================================================
+   FORM (record item)
    ========================================================= */
 function buildForm(){
   $('#dataForm').innerHTML = FIELDS.map(f=>{
@@ -529,10 +925,7 @@ function buildForm(){
   }).join('');
 }
 
-/* =========================================================
-   MODAL CRUD
-   ========================================================= */
-function openModal(id = null){
+function openModal(id = null, preset = null){
   editingId = id;
   const form = $('#dataForm');
   form.reset();
@@ -542,6 +935,9 @@ function openModal(id = null){
     $('#deleteBtn').style.display = 'none';
     const maxNo = data.reduce((m,d)=> Math.max(m, parseInt(d.nomor)||0), 0);
     form.elements['nomor'].value = String(maxNo + 1);
+    if(preset && preset.buktiTransaksiKirim){
+      form.elements['buktiTransaksiKirim'].value = preset.buktiTransaksiKirim;
+    }
   }else{
     $('#modalTitle').textContent = 'Edit Data Pengiriman';
     $('#deleteBtn').style.display = 'inline-flex';
@@ -555,12 +951,10 @@ function openModal(id = null){
   $('#overlay').classList.add('show');
   setTimeout(()=>{ const el = form.elements['site']; if(el) el.focus(); }, 80);
 }
-
 function closeModal(){
   $('#overlay').classList.remove('show');
   editingId = null;
 }
-
 function saveRecord(){
   const form = $('#dataForm');
   const obj = {};
@@ -568,7 +962,6 @@ function saveRecord(){
     const el = form.elements[f.key];
     obj[f.key] = el ? el.value.trim() : '';
   });
-
   if(!obj.site){ toast('⚠️ Site wajib diisi'); form.elements['site'].focus(); return; }
   if(!obj.partNumber){ toast('⚠️ Part Number wajib diisi'); form.elements['partNumber'].focus(); return; }
 
@@ -584,12 +977,10 @@ function saveRecord(){
     data[idx] = obj;
     toast('✅ Data berhasil diperbarui');
   }
-
   saveData();
   renderTable();
   closeModal();
 }
-
 function deleteRecord(){
   if(editingId === null) return;
   const d = data.find(x=>x.id === editingId);
@@ -602,74 +993,177 @@ function deleteRecord(){
 }
 
 /* =========================================================
-   EXPORT CSV
+   EXCEL EXPORT
    ========================================================= */
-function exportCSV(){
-  const q      = $('#searchInput').value.trim().toLowerCase();
-  const site   = $('#siteFilter').value;
-  const status = $('#statusFilter').value;
+/* Daftar kolom untuk Excel: FIELDS + GROUP_FIELDS disisipkan setelah buktiTransaksiKirim */
+function getExportFields(){
+  const out = [];
+  FIELDS.forEach(f=>{
+    out.push(f);
+    if(f.key === 'buktiTransaksiKirim'){
+      GROUP_FIELDS.forEach(gf => out.push({ ...gf, isMeta:true }));
+    }
+  });
+  return out;
+}
 
-  const rows = data.filter(d=>{
-    if(site   && (d.site||'') !== site) return false;
-    if(status && (d.statusServiceCall||'') !== status) return false;
-    if(q) return FIELDS.some(f => String(d[f.key] ?? '').toLowerCase().includes(q));
-    return true;
+function recordToLabeled(d){
+  const meta = getMeta(groupKey(d));
+  const o = {};
+  getExportFields().forEach(f=>{
+    let v;
+    if(f.isMeta){
+      v = meta[f.key] ?? '';
+      if(f.type === 'datetime-local' && v) v = String(v).replace('T',' ');
+    }else{
+      v = d[f.key] ?? '';
+      if(f.key === 'tanggalReservasi' && v){
+        const dt = new Date(v);
+        if(!isNaN(dt)) v = dt.toISOString().slice(0,10);
+      }
+    }
+    o[f.label] = v;
+  });
+  return o;
+}
+
+function autoWidths(rows, headers){
+  return headers.map(h=>{
+    const maxLen = Math.max(
+      String(h).length,
+      ...rows.map(r => String(r[h] ?? '').length)
+    );
+    return { wch: Math.min(Math.max(maxLen + 2, 10), 45) };
+  });
+}
+
+function exportExcel(){
+  const filtered = getFilteredData();
+  if(!filtered.length){ toast('⚠️ Tidak ada data untuk di-export'); return; }
+
+  const headers = getExportFields().map(f=>f.label);
+  const rows = filtered.map(recordToLabeled);
+
+  const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
+  ws['!cols'] = autoWidths(rows, headers);
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({
+    s:{r:0,c:0}, e:{r:rows.length, c:headers.length-1}
+  })};
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Data Sparepart');
+
+  const info = [
+    ['Laporan', 'Kontrol Pengiriman Sparepart'],
+    ['Tanggal Export', new Date().toLocaleString('id-ID')],
+    ['Total Baris', filtered.length],
+    ['Total Qty', filtered.reduce((a,d)=> a + (parseInt(d.qty)||0), 0)],
+    ['Total Grup Bukti Transaksi', new Set(filtered.map(groupKey)).size],
+    ['Filter Site', $('#siteFilter').value || 'Semua'],
+    ['Filter Status', $('#statusFilter').value || 'Semua'],
+    ['Kata Kunci', $('#searchInput').value.trim() || '-']
+  ];
+  const wsInfo = XLSX.utils.aoa_to_sheet(info);
+  wsInfo['!cols'] = [{wch:26},{wch:36}];
+  XLSX.utils.book_append_sheet(wb, wsInfo, 'Info');
+
+  const tgl = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `kontrol-pengiriman-sparepart-${tgl}.xlsx`);
+  toast('⬇ File Excel berhasil diunduh');
+}
+
+function exportGroupExcel(){
+  if(!currentDetailKey) return;
+  const items = data.filter(d => groupKey(d) === currentDetailKey);
+  if(!items.length){ toast('⚠️ Tidak ada data pada grup ini'); return; }
+
+  const headers = getExportFields().map(f=>f.label);
+  const rows = items.map(recordToLabeled);
+
+  const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
+  ws['!cols'] = autoWidths(rows, headers);
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({
+    s:{r:0,c:0}, e:{r:rows.length, c:headers.length-1}
+  })};
+
+  const wb = XLSX.utils.book_new();
+  let sheetName = String(currentDetailKey).replace(/[\\\/\?\*\[\]:]/g,'-').slice(0,31);
+  if(!sheetName) sheetName = 'Detail';
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+  const safeFile = String(currentDetailKey).replace(/[\\\/\?\*\[\]:]/g,'-');
+  XLSX.writeFile(wb, `sparepart-${safeFile}.xlsx`);
+  toast('⬇ File Excel grup berhasil diunduh');
+}
+
+function downloadTemplateExcel(){
+  const allFields = getExportFields();
+  const headers = allFields.map(f=>f.label);
+
+  const example = {};
+  allFields.forEach(f=>{
+    const k = f.key;
+    if(k === 'nomor') example[f.label] = 1;
+    else if(k === 'site') example[f.label] = 'JKT-01';
+    else if(k === 'buktiTransaksiKirim') example[f.label] = 'KKG/KPG/SV/26/08/003';
+    else if(k === 'nomorSuratJalan') example[f.label] = 'SJ-2024-08-0031';
+    else if(k === 'dikonfirmasiTanggal') example[f.label] = '2024-06-03';
+    else if(k === 'tglKirimKpgSby') example[f.label] = '2024-06-04';
+    else if(k === 'sbyKdsSyg') example[f.label] = '2024-06-05';
+    else if(k === 'namaExpedisi') example[f.label] = 'JNE Express';
+    else if(k === 'noResiExpedisi') example[f.label] = 'JNE-88231-00921';
+    else if(k === 'diubahOleh') example[f.label] = 'admin_jkt';
+    else if(k === 'diubahPada') example[f.label] = '2024-06-03 14:30';
+    else if(k === 'tcode') example[f.label] = 'TCODE-KPG-001';
+    else if(k === 'statusServiceCall') example[f.label] = 'Open';
+    else if(k === 'kembaliKePabrik' || k === 'klaimKeHIT') example[f.label] = 'Tidak';
+    else if(k === 'qty') example[f.label] = 1;
+    else if(k === 'tanggalReservasi') example[f.label] = new Date().toISOString().slice(0,10);
+    else example[f.label] = '';
   });
 
-  if(!rows.length){ toast('⚠️ Tidak ada data untuk diexport'); return; }
+  const ws = XLSX.utils.json_to_sheet([example], { header: headers });
+  ws['!cols'] = autoWidths([example], headers);
 
-  const csvCell = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
-  const head = FIELDS.map(f=>csvCell(f.label)).join(';');
-  const body = rows.map(d => FIELDS.map(f=>csvCell(d[f.key])).join(';')).join('\r\n');
+  const guide = [
+    ['PETUNJUK PENGGUNAAN TEMPLATE'],
+    [''],
+    ['1. Isi data mulai dari baris ke-2 (baris ke-1 adalah header).'],
+    ['2. Jangan mengubah nama kolom pada baris pertama.'],
+    ['3. Kolom "Bukti Transaksi Kirim" berfungsi sebagai kunci pengelompokan.'],
+    ['4. Kolom INFO PENGIRIMAN (Nomor Surat Jalan s/d TCODE) berlaku PER GRUP'],
+    ['   Bukti Transaksi Kirim — cukup isi di salah satu baris, sistem akan'],
+    ['   memakai nilai pertama yang ditemukan untuk grup tersebut.'],
+    ['5. Format tanggal: YYYY-MM-DD. Untuk "Diubah Pada": YYYY-MM-DD HH:MM.'],
+    ['6. Status Service Call: Open / Proses / Selesai / Batal.'],
+    ['7. Kembali Ke Pabrik & Klaim Ke HIT: Ya / Tidak.'],
+    [''],
+    ['Daftar Kolom:'],
+    ...headers.map((h,i)=>[`${i+1}. ${h}`])
+  ];
+  const wsGuide = XLSX.utils.aoa_to_sheet(guide);
+  wsGuide['!cols'] = [{wch:60}];
 
-  const blob = new Blob(['\uFEFF' + head + '\r\n' + body], {type:'text/csv;charset=utf-8;'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  const tgl  = new Date().toISOString().slice(0,10);
-  a.href = url; a.download = `kontrol-pengiriman-sparepart-${tgl}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('⬇ CSV berhasil diunduh');
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Template');
+  XLSX.utils.book_append_sheet(wb, wsGuide, 'Petunjuk');
+
+  XLSX.writeFile(wb, 'template-upload-sparepart.xlsx');
+  toast('📄 Template Excel berhasil diunduh');
 }
 
 /* =========================================================
-   DOWNLOAD TEMPLATE EXCEL (CSV)
-   ========================================================= */
-function downloadTemplate(){
-  const header = FIELDS.map(f=>`"${f.label}"`).join(';');
-  const example = FIELDS.map(f=>{
-    if(f.key === 'nomor') return '"1"';
-    if(f.key === 'site') return '"JKT-01"';
-    if(f.key === 'statusServiceCall') return '"Open"';
-    if(f.key === 'kembaliKePabrik' || f.key === 'klaimKeHIT') return '"Tidak"';
-    if(f.key === 'qty') return '"1"';
-    if(f.key === 'tanggalReservasi') return '"' + new Date().toISOString().slice(0,10) + '"';
-    return '""';
-  }).join(';');
-  const blob = new Blob(['\uFEFF' + header + '\r\n' + example], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'template-upload-sparepart.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('📄 Template berhasil diunduh');
-}
-
-/* =========================================================
-   NORMALISASI HEADER UNTUK PEMETAAN
+   IMPORT EXCEL
    ========================================================= */
 function norm(str){
-  return String(str || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '');   // hapus spasi, titik, strip, dsb
+  return String(str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-/* Pemetaan header Excel -> key field. Dibuat fleksibel. */
 const HEADER_ALIASES = {
   nomor:               ['nomor','no','nomer','nomorurut','no.','no'],
   site:                ['site','sitelokasi','lokasisite','lokasi'],
-  buktiTransaksiKirim: ['buktitransaksikirim','buktikirim','buktitransaksi','transactionproof'],
-  tanggalReservasi:    ['tanggalreservasi','tglreservasi','tglreservasi','tanggalresv','tglresv','reservationdate'],
+  buktiTransaksiKirim: ['buktitransaksikirim','buktikirim','buktitransaksi','transactionproof','nobuktikirim','nobukti'],
+  tanggalReservasi:    ['tanggalreservasi','tglreservasi','tglresv','reservationdate'],
   buktiServiceCall:    ['buktiservicecall','servicecall','sc','bukti_sc'],
   buktiServiceJob:     ['buktiservicejob','servicejob','sj','bukti_sj'],
   statusServiceCall:   ['statusservicecall','statussc','status','statuscall'],
@@ -686,7 +1180,19 @@ const HEADER_ALIASES = {
   nomorPO:             ['nomorpo','nopo','no_po','po','purchaseorder'],
   invoiceKeHIT:        ['invoicekeh','invoicekehit','invoice','invoicehit'],
   buktiTerima:         ['bukti terima','bukti_terima','buktiterima','terima','penerimaan','bast','ba'],
-  analisisSA:          ['analisissa','analisissa','analisis','analisysa','catatan','keterangan','note']
+  analisisSA:          ['analisissa','analisis','analisysa','catatan','keterangan','note']
+};
+
+const META_ALIASES = {
+  nomorSuratJalan:     ['nomorsuratjalan','nosuratjalan','suratjalan','nosj'],
+  dikonfirmasiTanggal: ['dikonfirmasitanggal','tglkonfirmasi','tanggaldikonfirmasi'],
+  tglKirimKpgSby:      ['tglkirimkpgsby','tglkirimkpg-sby','tanggal kirim kpg sby','tgl_kirim_kpg_sby'],
+  sbyKdsSyg:           ['sbykdssyg','sby-kds/syg','sbykdssyg','sby_kds_syg'],
+  namaExpedisi:        ['namaexpedisi','expedisi','ekspedisi','kurir'],
+  noResiExpedisi:      ['no resi expedisi','noresiexpedisi','noresi','nomeresi','no_resi','resi'],
+  diubahOleh:          ['diubaholeh','diubah_oleh','editor','modifiedby'],
+  diubahPada:          ['diubahpada','diubah_pada','modifiedat','tanggalubah'],
+  tcode:               ['tcode','t_code','kodetransaksi']
 };
 
 function mapHeaders(headers){
@@ -695,35 +1201,42 @@ function mapHeaders(headers){
   headers.forEach((h, idx)=>{
     const n = norm(h);
     if(!n) return;
-    // prioritas: alias list
     for(const f of FIELDS){
       if(used.has(f.key)) continue;
       const aliases = HEADER_ALIASES[f.key] || [];
-      if(aliases.some(a => norm(a) === n)){
-        map[f.key] = idx;
-        used.add(f.key);
-        return;
-      }
+      if(aliases.some(a => norm(a) === n)){ map[f.key] = idx; used.add(f.key); return; }
     }
-    // fallback: exact normalized label
     for(const f of FIELDS){
       if(used.has(f.key)) continue;
-      if(norm(f.label) === n){
-        map[f.key] = idx;
-        used.add(f.key);
-        return;
-      }
+      if(norm(f.label) === n){ map[f.key] = idx; used.add(f.key); return; }
     }
   });
   return map;
 }
 
-/* =========================================================
-   IMPORT EXCEL LOGIC
-   ========================================================= */
+function mapMetaHeaders(headers){
+  const map = {};
+  const used = new Set();
+  headers.forEach((h, idx)=>{
+    const n = norm(h);
+    if(!n) return;
+    for(const f of GROUP_FIELDS){
+      if(used.has(f.key)) continue;
+      const aliases = META_ALIASES[f.key] || [];
+      if(aliases.some(a => norm(a) === n)){ map[f.key] = idx; used.add(f.key); return; }
+    }
+    for(const f of GROUP_FIELDS){
+      if(used.has(f.key)) continue;
+      if(norm(f.label) === n){ map[f.key] = idx; used.add(f.key); return; }
+    }
+  });
+  return map;
+}
+
 function openImportModal(){
   importRows = [];
   importMapping = {};
+  importMetaMap = {};
   $('#fileInput').value = '';
   $('#fileChip').classList.remove('show');
   $('#previewBox').classList.remove('show');
@@ -744,7 +1257,6 @@ function handleFile(file){
     showAlert('Format file tidak didukung. Gunakan .xlsx, .xls, atau .csv', 'err');
     return;
   }
-
   $('#fcName').textContent = file.name;
   $('#fcMeta').textContent = (file.size/1024).toFixed(1) + ' KB · membaca...';
   $('#fileChip').classList.add('show');
@@ -761,53 +1273,64 @@ function handleFile(file){
         $('#importConfirmBtn').disabled = true;
         return;
       }
-
       const headers = Object.keys(json[0]);
       importMapping = mapHeaders(headers);
+      const metaMap = mapMetaHeaders(headers);
 
-      // konversi tiap baris ke object {key:value}
       importRows = json.map((row, i)=>{
         const obj = {};
         FIELDS.forEach(f=>{
           const colIdx = importMapping[f.key];
-          if(colIdx === undefined){
-            obj[f.key] = '';
-          }else{
+          if(colIdx === undefined){ obj[f.key] = ''; }
+          else{
             let v = row[headers[colIdx]];
-            if(v instanceof Date){
-              v = v.toISOString().slice(0,10);
-            }
+            if(v instanceof Date) v = v.toISOString().slice(0,10);
             obj[f.key] = v === null || v === undefined ? '' : String(v).trim();
           }
         });
-        // Auto nomor kalau kosong
         if(!obj.nomor) obj.nomor = String(i+1);
+
+        // Simpan metadata grup (nilai pertama non-empty menang)
+        const gk = groupKey(obj);
+        if(gk && gk !== NO_BUKTI_KEY){
+          if(!importMetaMap[gk]) importMetaMap[gk] = {};
+          GROUP_FIELDS.forEach(f=>{
+            const cIdx = metaMap[f.key];
+            if(cIdx === undefined) return;
+            let v = row[headers[cIdx]];
+            if(v instanceof Date){
+              if(f.type === 'datetime-local'){
+                const pad = n => String(n).padStart(2,'0');
+                v = `${v.getFullYear()}-${pad(v.getMonth()+1)}-${pad(v.getDate())}T${pad(v.getHours())}:${pad(v.getMinutes())}`;
+              }else{
+                v = v.toISOString().slice(0,10);
+              }
+            }
+            v = (v === null || v === undefined) ? '' : String(v).trim();
+            if(v && !importMetaMap[gk][f.key]) importMetaMap[gk][f.key] = v;
+          });
+        }
         return obj;
       });
 
       $('#fcMeta').textContent = (file.size/1024).toFixed(1) + ' KB · ' + importRows.length + ' baris siap diimport';
-
       renderImportPreview(headers);
-      renderMappingStatus();
+      renderMappingStatus(metaMap);
 
-      // Validasi: minimal ada site & partNumber terpetakan
+      const hasBTK  = importMapping.buktiTransaksiKirim !== undefined;
       const hasSite = importMapping.site !== undefined;
       const hasPart = importMapping.partNumber !== undefined;
 
-      if(!hasSite && !hasPart){
-        showAlert('Kolom "Site" dan "Part Number" tidak ditemukan pada header Excel. Periksa kembali nama kolom.', 'err');
+      if(!hasBTK){
+        showAlert('Kolom "Bukti Transaksi Kirim" tidak ditemukan. Semua baris masuk ke grup "(Tanpa Bukti Transaksi Kirim)".', 'warn');
+        $('#importConfirmBtn').disabled = false;
+      }else if(!hasSite && !hasPart){
+        showAlert('Kolom "Site" dan "Part Number" tidak ditemukan. Periksa nama kolom pada file Excel.', 'err');
         $('#importConfirmBtn').disabled = true;
-      }else if(!hasSite){
-        showAlert('Kolom "Site" tidak ditemukan. Data tetap dapat diimport namun kolom Site akan kosong.', 'warn');
-        $('#importConfirmBtn').disabled = false;
-      }else if(!hasPart){
-        showAlert('Kolom "Part Number" tidak ditemukan. Data tetap dapat diimport namun kolom Part Number akan kosong.', 'warn');
-        $('#importConfirmBtn').disabled = false;
       }else{
-        showAlert('✓ File berhasil dibaca. Periksa preview di bawah lalu klik "Import Sekarang".', 'info');
+        showAlert('✓ File berhasil dibaca. Periksa preview lalu klik "Import Sekarang".', 'info');
         $('#importConfirmBtn').disabled = false;
       }
-
     }catch(err){
       console.error(err);
       showAlert('Gagal membaca file: ' + err.message, 'err');
@@ -824,24 +1347,31 @@ function showAlert(msg, type){
 }
 
 function renderImportPreview(headers){
-  // tampilkan maksimal 6 baris & kolom kunci (nomor, site, partNumber, qty, statusServiceCall)
-  const previewKeys = ['nomor','site','partNumber','deskripsiPartNumber','qty','statusServiceCall'];
-  const cols = previewKeys.filter(k => importMapping[k] !== undefined);
-  // kalau tidak ada yang terpetakan, tampilkan semua header apa adanya
+  const previewKeys = ['nomor','buktiTransaksiKirim','nomorSuratJalan','namaExpedisi','noResiExpedisi',
+                       'site','partNumber','qty','statusServiceCall'];
+  const allIdx = { ...importMapping, ...mapMetaHeaders(headers) };
+  const cols = previewKeys.filter(k => allIdx[k] !== undefined);
   const useCols = cols.length ? cols : FIELDS.slice(0,6).map(f=>f.key);
 
   $('#previewCount').textContent = importRows.length + ' baris';
 
   let html = '<table><thead><tr>';
   html += useCols.map(k=>{
-    const f = FIELDS.find(x=>x.key===k);
+    const f = FIELDS.find(x=>x.key===k) || GROUP_FIELDS.find(x=>x.key===k);
     return `<th>${esc(f ? f.label : k)}</th>`;
   }).join('');
   html += '</tr></thead><tbody>';
 
   importRows.slice(0, 8).forEach(r=>{
+    const gk = groupKey(r);
+    const meta = importMetaMap[gk] || {};
     html += '<tr>' + useCols.map(k=>{
-      const v = r[k] ?? '';
+      let v;
+      if(GROUP_FIELDS.some(gf=>gf.key===k)){
+        v = meta[k] ?? '';
+      }else{
+        v = r[k] ?? '';
+      }
       return `<td>${esc(v === '' ? '-' : v)}</td>`;
     }).join('') + '</tr>';
   });
@@ -851,80 +1381,107 @@ function renderImportPreview(headers){
     html += `<div style="padding:8px 14px;font-size:11px;color:#64748b;background:#f8fafc;border-top:1px solid #e2e8f0">
       ... dan ${importRows.length - 8} baris lainnya</div>`;
   }
-
   $('#previewScroll').innerHTML = html;
   $('#previewBox').classList.add('show');
 }
 
-function renderMappingStatus(){
-  const list = FIELDS.map(f=>{
+function renderMappingStatus(metaMap){
+  const metaMapFinal = metaMap || mapMetaHeaders([]);
+  const listMain = FIELDS.map(f=>{
     const ok = importMapping[f.key] !== undefined;
     return `<span class="map-tag ${ok ? '' : 'miss'}">${ok ? '✓' : '○'} ${esc(f.label)}</span>`;
   }).join('');
-  $('#mappingList').innerHTML = list;
+  const listMeta = GROUP_FIELDS.map(f=>{
+    const ok = metaMapFinal[f.key] !== undefined;
+    return `<span class="map-tag ${ok ? 'meta' : 'miss'}">${ok ? '✓' : '○'} ${esc(f.label)}</span>`;
+  }).join('');
+  $('#mappingList').innerHTML = listMain + listMeta;
   $('#mappingWrap').style.display = 'block';
 }
 
 function confirmImport(){
   if(!importRows.length){ return; }
-
   const mode = document.querySelector('input[name="importMode"]:checked').value;
   const baseId = data.length ? Math.max(...data.map(d=>d.id)) : 0;
-
-  const newRecords = importRows.map((r, i)=>({
-    ...r,
-    id: baseId + i + 1
-  }));
+  const newRecords = importRows.map((r, i)=>({ ...r, id: baseId + i + 1 }));
 
   if(mode === 'replace'){
     if(!confirm(`Ganti SEMUA data existing (${data.length} baris) dengan ${newRecords.length} baris dari file?`)) return;
     data = newRecords;
+    groupMeta = { ...importMetaMap };
+    saveMeta();
     toast(`✓ Import selesai — ${newRecords.length} baris (mode: ganti semua)`);
   }else{
     data = data.concat(newRecords);
+    // gabung meta: nilai baru menimpa nilai lama per field
+    Object.keys(importMetaMap).forEach(k=>{
+      groupMeta[k] = { ...(groupMeta[k]||{}), ...importMetaMap[k] };
+    });
+    saveMeta();
     toast(`✓ Import selesai — ${newRecords.length} baris ditambahkan`);
   }
-
   saveData();
   renderTable();
   closeImportModal();
 }
 
 /* =========================================================
-   INISIALISASI
+   INIT
    ========================================================= */
 function init(){
   $('#today').textContent = new Date().toLocaleDateString('id-ID',
     { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
   loadData();
-  renderHead();
+  loadMeta();
+  buildMainHead();
   buildForm();
+  buildMetaForm();
   renderTable();
 
-  // Event CRUD
   $('#searchInput').addEventListener('input', renderTable);
   $('#siteFilter').addEventListener('change', renderTable);
   $('#statusFilter').addEventListener('change', renderTable);
 
+  // CRUD record
   $('#addBtn').addEventListener('click', ()=> openModal(null));
   $('#closeX').addEventListener('click', closeModal);
   $('#cancelBtn').addEventListener('click', closeModal);
   $('#saveBtn').addEventListener('click', saveRecord);
   $('#deleteBtn').addEventListener('click', deleteRecord);
-  $('#exportBtn').addEventListener('click', exportCSV);
-  $('#templateBtn').addEventListener('click', downloadTemplate);
-
   $('#overlay').addEventListener('click', e=>{ if(e.target.id === 'overlay') closeModal(); });
 
-  // ===== IMPORT EXCEL =====
+  // Meta modal
+  $('#metaCloseX').addEventListener('click', closeMetaModal);
+  $('#metaCancelBtn').addEventListener('click', closeMetaModal);
+  $('#metaSaveBtn').addEventListener('click', saveMetaRecord);
+  $('#metaOverlay').addEventListener('click', e=>{ if(e.target.id === 'metaOverlay') closeMetaModal(); });
+
+  // Detail modal
+  $('#detailCloseX').addEventListener('click', closeDetail);
+  $('#detailOverlay').addEventListener('click', e=>{ if(e.target.id === 'detailOverlay') closeDetail(); });
+  $('#detailAddBtn').addEventListener('click', ()=>{
+    const presetKey = currentDetailKey === NO_BUKTI_KEY ? '' : currentDetailKey;
+    closeDetail();
+    openModal(null, { buktiTransaksiKirim: presetKey });
+  });
+  $('#detailExportBtn').addEventListener('click', exportGroupExcel);
+  $('#detailMetaBtn').addEventListener('click', ()=>{
+    const key = currentDetailKey;
+    closeDetail();
+    openMetaModal(key);
+  });
+
+  $('#exportBtn').addEventListener('click', exportExcel);
+  $('#templateBtn').addEventListener('click', downloadTemplateExcel);
+
+  // Import
   $('#importBtn').addEventListener('click', openImportModal);
   $('#importCloseX').addEventListener('click', closeImportModal);
   $('#importCancelBtn').addEventListener('click', closeImportModal);
   $('#importConfirmBtn').addEventListener('click', confirmImport);
   $('#importOverlay').addEventListener('click', e=>{ if(e.target.id === 'importOverlay') closeImportModal(); });
 
-  // Drop zone
   const dz = $('#dropZone');
   const fi = $('#fileInput');
   dz.addEventListener('click', ()=> fi.click());
@@ -942,6 +1499,7 @@ function init(){
   $('#fcRemove').addEventListener('click', ()=>{
     importRows = [];
     importMapping = {};
+    importMetaMap = {};
     fi.value = '';
     $('#fileChip').classList.remove('show');
     $('#previewBox').classList.remove('show');
@@ -954,6 +1512,8 @@ function init(){
   document.addEventListener('keydown', e=>{
     if(e.key === 'Escape'){
       if($('#importOverlay').classList.contains('show')) closeImportModal();
+      else if($('#metaOverlay').classList.contains('show')) closeMetaModal();
+      else if($('#detailOverlay').classList.contains('show')) closeDetail();
       else closeModal();
     }
     if(e.key === 'Enter' && $('#overlay').classList.contains('show') && e.target.tagName !== 'TEXTAREA'){
