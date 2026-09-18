@@ -324,7 +324,7 @@
 <div class="hint-bar">
   <span class="icon">💡</span>
   <span>
-    Kolom <b>Nomor Surat Jalan ke P3</b>, <b>Dikonfirmasi Tanggal</b>, <b>Sjl KPG - SBY</b>, <b>Tgl Kirim KPG - SBY</b>, <b>NAMA EXPEDISI</b>, <b>NO. RESI / TRACKING EXPEDISI</b>, <b>Status Pengiriman Sindo</b>, <b>Lokasi Terakhir Sindo</b>, <b>Update Terakhir Sindo</b>, <b>Sjl SBY</b>, <b>Tgl Kirim SBY</b>, <b>NO TRUK | DRIVER</b>, <b>Diubah Oleh</b>, <b>Diubah Pada</b>, dan <b>TCODE</b> bisa <b>langsung diklik &amp; diketik</b> di sel-nya. Tekan <b>Enter</b> untuk simpan, <b>Esc</b> untuk batal.
+    Kolom <b>Nomor Surat Jalan ke P3</b>, <b>Dikonfirmasi Tanggal</b>, <b>Sjl KPG - SBY</b>, <b>Tgl Kirim KPG - SBY</b>, <b>NAMA EXPEDISI</b>, <b>NO. RESI / TRACKING EXPEDISI</b>, <b>Sjl SBY</b>, <b>Tgl Kirim SBY</b>, <b>NO TRUK | DRIVER</b>, <b>Diubah Oleh</b>, <b>Diubah Pada</b>, dan <b>TCODE</b> bisa <b>langsung diklik &amp; diketik</b> di sel-nya. Tekan <b>Enter</b> untuk simpan, <b>Esc</b> untuk batal.
   </span>
 </div>
 
@@ -508,9 +508,6 @@ const GROUP_FIELDS = [
   { key:'tglKirimKpgSby',       label:'Tgl Kirim KPG - SBY',          type:'date'          },
   { key:'namaExpedisi',         label:'NAMA EXPEDISI',                type:'text'          },
   { key:'noResiExpedisi',       label:'NO. RESI / TRACKING EXPEDISI', type:'text'          },
-  { key:'statusPengirimanSindo', label:'Status Pengiriman Sindo',     type:'select', options:['Dalam Perjalanan', 'Tiba di Tujuan', 'Terkirim', 'Gagal Kirim', 'Dalam Proses'] },
-  { key:'lokasiTerakhirSindo',  label:'Lokasi Terakhir Sindo',        type:'text'          },
-  { key:'updateTerakhirSindo',  label:'Update Terakhir Sindo',        type:'datetime-local'},
   { key:'sjlSby',               label:'Sjl SBY',                      type:'text'          },
   { key:'tglKirimSby',          label:'Tgl Kirim SBY',                type:'date'          },
   { key:'noTrukDriver',         label:'NO TRUK | DRIVER',             type:'text'          },
@@ -575,9 +572,6 @@ function seedMeta(){
       tglKirimKpgSby:'2024-06-04',
       namaExpedisi:'JNE Express',
       noResiExpedisi:'JNE-88231-00921',
-      statusPengirimanSindo:'Terkirim',
-      lokasiTerakhirSindo:'Jakarta Selatan',
-      updateTerakhirSindo:'2024-06-05T10:30',
       sjlSby:'SJL/SBY-KDS/06/0044',
       tglKirimSby:'2024-06-05',
       noTrukDriver:'B 9021 XYZ | Pak Budi',
@@ -592,9 +586,6 @@ function seedMeta(){
       tglKirimKpgSby:'2024-06-08',
       namaExpedisi:'SiCepat',
       noResiExpedisi:'SCP-009923',
-      statusPengirimanSindo:'Dalam Perjalanan',
-      lokasiTerakhirSindo:'Surabaya',
-      updateTerakhirSindo:'2024-06-09T08:15',
       sjlSby:'',
       tglKirimSby:'',
       noTrukDriver:'',
@@ -721,7 +712,15 @@ function renderTable(){
       </div>
     </td></tr>`;
   }else{
-    const entries = [...groups.entries()].sort((a,b)=> a[0].localeCompare(b[0]));
+    /* =========================================================
+       PENGURUTAN: PERTAHANKAN URUTAN INPUT (INSERTION ORDER)
+       Data baru dari upload akan otomatis muncul di bawah,
+       sehingga urutan tetap rapi sesuai urutan input.
+       ========================================================= */
+    const entries = [...groups.entries()];
+    /* Catatan: JANGAN gunakan .sort() di sini, karena akan mengubah
+       urutan menjadi alfabetis dan membuat data baru "nyempil" di tengah. */
+
     tbody.innerHTML = entries.map(([key, items])=>{
       const meta = getMeta(key);
       const totalQty = items.reduce((a,d)=> a + (parseInt(d.qty)||0), 0);
@@ -734,9 +733,6 @@ function renderTable(){
           display = `<span class="meta-empty">—</span>`;
         }else if(f.type === 'datetime-local'){
           display = esc(String(raw).replace('T',' '));
-        }else if(f.key === 'statusPengirimanSindo'){
-          const cls = String(raw).toLowerCase().replace(/\s+/g,'');
-          display = `<span class="pill ${cls}">${esc(raw)}</span>`;
         }else{
           display = esc(raw);
         }
@@ -817,45 +813,6 @@ function startEditCell(td){
   if(type === 'date') inputType = 'date';
   else if(type === 'datetime-local') inputType = 'datetime-local';
   else if(type === 'number') inputType = 'number';
-  else if(type === 'select') {
-    // Untuk field select, kita buat dropdown
-    const options = fieldDef.options || [];
-    td.classList.add('editing');
-    td.innerHTML = `<select class="cell-input">
-      <option value="">-- Pilih --</option>
-      ${options.map(opt => `<option value="${esc(opt)}" ${opt === curVal ? 'selected' : ''}>${esc(opt)}</option>`).join('')}
-    </select>`;
-    const sel = td.querySelector('select');
-    sel.focus();
-    const finishSelect = (save) => {
-      td.classList.remove('editing');
-      if(save){
-        const newVal = sel.value;
-        const m = getMeta(key);
-        if(newVal === ''){ delete m[fieldKey]; }
-        else{ m[fieldKey] = newVal; }
-        setMeta(key, m);
-        let disp;
-        if(newVal === '') disp = '<span class="meta-empty">—</span>';
-        else {
-          const cls = newVal.toLowerCase().replace(/\s+/g,'');
-          disp = `<span class="pill ${cls}">${esc(newVal)}</span>`;
-        }
-        td.innerHTML = disp;
-        toast('💾 Tersimpan');
-      } else {
-        td.innerHTML = prevHtml;
-      }
-    };
-    sel.addEventListener('keydown', ev => {
-      if(ev.key === 'Enter'){ ev.preventDefault(); finishSelect(true); }
-      else if(ev.key === 'Escape'){ ev.preventDefault(); finishSelect(false); }
-      else if(ev.key === 'Tab'){ finishSelect(true); }
-    });
-    sel.addEventListener('blur', () => { if(td.classList.contains('editing')) finishSelect(true); });
-    sel.addEventListener('click', ev => ev.stopPropagation());
-    return;
-  }
 
   td.classList.add('editing');
   td.innerHTML = `<input class="cell-input" type="${inputType}" value="${esc(curVal)}"
@@ -1009,12 +966,10 @@ function renderDetail(){
     return;
   }
 
-  /* ====== PERUBAHAN: Kolom "nomor" jadi nomor urut baru (idx + 1) ====== */
   $('#detailTbody').innerHTML = items.map((d, idx)=>{
     const tds = FIELDS.map(f=>{
       const v = d[f.key] ?? '';
 
-      /* >>> NOMOR URUT BARU <<< */
       if(f.key === 'nomor'){
         return `<td class="qty-cell" style="color:#2563eb;font-weight:700">${idx + 1}</td>`;
       }
@@ -1103,6 +1058,7 @@ function openModal(id = null, preset = null){
   if(id === null){
     $('#modalTitle').textContent = 'Tambah Data Pengiriman';
     $('#deleteBtn').style.display = 'none';
+    /* Nomor urut item mengikuti nomor terakhir di seluruh data */
     const maxNo = data.reduce((m,d)=> Math.max(m, parseInt(d.nomor)||0), 0);
     form.elements['nomor'].value = String(maxNo + 1);
     if(preset && preset.buktiTransaksiKirim){
@@ -1139,7 +1095,7 @@ function saveRecord(){
     const newId = data.length ? Math.max(...data.map(d=>d.id)) + 1 : 1;
     obj.id = newId;
     if(!obj.nomor) obj.nomor = String(newId);
-    data.push(obj);
+    data.push(obj);   /* push ke belakang -> otomatis tersusun di bawah */
     toast('✅ Data berhasil ditambahkan');
   }else{
     const idx = data.findIndex(d=>d.id === editingId);
@@ -1246,7 +1202,7 @@ function exportGroupExcel(){
   const headers = getExportFields().map(f=>f.label);
   const rows = items.map((d, idx)=>{
     const o = recordToLabeled(d);
-    o['Nomor'] = idx + 1;   // nomor urut baru
+    o['Nomor'] = idx + 1;
     return o;
   });
 
@@ -1281,9 +1237,6 @@ function downloadTemplateExcel(){
     else if(k === 'tglKirimKpgSby') example[f.label] = '2024-06-04';
     else if(k === 'namaExpedisi') example[f.label] = 'JNE Express';
     else if(k === 'noResiExpedisi') example[f.label] = 'JNE-88231-00921';
-    else if(k === 'statusPengirimanSindo') example[f.label] = 'Terkirim';
-    else if(k === 'lokasiTerakhirSindo') example[f.label] = 'Jakarta Selatan';
-    else if(k === 'updateTerakhirSindo') example[f.label] = '2024-06-05 10:30';
     else if(k === 'sjlSby') example[f.label] = 'SJL/SBY-KDS/06/0044';
     else if(k === 'tglKirimSby') example[f.label] = '2024-06-05';
     else if(k === 'noTrukDriver') example[f.label] = 'B 9021 XYZ | Pak Budi';
@@ -1310,6 +1263,7 @@ function downloadTemplateExcel(){
     ['   Nomor Surat Jalan ke P3 s/d TCODE — berlaku PER GRUP Bukti Transaksi Kirim.'],
     ['   Cukup isi di salah satu baris, sistem memakai nilai pertama non-kosong.'],
     ['5. Format tanggal: YYYY-MM-DD. Untuk "Diubah Pada": YYYY-MM-DD HH:MM.'],
+    ['6. Setiap upload baru akan otomatis ditambahkan di BAWAH data sebelumnya.'],
     [''],
     ['Daftar Kolom (urutan di file Excel):'],
     ...headers.map((h,i)=>[`${i+1}. ${h}`])
@@ -1367,9 +1321,6 @@ const META_ALIASES = {
   noResiExpedisi:      ['no resi / tracking expedisi','no resi expedisi','noresiexpedisi',
                         'noresi','nomeresi','no_resi','resi','notracking','nomeresi',
                         'no tracking expedisi','noresi/trackingexpedisi'],
-  statusPengirimanSindo: ['statuspengiriman','statussindo','statuspengirimansindo','status'],
-  lokasiTerakhirSindo: ['lokasiterakhir','lokasiterakhirsindo','lokasiterakhirs'],
-  updateTerakhirSindo: ['updateterakhir','updateterakhirsindo','update'],
   sjlSby:              ['sjlsby','sjl_sby','suratjalansby','suratjalan_sby'],
   tglKirimSby:         ['tglkirimsby','tgl_kirim_sby','tanggal kirim sby'],
   noTrukDriver:        ['no truk | driver','notrukdriver','notruk|driver','notruk','nodriver',
@@ -1527,7 +1478,6 @@ function showAlert(msg, type){
 }
 function renderImportPreview(headers){
   const previewKeys = ['nomor','buktiTransaksiKirim','nomorSuratJalanP3','sjlKpgSby','namaExpedisi','noResiExpedisi',
-                       'statusPengirimanSindo','lokasiTerakhirSindo',
                        'sjlSby','noTrukDriver',
                        'site','partNumber','qty','statusServiceCall'];
   const allIdx = { ...importMapping, ...mapMetaHeaders(headers) };
@@ -1578,25 +1528,45 @@ function renderMappingStatus(metaMap){
   $('#mappingList').innerHTML = listMain + listMeta;
   $('#mappingWrap').style.display = 'block';
 }
+
+/* =========================================================
+   CONFIRM IMPORT — dengan NOMOR URUT LANJUTAN
+   ========================================================= */
 function confirmImport(){
   if(!importRows.length){ return; }
   const mode = document.querySelector('input[name="importMode"]:checked').value;
   const baseId = data.length ? Math.max(...data.map(d=>d.id)) : 0;
-  const newRecords = importRows.map((r, i)=>({ ...r, id: baseId + i + 1 }));
+
+  /* =========================================================
+     HITUNG NOMOR URUT LANJUTAN
+     Baris baru melanjutkan nomor terakhir dari data existing,
+     sehingga penomoran tetap rapi dan berurutan.
+     ========================================================= */
+  const maxNomor = data.reduce((m,d)=> Math.max(m, parseInt(d.nomor)||0), 0);
+  let nomorCounter = maxNomor;
+
+  const newRecords = importRows.map((r, i)=>{
+    nomorCounter++;
+    return { ...r, id: baseId + i + 1, nomor: String(nomorCounter) };
+  });
 
   if(mode === 'replace'){
     if(!confirm(`Ganti SEMUA data existing (${data.length} baris) dengan ${newRecords.length} baris dari file?`)) return;
-    data = newRecords;
+    /* Reset penomoran dari 1 untuk mode replace */
+    const replacedRecords = importRows.map((r, i)=>({ ...r, id: i + 1, nomor: String(i + 1) }));
+    data = replacedRecords;
     groupMeta = { ...importMetaMap };
     saveMeta();
-    toast(`✓ Import selesai — ${newRecords.length} baris (mode: ganti semua)`);
+    toast(`✓ Import selesai — ${replacedRecords.length} baris (mode: ganti semua)`);
   }else{
+    /* Mode append: data baru ditambahkan di BELAKANG array data,
+       sehingga otomatis tersusun di bawah data sebelumnya. */
     data = data.concat(newRecords);
     Object.keys(importMetaMap).forEach(k=>{
       groupMeta[k] = { ...(groupMeta[k]||{}), ...importMetaMap[k] };
     });
     saveMeta();
-    toast(`✓ Import selesai — ${newRecords.length} baris ditambahkan`);
+    toast(`✓ Import selesai — ${newRecords.length} baris ditambahkan di bawah`);
   }
   saveData();
   renderTable();
