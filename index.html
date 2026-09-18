@@ -14,7 +14,6 @@
   }
   body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
     background:var(--bg); color:var(--ink); font-size:13px; padding:18px}
-  /* HEADER */
   .page-head{background:linear-gradient(120deg,#0f172a,#1e3a8a);color:#fff;border-radius:14px;
     padding:20px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
     box-shadow:0 8px 24px rgba(15,23,42,.18)}
@@ -24,14 +23,12 @@
   .page-head p{font-size:12px;color:#c7d2fe;margin-top:3px}
   .head-badge{margin-left:auto;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
     padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600}
-  /* STATS */
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0}
   .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
   .stat .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
   .stat .val{font-size:22px;font-weight:700;margin-top:5px}
   .stat.b .val{color:var(--brand)} .stat.g .val{color:var(--green)}
   .stat.a .val{color:var(--amber)} .stat.r .val{color:var(--red)}
-  /* TOOLBAR */
   .toolbar{background:var(--panel);border:1px solid var(--line);border-radius:12px;
     padding:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
   .search{position:relative;flex:1;min-width:200px}
@@ -54,7 +51,6 @@
   .btn.excel:hover{background:#0c5e31}
   .btn.danger{background:#fee2e2;color:var(--red)}
   .btn.danger:hover{background:#fecaca}
-  /* HINT BAR */
   .hint-bar{
     background:#fffbeb;border:1px solid #fde68a;color:#92400e;
     padding:10px 16px;border-radius:10px;font-size:12px;font-weight:500;
@@ -62,7 +58,6 @@
   }
   .hint-bar .icon{font-size:15px}
   .hint-bar b{color:#78350f}
-  /* ======= MAIN TABLE ======= */
   .table-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
   .table-wrap{overflow:auto;max-height:calc(100vh - 380px);min-height:280px}
   .table-wrap::-webkit-scrollbar{width:12px;height:12px}
@@ -124,7 +119,6 @@
     display:inline-flex;align-items:center;gap:4px;margin:0 2px;
   }
   .main-table .btn-icon:hover{background:#eff6ff;border-color:var(--brand);color:var(--brand)}
-  /* ======= EDITABLE CELL ======= */
   .main-table td.editable-cell{
     cursor:pointer;position:relative;min-width:130px;
     transition:background .12s;
@@ -153,7 +147,6 @@
   .cell-input:focus{box-shadow:0 0 0 3px rgba(37,99,235,.18)}
   .empty{padding:60px 20px;text-align:center;color:var(--muted)}
   .empty .big{font-size:38px;margin-bottom:10px}
-  /* MODAL */
   .overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);
     display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
   .overlay.show{display:flex}
@@ -172,7 +165,6 @@
   .modal-body{padding:20px 22px;overflow-y:auto}
   .modal-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .spacer{flex:1}
-  /* FORM */
   .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
   .field{display:flex;flex-direction:column;gap:5px}
   .field.full{grid-column:1/-1}
@@ -182,13 +174,11 @@
   .field input:focus,.field select:focus,.field textarea:focus{
     border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
   .field textarea{resize:vertical;min-height:64px}
-  /* META BANNER */
   .meta-banner{
     padding:12px 16px;border-radius:10px;background:#dbeafe;border:1px solid #bfdbfe;
     color:#1e40af;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;
   }
   .meta-banner .icon{font-size:18px}
-  /* DETAIL MODAL */
   .detail-title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .detail-title-row .key{font-size:16px;font-weight:700;color:#1e293b;letter-spacing:.2px}
   .detail-title-row .count-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;
@@ -244,7 +234,6 @@
   .btn-icon:hover{background:#eff6ff;border-color:var(--brand);color:var(--brand)}
   .btn-icon.danger{color:var(--red)}
   .btn-icon.danger:hover{background:#fee2e2;border-color:var(--red);color:var(--red)}
-  /* PILL */
   .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
   .pill.open{background:#fef3c7;color:#92400e}
   .pill.proses{background:#dbeafe;color:#1e40af}
@@ -253,7 +242,6 @@
   .yn{font-weight:700}
   .yn.ya{color:var(--green)}
   .yn.tidak{color:#94a3b8}
-  /* IMPORT MODAL */
   .drop-zone{border:2px dashed #cbd5e1;border-radius:14px;padding:34px 20px;text-align:center;
     background:#f8fafc;cursor:pointer;transition:.15s}
   .drop-zone:hover,.drop-zone.drag{border-color:var(--brand);background:#eff6ff}
@@ -288,7 +276,6 @@
   .alert.info{background:#dbeafe;color:#1e40af}
   .alert.warn{background:#fef3c7;color:#92400e}
   .alert.err{background:#fee2e2;color:#991b1b}
-  /* TOAST */
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
     background:#0f172a;color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;
     opacity:0;transition:.28s;z-index:99;pointer-events:none;max-width:90vw;text-align:center}
@@ -334,15 +321,13 @@
   <button class="btn primary" id="addBtn">＋ Tambah Data</button>
 </div>
 
-<!-- HINT BAR -->
 <div class="hint-bar">
   <span class="icon">💡</span>
   <span>
-    Kolom <b>Nomor Surat Jalan ke P3</b>, <b>Dikonfirmasi Tanggal</b>, <b>Sjl KPG - SBY</b>, <b>Tgl Kirim KPG - SBY</b>, <b>NAMA EXPEDISI</b>, <b>NO. RESI / TRACKING EXPEDISI</b>, <b>Sjl SBY</b>, <b>Tgl Kirim SBY</b>, <b>NO TRUK | DRIVER</b>, <b>Diubah Oleh</b>, <b>Diubah Pada</b>, dan <b>TCODE</b> bisa <b>langsung diklik &amp; diketik</b> di sel-nya. Tekan <b>Enter</b> untuk simpan, <b>Esc</b> untuk batal.
+    Kolom <b>Nomor Surat Jalan ke P3</b>, <b>Dikonfirmasi Tanggal</b>, <b>Sjl KPG - SBY</b>, <b>Tgl Kirim KPG - SBY</b>, <b>NAMA EXPEDISI</b>, <b>NO. RESI / TRACKING EXPEDISI</b>, <b>Status Pengiriman Sindo</b>, <b>Lokasi Terakhir Sindo</b>, <b>Update Terakhir Sindo</b>, <b>Sjl SBY</b>, <b>Tgl Kirim SBY</b>, <b>NO TRUK | DRIVER</b>, <b>Diubah Oleh</b>, <b>Diubah Pada</b>, dan <b>TCODE</b> bisa <b>langsung diklik &amp; diketik</b> di sel-nya. Tekan <b>Enter</b> untuk simpan, <b>Esc</b> untuk batal.
   </span>
 </div>
 
-<!-- ================= MAIN TABLE ================= -->
 <div class="table-card">
   <div class="table-wrap">
     <table class="main-table">
@@ -352,7 +337,7 @@
   </div>
 </div>
 
-<!-- ================= MODAL META ================= -->
+<!-- META MODAL -->
 <div class="overlay" id="metaOverlay">
   <div class="modal medium">
     <div class="modal-head">
@@ -377,7 +362,7 @@
   </div>
 </div>
 
-<!-- ================= MODAL DETAIL ================= -->
+<!-- DETAIL MODAL -->
 <div class="overlay" id="detailOverlay">
   <div class="modal wide">
     <div class="modal-head">
@@ -386,7 +371,7 @@
           <span class="key" id="detailKey">-</span>
           <span class="count-pill" id="detailCount">0 item</span>
         </div>
-        <div class="detail-hint">Tampilan spreadsheet — sama seperti file Excel. Geser ke kanan untuk melihat semua kolom →</div>
+        <div class="detail-hint">Tampilan spreadsheet — kolom <b>Nomor</b> di sini menampilkan nomor urut baru sesuai urutan item (1, 2, 3, …)</div>
       </div>
       <button class="close-x" id="detailCloseX">✕</button>
     </div>
@@ -516,7 +501,6 @@ const FIELDS = [
   { key:'analisisSA',           label:'Analisis SA',             type:'textarea' }
 ];
 
-/* ===== 12 KOLOM INFO PENGIRIMAN (HEAD BARU) ===== */
 const GROUP_FIELDS = [
   { key:'nomorSuratJalanP3',    label:'Nomor Surat Jalan ke P3',      type:'text'          },
   { key:'dikonfirmasiTanggal',  label:'Dikonfirmasi Tanggal',         type:'date'          },
@@ -524,6 +508,9 @@ const GROUP_FIELDS = [
   { key:'tglKirimKpgSby',       label:'Tgl Kirim KPG - SBY',          type:'date'          },
   { key:'namaExpedisi',         label:'NAMA EXPEDISI',                type:'text'          },
   { key:'noResiExpedisi',       label:'NO. RESI / TRACKING EXPEDISI', type:'text'          },
+  { key:'statusPengirimanSindo', label:'Status Pengiriman Sindo',     type:'select', options:['Dalam Perjalanan', 'Tiba di Tujuan', 'Terkirim', 'Gagal Kirim', 'Dalam Proses'] },
+  { key:'lokasiTerakhirSindo',  label:'Lokasi Terakhir Sindo',        type:'text'          },
+  { key:'updateTerakhirSindo',  label:'Update Terakhir Sindo',        type:'datetime-local'},
   { key:'sjlSby',               label:'Sjl SBY',                      type:'text'          },
   { key:'tglKirimSby',          label:'Tgl Kirim SBY',                type:'date'          },
   { key:'noTrukDriver',         label:'NO TRUK | DRIVER',             type:'text'          },
@@ -588,6 +575,9 @@ function seedMeta(){
       tglKirimKpgSby:'2024-06-04',
       namaExpedisi:'JNE Express',
       noResiExpedisi:'JNE-88231-00921',
+      statusPengirimanSindo:'Terkirim',
+      lokasiTerakhirSindo:'Jakarta Selatan',
+      updateTerakhirSindo:'2024-06-05T10:30',
       sjlSby:'SJL/SBY-KDS/06/0044',
       tglKirimSby:'2024-06-05',
       noTrukDriver:'B 9021 XYZ | Pak Budi',
@@ -602,6 +592,9 @@ function seedMeta(){
       tglKirimKpgSby:'2024-06-08',
       namaExpedisi:'SiCepat',
       noResiExpedisi:'SCP-009923',
+      statusPengirimanSindo:'Dalam Perjalanan',
+      lokasiTerakhirSindo:'Surabaya',
+      updateTerakhirSindo:'2024-06-09T08:15',
       sjlSby:'',
       tglKirimSby:'',
       noTrukDriver:'',
@@ -741,6 +734,9 @@ function renderTable(){
           display = `<span class="meta-empty">—</span>`;
         }else if(f.type === 'datetime-local'){
           display = esc(String(raw).replace('T',' '));
+        }else if(f.key === 'statusPengirimanSindo'){
+          const cls = String(raw).toLowerCase().replace(/\s+/g,'');
+          display = `<span class="pill ${cls}">${esc(raw)}</span>`;
         }else{
           display = esc(raw);
         }
@@ -821,6 +817,45 @@ function startEditCell(td){
   if(type === 'date') inputType = 'date';
   else if(type === 'datetime-local') inputType = 'datetime-local';
   else if(type === 'number') inputType = 'number';
+  else if(type === 'select') {
+    // Untuk field select, kita buat dropdown
+    const options = fieldDef.options || [];
+    td.classList.add('editing');
+    td.innerHTML = `<select class="cell-input">
+      <option value="">-- Pilih --</option>
+      ${options.map(opt => `<option value="${esc(opt)}" ${opt === curVal ? 'selected' : ''}>${esc(opt)}</option>`).join('')}
+    </select>`;
+    const sel = td.querySelector('select');
+    sel.focus();
+    const finishSelect = (save) => {
+      td.classList.remove('editing');
+      if(save){
+        const newVal = sel.value;
+        const m = getMeta(key);
+        if(newVal === ''){ delete m[fieldKey]; }
+        else{ m[fieldKey] = newVal; }
+        setMeta(key, m);
+        let disp;
+        if(newVal === '') disp = '<span class="meta-empty">—</span>';
+        else {
+          const cls = newVal.toLowerCase().replace(/\s+/g,'');
+          disp = `<span class="pill ${cls}">${esc(newVal)}</span>`;
+        }
+        td.innerHTML = disp;
+        toast('💾 Tersimpan');
+      } else {
+        td.innerHTML = prevHtml;
+      }
+    };
+    sel.addEventListener('keydown', ev => {
+      if(ev.key === 'Enter'){ ev.preventDefault(); finishSelect(true); }
+      else if(ev.key === 'Escape'){ ev.preventDefault(); finishSelect(false); }
+      else if(ev.key === 'Tab'){ finishSelect(true); }
+    });
+    sel.addEventListener('blur', () => { if(td.classList.contains('editing')) finishSelect(true); });
+    sel.addEventListener('click', ev => ev.stopPropagation());
+    return;
+  }
 
   td.classList.add('editing');
   td.innerHTML = `<input class="cell-input" type="${inputType}" value="${esc(curVal)}"
@@ -941,7 +976,7 @@ function saveMetaRecord(){
 }
 
 /* =========================================================
-   DETAIL MODAL
+   DETAIL MODAL — NOMOR URUT BARU (1, 2, 3, …)
    ========================================================= */
 function openDetail(key){
   currentDetailKey = key;
@@ -974,9 +1009,16 @@ function renderDetail(){
     return;
   }
 
-  $('#detailTbody').innerHTML = items.map(d=>{
+  /* ====== PERUBAHAN: Kolom "nomor" jadi nomor urut baru (idx + 1) ====== */
+  $('#detailTbody').innerHTML = items.map((d, idx)=>{
     const tds = FIELDS.map(f=>{
       const v = d[f.key] ?? '';
+
+      /* >>> NOMOR URUT BARU <<< */
+      if(f.key === 'nomor'){
+        return `<td class="qty-cell" style="color:#2563eb;font-weight:700">${idx + 1}</td>`;
+      }
+
       if(f.key === 'statusServiceCall'){
         const cls = String(v).toLowerCase();
         return `<td><span class="pill ${cls}">${esc(v || '-')}</span></td>`;
@@ -1014,7 +1056,7 @@ function renderDetail(){
       const id = Number(b.dataset.id);
       const rec = data.find(x=>x.id===id);
       if(!rec) return;
-      if(!confirm(`Hapus item "${rec.partNumber}" (#${rec.nomor})?`)) return;
+      if(!confirm(`Hapus item "${rec.partNumber}"?`)) return;
       data = data.filter(x=>x.id !== id);
       saveData();
       renderTable();
@@ -1121,7 +1163,7 @@ function deleteRecord(){
 }
 
 /* =========================================================
-   EXCEL EXPORT — 21 kolom utama + 12 kolom info di KANAN
+   EXCEL EXPORT
    ========================================================= */
 function getExportFields(){
   const out = [];
@@ -1194,13 +1236,20 @@ function exportExcel(){
   XLSX.writeFile(wb, `kontrol-pengiriman-sparepart-${tgl}.xlsx`);
   toast('⬇ File Excel berhasil diunduh');
 }
+
+/* ===== EXPORT GRUP — dengan NOMOR URUT BARU juga ===== */
 function exportGroupExcel(){
   if(!currentDetailKey) return;
   const items = data.filter(d => groupKey(d) === currentDetailKey);
   if(!items.length){ toast('⚠️ Tidak ada data pada grup ini'); return; }
 
   const headers = getExportFields().map(f=>f.label);
-  const rows = items.map(recordToLabeled);
+  const rows = items.map((d, idx)=>{
+    const o = recordToLabeled(d);
+    o['Nomor'] = idx + 1;   // nomor urut baru
+    return o;
+  });
+
   const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
   ws['!cols'] = autoWidths(rows, headers);
   ws['!autofilter'] = { ref: XLSX.utils.encode_range({
@@ -1216,6 +1265,7 @@ function exportGroupExcel(){
   XLSX.writeFile(wb, `sparepart-${safeFile}.xlsx`);
   toast('⬇ File Excel grup berhasil diunduh');
 }
+
 function downloadTemplateExcel(){
   const allFields = getExportFields();
   const headers = allFields.map(f=>f.label);
@@ -1231,6 +1281,9 @@ function downloadTemplateExcel(){
     else if(k === 'tglKirimKpgSby') example[f.label] = '2024-06-04';
     else if(k === 'namaExpedisi') example[f.label] = 'JNE Express';
     else if(k === 'noResiExpedisi') example[f.label] = 'JNE-88231-00921';
+    else if(k === 'statusPengirimanSindo') example[f.label] = 'Terkirim';
+    else if(k === 'lokasiTerakhirSindo') example[f.label] = 'Jakarta Selatan';
+    else if(k === 'updateTerakhirSindo') example[f.label] = '2024-06-05 10:30';
     else if(k === 'sjlSby') example[f.label] = 'SJL/SBY-KDS/06/0044';
     else if(k === 'tglKirimSby') example[f.label] = '2024-06-05';
     else if(k === 'noTrukDriver') example[f.label] = 'B 9021 XYZ | Pak Budi';
@@ -1308,12 +1361,15 @@ const META_ALIASES = {
                         'nosuratjalanp3','nosj','nosuratjalan','suratjalan','nomorsj'],
   dikonfirmasiTanggal: ['dikonfirmasitanggal','tglkonfirmasi','tanggaldikonfirmasi'],
   sjlKpgSby:           ['sjlkpgsby','sjlkpg-sby','suratjalankpgsby','sjlkpgsby',
-                        'sjl_kpg_sby','suratjalan_kpg_sby','sjlkpgsby'],
+                        'sjl_kpg_sby','suratjalan_kpg_sby'],
   tglKirimKpgSby:      ['tglkirimkpgsby','tglkirimkpg-sby','tanggal kirim kpg sby','tgl_kirim_kpg_sby'],
   namaExpedisi:        ['namaexpedisi','expedisi','ekspedisi','kurir'],
   noResiExpedisi:      ['no resi / tracking expedisi','no resi expedisi','noresiexpedisi',
                         'noresi','nomeresi','no_resi','resi','notracking','nomeresi',
                         'no tracking expedisi','noresi/trackingexpedisi'],
+  statusPengirimanSindo: ['statuspengiriman','statussindo','statuspengirimansindo','status'],
+  lokasiTerakhirSindo: ['lokasiterakhir','lokasiterakhirsindo','lokasiterakhirs'],
+  updateTerakhirSindo: ['updateterakhir','updateterakhirsindo','update'],
   sjlSby:              ['sjlsby','sjl_sby','suratjalansby','suratjalan_sby'],
   tglKirimSby:         ['tglkirimsby','tgl_kirim_sby','tanggal kirim sby'],
   noTrukDriver:        ['no truk | driver','notrukdriver','notruk|driver','notruk','nodriver',
@@ -1471,6 +1527,7 @@ function showAlert(msg, type){
 }
 function renderImportPreview(headers){
   const previewKeys = ['nomor','buktiTransaksiKirim','nomorSuratJalanP3','sjlKpgSby','namaExpedisi','noResiExpedisi',
+                       'statusPengirimanSindo','lokasiTerakhirSindo',
                        'sjlSby','noTrukDriver',
                        'site','partNumber','qty','statusServiceCall'];
   const allIdx = { ...importMapping, ...mapMetaHeaders(headers) };
