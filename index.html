@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kontrol Pengiriman Sparepart</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- ===== FIREBASE SDK (compat) ===== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -51,6 +55,7 @@
   .btn.excel:hover{background:#0c5e31}
   .btn.danger{background:#fee2e2;color:var(--red)}
   .btn.danger:hover{background:#fecaca}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
   .hint-bar{
     background:#fffbeb;border:1px solid #fde68a;color:#92400e;
     padding:10px 16px;border-radius:10px;font-size:12px;font-weight:500;
@@ -280,15 +285,85 @@
     background:#0f172a;color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;
     opacity:0;transition:.28s;z-index:99;pointer-events:none;max-width:90vw;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ====== LOGIN / LOADING / USER CHIP ====== */
+  .login-screen{position:fixed;inset:0;display:none;place-items:center;padding:20px;z-index:200;
+    background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 55%,#0f766e 100%)}
+  .login-screen.show{display:grid}
+  .login-card{width:min(400px,100%);background:#fff;border-radius:18px;padding:32px 28px;
+    box-shadow:0 30px 70px rgba(0,0,0,.45);text-align:center;animation:pop .22s ease}
+  .login-logo{width:64px;height:64px;border-radius:18px;margin:0 auto 14px;
+    background:linear-gradient(135deg,#2563eb,#0f766e);display:grid;place-items:center;font-size:30px;
+    box-shadow:0 10px 24px rgba(37,99,235,.35)}
+  .login-card h1{font-size:17px;font-weight:700;color:#0f172a}
+  .login-sub{font-size:12px;color:#64748b;margin:6px 0 22px}
+  .login-card .field{text-align:left;margin-bottom:14px}
+  .login-card .field input{padding:11px 13px;font-size:13.5px}
+  .login-btn{width:100%;justify-content:center;padding:12px;font-size:14px;margin-top:6px}
+  .login-msg{font-size:12px;margin-top:12px;min-height:16px;font-weight:600}
+  .login-msg.err{color:#dc2626}
+  .login-msg.ok{color:#16a34a}
+  .login-foot{margin-top:20px;font-size:11px;color:#94a3b8;line-height:1.6}
+  .loading-screen{position:fixed;inset:0;display:none;place-items:center;z-index:210;
+    background:#0f172a;color:#e2e8f0;font-size:13px;font-weight:600;
+    grid-auto-rows:min-content;gap:16px;text-align:center}
+  .loading-screen.show{display:grid}
+  .spinner{width:38px;height:38px;border:3px solid rgba(255,255,255,.2);border-top-color:#60a5fa;
+    border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .user-chip{display:none;align-items:center;gap:8px;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.2);padding:6px 8px 6px 12px;border-radius:10px;
+    font-size:12px;font-weight:600;color:#fff}
+  .user-chip.show{display:flex}
+  .user-chip .u-avatar{width:24px;height:24px;border-radius:50%;background:#60a5fa;color:#0f172a;
+    display:grid;place-items:center;font-size:11px;font-weight:800;flex:none}
+  .user-chip button{background:rgba(255,255,255,.16);border:none;color:#fff;border-radius:7px;
+    padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;transition:.15s}
+  .user-chip button:hover{background:rgba(239,68,68,.9)}
+
   @media(max-width:640px){
     body{padding:10px}
     .page-head{padding:16px}
     .page-head h1{font-size:16px}
     .head-badge{display:none}
+    .user-chip #userName{display:none}
   }
 </style>
 </head>
 <body>
+
+<!-- ================= LOGIN ================= -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">📦</div>
+    <h1>Kontrol Pengiriman Sparepart</h1>
+    <div class="login-sub">Masuk untuk melanjutkan</div>
+    <form id="loginForm" autocomplete="on">
+      <div class="field">
+        <label for="loginUser">Username</label>
+        <input type="text" id="loginUser" placeholder="mis. admin" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="loginPass">Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button class="btn primary login-btn" id="loginBtn" type="submit">🔐 Masuk</button>
+      <div class="login-msg" id="loginMsg"></div>
+    </form>
+    <div class="login-foot">Hubungi administrator jika belum punya akun</div>
+  </div>
+</div>
+
+<!-- ================= LOADING ================= -->
+<div class="loading-screen show" id="loadingScreen">
+  <div>
+    <div class="spinner"></div>
+    <div style="margin-top:14px">Memuat aplikasi…</div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="appWrap" style="display:none">
 
 <div class="page-head">
   <div class="logo">📦</div>
@@ -297,6 +372,11 @@
     <p>Klik sel kolom <b>info pengiriman</b> untuk input manual · Klik baris untuk lihat detail item</p>
   </div>
   <div class="head-badge">📅 <span id="today"></span></div>
+  <div class="user-chip" id="userChip">
+    <div class="u-avatar" id="userAvatar">U</div>
+    <span id="userName">-</span>
+    <button id="logoutBtn" title="Keluar">Keluar</button>
+  </div>
 </div>
 
 <div class="stats">
@@ -471,6 +551,8 @@
   </div>
 </div>
 
+</div><!-- /#appWrap -->
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -619,14 +701,14 @@ function toast(msg){
   t._tm = setTimeout(()=>t.classList.remove('show'), 2000);
 }
 
+/* =========================================================
+   LOCAL STORAGE  (+ hook ke Firestore)
+   ========================================================= */
 function loadData(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
     data = raw ? JSON.parse(raw) : seed();
   }catch(e){ data = seed(); }
-}
-function saveData(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
 }
 function loadMeta(){
   try{
@@ -634,8 +716,13 @@ function loadMeta(){
     groupMeta = raw ? JSON.parse(raw) : seedMeta();
   }catch(e){ groupMeta = seedMeta(); }
 }
+function saveData(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+  if(fsReady && !suppressPush) pushToFirestore();
+}
 function saveMeta(){
   try{ localStorage.setItem(META_KEY, JSON.stringify(groupMeta)); }catch(e){}
+  if(fsReady && !suppressPush) pushToFirestore();
 }
 
 /* =========================================================
@@ -712,15 +799,7 @@ function renderTable(){
       </div>
     </td></tr>`;
   }else{
-    /* =========================================================
-       PENGURUTAN: PERTAHANKAN URUTAN INPUT (INSERTION ORDER)
-       Data baru dari upload akan otomatis muncul di bawah,
-       sehingga urutan tetap rapi sesuai urutan input.
-       ========================================================= */
-    const entries = [...groups.entries()];
-    /* Catatan: JANGAN gunakan .sort() di sini, karena akan mengubah
-       urutan menjadi alfabetis dan membuat data baru "nyempil" di tengah. */
-
+    const entries = [...groups.entries()].sort((a,b)=> a[0].localeCompare(b[0]));
     tbody.innerHTML = entries.map(([key, items])=>{
       const meta = getMeta(key);
       const totalQty = items.reduce((a,d)=> a + (parseInt(d.qty)||0), 0);
@@ -833,6 +912,10 @@ function startEditCell(td){
       }else{
         m[fieldKey] = newVal;
       }
+      // otomatis isi "Diubah Oleh" dari user yang login
+      if(currentUser && fieldKey !== 'diubahOleh'){
+        m.diubahOleh = emailToUsername(currentUser.email || '');
+      }
       setMeta(key, m);
 
       let disp;
@@ -911,6 +994,10 @@ function openMetaModal(key){
     const el = form.elements[f.key];
     if(el) el.value = meta[f.key] ?? '';
   });
+  // prefill "Diubah Oleh" dengan user aktif
+  if(currentUser && form.elements['diubahOleh'] && !form.elements['diubahOleh'].value){
+    form.elements['diubahOleh'].value = emailToUsername(currentUser.email || '');
+  }
   $('#metaOverlay').classList.add('show');
   setTimeout(()=>{ const el = form.elements['nomorSuratJalanP3']; if(el) el.focus(); }, 80);
 }
@@ -1058,7 +1145,6 @@ function openModal(id = null, preset = null){
   if(id === null){
     $('#modalTitle').textContent = 'Tambah Data Pengiriman';
     $('#deleteBtn').style.display = 'none';
-    /* Nomor urut item mengikuti nomor terakhir di seluruh data */
     const maxNo = data.reduce((m,d)=> Math.max(m, parseInt(d.nomor)||0), 0);
     form.elements['nomor'].value = String(maxNo + 1);
     if(preset && preset.buktiTransaksiKirim){
@@ -1095,7 +1181,7 @@ function saveRecord(){
     const newId = data.length ? Math.max(...data.map(d=>d.id)) + 1 : 1;
     obj.id = newId;
     if(!obj.nomor) obj.nomor = String(newId);
-    data.push(obj);   /* push ke belakang -> otomatis tersusun di bawah */
+    data.push(obj);
     toast('✅ Data berhasil ditambahkan');
   }else{
     const idx = data.findIndex(d=>d.id === editingId);
@@ -1175,6 +1261,7 @@ function exportExcel(){
   const info = [
     ['Laporan', 'Kontrol Pengiriman Sparepart'],
     ['Tanggal Export', new Date().toLocaleString('id-ID')],
+    ['Diekspor Oleh', currentUser ? emailToUsername(currentUser.email) : '-'],
     ['Total Baris', filtered.length],
     ['Total Qty', filtered.reduce((a,d)=> a + (parseInt(d.qty)||0), 0)],
     ['Total Grup Bukti Transaksi', new Set(filtered.map(groupKey)).size],
@@ -1193,7 +1280,6 @@ function exportExcel(){
   toast('⬇ File Excel berhasil diunduh');
 }
 
-/* ===== EXPORT GRUP — dengan NOMOR URUT BARU juga ===== */
 function exportGroupExcel(){
   if(!currentDetailKey) return;
   const items = data.filter(d => groupKey(d) === currentDetailKey);
@@ -1263,7 +1349,6 @@ function downloadTemplateExcel(){
     ['   Nomor Surat Jalan ke P3 s/d TCODE — berlaku PER GRUP Bukti Transaksi Kirim.'],
     ['   Cukup isi di salah satu baris, sistem memakai nilai pertama non-kosong.'],
     ['5. Format tanggal: YYYY-MM-DD. Untuk "Diubah Pada": YYYY-MM-DD HH:MM.'],
-    ['6. Setiap upload baru akan otomatis ditambahkan di BAWAH data sebelumnya.'],
     [''],
     ['Daftar Kolom (urutan di file Excel):'],
     ...headers.map((h,i)=>[`${i+1}. ${h}`])
@@ -1528,45 +1613,25 @@ function renderMappingStatus(metaMap){
   $('#mappingList').innerHTML = listMain + listMeta;
   $('#mappingWrap').style.display = 'block';
 }
-
-/* =========================================================
-   CONFIRM IMPORT — dengan NOMOR URUT LANJUTAN
-   ========================================================= */
 function confirmImport(){
   if(!importRows.length){ return; }
   const mode = document.querySelector('input[name="importMode"]:checked').value;
   const baseId = data.length ? Math.max(...data.map(d=>d.id)) : 0;
-
-  /* =========================================================
-     HITUNG NOMOR URUT LANJUTAN
-     Baris baru melanjutkan nomor terakhir dari data existing,
-     sehingga penomoran tetap rapi dan berurutan.
-     ========================================================= */
-  const maxNomor = data.reduce((m,d)=> Math.max(m, parseInt(d.nomor)||0), 0);
-  let nomorCounter = maxNomor;
-
-  const newRecords = importRows.map((r, i)=>{
-    nomorCounter++;
-    return { ...r, id: baseId + i + 1, nomor: String(nomorCounter) };
-  });
+  const newRecords = importRows.map((r, i)=>({ ...r, id: baseId + i + 1 }));
 
   if(mode === 'replace'){
     if(!confirm(`Ganti SEMUA data existing (${data.length} baris) dengan ${newRecords.length} baris dari file?`)) return;
-    /* Reset penomoran dari 1 untuk mode replace */
-    const replacedRecords = importRows.map((r, i)=>({ ...r, id: i + 1, nomor: String(i + 1) }));
-    data = replacedRecords;
+    data = newRecords;
     groupMeta = { ...importMetaMap };
     saveMeta();
-    toast(`✓ Import selesai — ${replacedRecords.length} baris (mode: ganti semua)`);
+    toast(`✓ Import selesai — ${newRecords.length} baris (mode: ganti semua)`);
   }else{
-    /* Mode append: data baru ditambahkan di BELAKANG array data,
-       sehingga otomatis tersusun di bawah data sebelumnya. */
     data = data.concat(newRecords);
     Object.keys(importMetaMap).forEach(k=>{
       groupMeta[k] = { ...(groupMeta[k]||{}), ...importMetaMap[k] };
     });
     saveMeta();
-    toast(`✓ Import selesai — ${newRecords.length} baris ditambahkan di bawah`);
+    toast(`✓ Import selesai — ${newRecords.length} baris ditambahkan`);
   }
   saveData();
   renderTable();
@@ -1574,7 +1639,7 @@ function confirmImport(){
 }
 
 /* =========================================================
-   INIT
+   INIT (UI + EVENTS)
    ========================================================= */
 function init(){
   $('#today').textContent = new Date().toLocaleDateString('id-ID',
@@ -1666,7 +1731,215 @@ function init(){
   });
 }
 
-init();
+/* =========================================================
+   ============  FIREBASE : AUTH + FIRESTORE  ==============
+   ========================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCJXpd7hicPPiIMnNdTI5xPgVyBcNf5olo",
+  authDomain: "kontrol-pengiriman-sparepart.firebaseapp.com",
+  projectId: "kontrol-pengiriman-sparepart",
+  storageBucket: "kontrol-pengiriman-sparepart.firebasestorage.app",
+  messagingSenderId: "26757702130",
+  appId: "1:26757702130:web:24f586207585c75e19cb6b",
+  measurementId: "G-D7YWLLTX7Q"
+};
+
+/* Domain "email" semu untuk username.
+   Di Firebase Console, buat user dengan email:  namauser@kontrol-sparepart.local
+   User cukup mengetik "namauser" di form login. */
+const EMAIL_DOMAIN = '@kontrol-sparepart.local';
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+const DOC_REF = db.collection('kontrol').doc('main');
+
+let currentUser   = null;
+let fsReady       = false;   // true bila sinkronisasi Firestore aktif
+let suppressPush  = false;   // true saat menerima snapshot dari server
+let pushTimer     = null;
+let unsubSnap     = null;
+let appStarted    = false;
+
+/* ---------- helper username <-> email ---------- */
+function usernameToEmail(u){
+  const s = String(u || '').trim().toLowerCase();
+  if(!s) return '';
+  return s.includes('@') ? s : s + EMAIL_DOMAIN;
+}
+function emailToUsername(e){
+  return String(e || '').replace(EMAIL_DOMAIN, '');
+}
+
+/* ---------- pesan error Bahasa Indonesia ---------- */
+const AUTH_ERRORS = {
+  'auth/invalid-email'              : 'Format username tidak valid.',
+  'auth/user-disabled'              : 'Akun ini dinonaktifkan. Hubungi admin.',
+  'auth/user-not-found'             : 'Username tidak ditemukan.',
+  'auth/wrong-password'             : 'Password salah.',
+  'auth/invalid-credential'         : 'Username atau password salah.',
+  'auth/invalid-login-credentials'  : 'Username atau password salah.',
+  'auth/too-many-requests'          : 'Terlalu banyak percobaan gagal. Coba lagi beberapa saat.',
+  'auth/network-request-failed'     : 'Koneksi internet bermasalah.',
+  'auth/operation-not-allowed'      : 'Metode login Email/Password belum diaktifkan di Firebase Console.'
+};
+function authMsg(err){
+  return AUTH_ERRORS[err && err.code] || (err && err.message) || 'Terjadi kesalahan.';
+}
+
+/* ---------- LOGIN FORM ---------- */
+function bindLogin(){
+  $('#loginForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const u    = $('#loginUser').value.trim();
+    const p    = $('#loginPass').value;
+    const msg  = $('#loginMsg');
+    const btn  = $('#loginBtn');
+
+    msg.className = 'login-msg';
+    msg.textContent = '';
+
+    if(!u || !p){
+      msg.className = 'login-msg err';
+      msg.textContent = 'Username dan password wajib diisi.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Memproses…';
+
+    try{
+      await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      await auth.signInWithEmailAndPassword(usernameToEmail(u), p);
+      msg.className = 'login-msg ok';
+      msg.textContent = '✓ Berhasil masuk, memuat data…';
+    }catch(err){
+      console.error(err);
+      msg.className = 'login-msg err';
+      msg.textContent = authMsg(err);
+      $('#loginPass').value = '';
+      $('#loginPass').focus();
+    }finally{
+      btn.disabled = false;
+      btn.textContent = '🔐 Masuk';
+    }
+  });
+
+  $('#logoutBtn').addEventListener('click', async ()=>{
+    if(!confirm('Keluar dari aplikasi?')) return;
+    try{ await auth.signOut(); }catch(e){ console.error(e); }
+  });
+}
+
+/* ---------- AUTH STATE ---------- */
+function initAuth(){
+  auth.onAuthStateChanged(async user=>{
+    $('#loadingScreen').classList.remove('show');
+
+    if(user){
+      currentUser = user;
+
+      const uname = emailToUsername(user.email || 'user');
+      $('#userName').textContent   = uname;
+      $('#userAvatar').textContent = (uname.charAt(0) || 'U').toUpperCase();
+      $('#userChip').classList.add('show');
+
+      $('#loginScreen').classList.remove('show');
+      $('#appWrap').style.display = '';
+
+      $('#loginPass').value = '';
+
+      await startApp();        // bangun UI sekali saja
+      startFirestoreSync();    // lalu mulai sinkronisasi
+    }else{
+      currentUser = null;
+      stopFirestoreSync();
+
+      $('#appWrap').style.display = 'none';
+      $('#userChip').classList.remove('show');
+      $('#loginScreen').classList.add('show');
+      $('#loginMsg').textContent = '';
+      setTimeout(()=>{ const el = $('#loginUser'); if(el) el.focus(); }, 120);
+    }
+  });
+}
+
+async function startApp(){
+  if(appStarted) return;
+  appStarted = true;
+  init();
+}
+
+/* ---------- FIRESTORE SYNC ---------- */
+function startFirestoreSync(){
+  if(unsubSnap) return;
+  fsReady = false;
+
+  unsubSnap = DOC_REF.onSnapshot(snap=>{
+    // Abaikan snapshot yang masih berisi tulisan lokal yang belum terkirim
+    if(snap.metadata.hasPendingWrites) return;
+
+    const d = snap.data();
+
+    suppressPush = true;
+
+    if(d && Array.isArray(d.data) && d.data.length){
+      data      = d.data;
+      groupMeta = (d.groupMeta && typeof d.groupMeta === 'object') ? d.groupMeta : {};
+      // simpan salinan lokal untuk offline
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+      try{ localStorage.setItem(META_KEY, JSON.stringify(groupMeta)); }catch(e){}
+    }else{
+      // Dokumen belum ada -> unggah data awal (seed / localStorage)
+      suppressPush = false;
+      fsReady = true;
+      pushToFirestore();
+      return;
+    }
+
+    fsReady = false;   // tahan push dulu
+    suppressPush = false;
+    fsReady = true;
+
+    // Jangan render ulang jika user sedang mengetik di sel
+    if(!document.querySelector('.editable-cell.editing')){
+      renderTable();
+      if(currentDetailKey && $('#detailOverlay').classList.contains('show')) renderDetail();
+    }
+  }, err=>{
+    console.error('Firestore error:', err);
+    fsReady = false;
+    toast('⚠️ Gagal sinkron ke server (' + (err.code || 'error') + ')');
+  });
+}
+
+function stopFirestoreSync(){
+  if(unsubSnap){ unsubSnap(); unsubSnap = null; }
+  fsReady = false;
+  clearTimeout(pushTimer);
+}
+
+function pushToFirestore(){
+  if(!currentUser) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(()=>{
+    DOC_REF.set({
+      data,
+      groupMeta,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: currentUser.email || ''
+    }).catch(err=>{
+      console.error('Gagal simpan ke Firestore:', err);
+      toast('⚠️ Gagal menyimpan ke server');
+    });
+  }, 400);   // debounce 400ms
+}
+
+/* =========================================================
+   BOOTSTRAP
+   ========================================================= */
+bindLogin();
+initAuth();
 </script>
 </body>
 </html>
