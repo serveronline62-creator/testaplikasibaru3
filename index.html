@@ -63,6 +63,7 @@
   }
   .hint-bar .icon{font-size:15px}
   .hint-bar b{color:#78350f}
+  .hint-bar code{background:#fef3c7;padding:1px 6px;border-radius:4px;font-family:'Consolas','Monaco',monospace;font-size:11.5px}
   .table-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
   .table-wrap{overflow:auto;max-height:calc(100vh - 380px);min-height:280px}
   .table-wrap::-webkit-scrollbar{width:12px;height:12px}
@@ -83,6 +84,7 @@
   .main-table thead th.input-col::after{
     content:'✎';font-size:10px;margin-left:6px;opacity:.7;
   }
+  .main-table thead th.tcode-col{background:#7c2d12;color:#fff}
   .main-table tbody td{
     padding:11px 14px;border-bottom:1px solid var(--line);border-right:1px solid #f1f5f9;
     background:#fff;white-space:nowrap;vertical-align:middle;font-size:12.5px;
@@ -111,7 +113,11 @@
     background:#dbeafe;color:#1e40af;font-size:11px;font-weight:700;
   }
   .main-table .meta-empty{color:#cbd5e1}
-  .main-table .tcode-cell{font-family:'Consolas','Monaco',monospace;font-weight:600;color:#334155;font-size:12px}
+  .main-table .tcode-cell{font-family:'Consolas','Monaco',monospace;font-weight:700;color:#7c2d12;font-size:12px}
+  .main-table .tcode-cell.auto{position:relative}
+  .main-table .tcode-cell.auto::before{
+    content:'⚡';position:absolute;left:3px;top:2px;font-size:9px;opacity:.7;
+  }
   .main-table .aksi-col{
     position:sticky;right:0;z-index:2;background:#f1f5f9;
     border-left:1px solid var(--line);border-right:none;text-align:center;
@@ -179,6 +185,7 @@
   .field input:focus,.field select:focus,.field textarea:focus{
     border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
   .field textarea{resize:vertical;min-height:64px}
+  .field .field-hint{font-size:10.5px;color:#94a3b8;margin-top:-2px}
   .meta-banner{
     padding:12px 16px;border-radius:10px;background:#dbeafe;border:1px solid #bfdbfe;
     color:#1e40af;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;
@@ -404,7 +411,10 @@
 <div class="hint-bar">
   <span class="icon">💡</span>
   <span>
-    Kolom <b>Nomor Surat Jalan ke P3</b>, <b>Dikonfirmasi Tanggal</b>, <b>Sjl KPG - SBY</b>, <b>Tgl Kirim KPG - SBY</b>, <b>NAMA EXPEDISI</b>, <b>NO. RESI / TRACKING EXPEDISI</b>, <b>Sjl SBY</b>, <b>Tgl Kirim SBY</b>, <b>NO TRUK | DRIVER</b>, <b>Diubah Oleh</b>, <b>Diubah Pada</b>, dan <b>TCODE</b> bisa <b>langsung diklik &amp; diketik</b> di sel-nya. Tekan <b>Enter</b> untuk simpan, <b>Esc</b> untuk batal.
+    Kolom <b>Nomor Surat Jalan ke P3</b>, <b>Dikonfirmasi Tanggal</b>, <b>Sjl KPG - SBY</b>, <b>Tgl Kirim KPG - SBY</b>, <b>NAMA EXPEDISI</b>, <b>NO. RESI / TRACKING EXPEDISI</b>, <b>Sjl SBY</b>, <b>Tgl Kirim SBY</b>, <b>NO TRUK | DRIVER</b>, <b>Diubah Oleh</b>, <b>Diubah Pada</b>, dan <b>TCODE</b> bisa <b>langsung diklik &amp; diketik</b> di sel-nya.
+    Kolom <b>TCODE</b> otomatis terisi <b>3 huruf pertama</b> dari <b>Bukti Transaksi Kirim</b>
+    (contoh: <code>KKG/KPG/SV/26/06/003</code> → <b>KKG</b>, <code>TRU/KPG/SV/26/06/006</code> → <b>TRU</b>).
+    Tekan <b>Enter</b> untuk simpan, <b>Esc</b> untuk batal.
   </span>
 </div>
 
@@ -603,6 +613,22 @@ const STORAGE_KEY  = 'kontrol_sparepart_v1';
 const META_KEY     = 'kontrol_sparepart_groupmeta_v1';
 
 /* =========================================================
+   AUTO TCODE — 3 huruf pertama dari segmen pertama
+   Bukti Transaksi Kirim.
+   Contoh: "KKG/KPG/SV/26/06/003" → "KKG"
+           "TRU/KPG/SV/26/06/006" → "TRU"
+           "TRX-2024-0012"        → "TRX"
+   ========================================================= */
+function deriveTcode(btk){
+  const s = String(btk || '').trim();
+  if(!s || s === NO_BUKTI_KEY) return '';
+  const firstSeg = s.split('/')[0].trim();
+  // ambil huruf/angka pertama saja, lalu 3 karakter
+  const clean = firstSeg.replace(/[^A-Za-z0-9]/g, '');
+  return clean.slice(0, 3).toUpperCase();
+}
+
+/* =========================================================
    SEED
    ========================================================= */
 function seed(){
@@ -635,7 +661,7 @@ function seed(){
       lokasiReservasi:'Gudang Surabaya', lokasiStok:'Rak D-01', lokasiTujuan:'Site SBY-02',
       buktiReservasi:'RSV-0098', nomorPO:'PO-4500141', invoiceKeHIT:'-',
       buktiTerima:'-', analisisSA:'Menunggu analisa dari pabrik' },
-    { id:5, nomor:'5', site:'MDN-03', buktiTransaksiKirim:'TRX-2024-0013', tanggalReservasi:'2024-06-11',
+    { id:5, nomor:'5', site:'MDN-03', buktiTransaksiKirim:'TRU/KPG/SV/26/06/006', tanggalReservasi:'2024-06-11',
       buktiServiceCall:'SC-88255', buktiServiceJob:'SJ-4455', statusServiceCall:'Open',
       partNumber:'PN-EY3344', deskripsiPartNumber:'Sensor Tekanan Oli', qty:'2',
       nomorSeriMaterial:'SN-221188', kembaliKePabrik:'Tidak', klaimKeHIT:'Tidak',
@@ -659,7 +685,7 @@ function seedMeta(){
       noTrukDriver:'B 9021 XYZ | Pak Budi',
       diubahOleh:'admin_jkt',
       diubahPada:'2024-06-03T14:30',
-      tcode:'TCODE-KPG-001'
+      tcode:'KKG'
     },
     'TRX-2024-0012': {
       nomorSuratJalanP3:'SJ-P3-2024-06-0012',
@@ -673,7 +699,7 @@ function seedMeta(){
       noTrukDriver:'',
       diubahOleh:'admin_sby',
       diubahPada:'2024-06-07T09:15',
-      tcode:'TCODE-SBY-014'
+      tcode:'TRX'
     }
   };
 }
@@ -752,7 +778,9 @@ function getFilteredData(){
       const hitRow = FIELDS.some(f => String(d[f.key] ?? '').toLowerCase().includes(q));
       const meta = getMeta(groupKey(d));
       const hitMeta = GROUP_FIELDS.some(f => String(meta[f.key] ?? '').toLowerCase().includes(q));
-      return hitRow || hitMeta;
+      // TCODE turunan juga ikut dicari
+      const hitTcode = deriveTcode(groupKey(d)).toLowerCase().includes(q);
+      return hitRow || hitMeta || hitTcode;
     }
     return true;
   });
@@ -774,7 +802,10 @@ function getGroups(){
 function buildMainHead(){
   const th = [
     '<th style="min-width:240px">Bukti Transaksi Kirim</th>',
-    ...GROUP_FIELDS.map(f=>`<th class="input-col">${esc(f.label)}</th>`),
+    ...GROUP_FIELDS.map(f=>{
+      const cls = f.key === 'tcode' ? 'input-col tcode-col' : 'input-col';
+      return `<th class="${cls}">${esc(f.label)}</th>`;
+    }),
     '<th style="text-align:center">Item</th>',
     '<th class="aksi-col">Aksi</th>'
   ].join('');
@@ -806,7 +837,15 @@ function renderTable(){
       const sites = [...new Set(items.map(d=>d.site).filter(Boolean))].join(', ') || '-';
 
       const metaCells = GROUP_FIELDS.map(f=>{
-        const raw = meta[f.key] ?? '';
+        let raw = meta[f.key] ?? '';
+        let isAuto = false;
+
+        // ---- AUTO-FILL TCODE dari Bukti Transaksi Kirim ----
+        if(f.key === 'tcode' && !raw){
+          raw = deriveTcode(key);
+          if(raw) isAuto = true;
+        }
+
         let display;
         if(raw === ''){
           display = `<span class="meta-empty">—</span>`;
@@ -815,11 +854,20 @@ function renderTable(){
         }else{
           display = esc(raw);
         }
-        return `<td class="editable-cell${f.key==='tcode'?' tcode-cell':''}"
+
+        const cls = 'editable-cell'
+          + (f.key === 'tcode' ? ' tcode-cell' : '')
+          + (isAuto ? ' auto' : '');
+        const tip = isAuto
+          ? 'TCODE otomatis dari Bukti Transaksi Kirim — klik untuk ubah manual'
+          : 'Klik untuk input manual';
+
+        return `<td class="${cls}"
                     data-key="${esc(key)}"
                     data-field="${f.key}"
                     data-type="${f.type}"
-                    title="Klik untuk input manual">${display}</td>`;
+                    data-auto="${isAuto ? '1' : '0'}"
+                    title="${esc(tip)}">${display}</td>`;
       }).join('');
 
       return `<tr data-key="${esc(key)}">
@@ -885,7 +933,13 @@ function startEditCell(td){
   const type     = td.dataset.type;
   const fieldDef = GROUP_FIELDS.find(f => f.key === fieldKey);
   const meta     = getMeta(key);
-  const curVal   = meta[fieldKey] || '';
+  let   curVal   = meta[fieldKey] || '';
+
+  // ---- AUTO-PREFILL TCODE saat sel diklik & belum tersimpan ----
+  if(fieldKey === 'tcode' && !curVal){
+    curVal = deriveTcode(key);
+  }
+
   const prevHtml = td.innerHTML;
 
   let inputType = 'text';
@@ -919,10 +973,22 @@ function startEditCell(td){
       setMeta(key, m);
 
       let disp;
-      if(newVal === '') disp = '<span class="meta-empty">—</span>';
-      else if(type === 'datetime-local') disp = esc(String(newVal).replace('T',' '));
-      else disp = esc(newVal);
+      let isAuto = false;
+      // kalau TCODE dikosongkan, tampilkan versi auto
+      if(fieldKey === 'tcode' && newVal === ''){
+        const auto = deriveTcode(key);
+        if(auto){ disp = esc(auto); isAuto = true; }
+        else disp = '<span class="meta-empty">—</span>';
+      }else if(newVal === ''){
+        disp = '<span class="meta-empty">—</span>';
+      }else if(type === 'datetime-local'){
+        disp = esc(String(newVal).replace('T',' '));
+      }else{
+        disp = esc(newVal);
+      }
       td.innerHTML = disp;
+      td.dataset.auto = isAuto ? '1' : '0';
+      td.classList.toggle('auto', isAuto);
 
       toast('💾 Tersimpan');
     }else{
@@ -973,6 +1039,10 @@ function refreshSiteFilter(){
 function buildMetaForm(){
   $('#metaForm').innerHTML = GROUP_FIELDS.map(f=>{
     let input;
+    let hint = '';
+    if(f.key === 'tcode'){
+      hint = `<div class="field-hint">⚡ Otomatis terisi 3 huruf pertama dari Bukti Transaksi Kirim (bisa diubah manual)</div>`;
+    }
     if(f.type === 'select'){
       input = `<select name="${f.key}"><option value="">-- Pilih --</option>
         ${(f.options||[]).map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select>`;
@@ -981,7 +1051,7 @@ function buildMetaForm(){
     }else{
       input = `<input type="${f.type}" name="${f.key}" placeholder="${esc(f.label)}">`;
     }
-    return `<div class="field"><label>${esc(f.label)}</label>${input}</div>`;
+    return `<div class="field"><label>${esc(f.label)}</label>${input}${hint}</div>`;
   }).join('');
 }
 function openMetaModal(key){
@@ -992,7 +1062,13 @@ function openMetaModal(key){
   const meta = getMeta(key);
   GROUP_FIELDS.forEach(f=>{
     const el = form.elements[f.key];
-    if(el) el.value = meta[f.key] ?? '';
+    if(!el) return;
+    let v = meta[f.key] ?? '';
+    // ---- AUTO-PREFILL TCODE kalau belum ada ----
+    if(f.key === 'tcode' && !v){
+      v = deriveTcode(key);
+    }
+    el.value = v;
   });
   // prefill "Diubah Oleh" dengan user aktif
   if(currentUser && form.elements['diubahOleh'] && !form.elements['diubahOleh'].value){
@@ -1189,6 +1265,20 @@ function saveRecord(){
     data[idx] = obj;
     toast('✅ Data berhasil diperbarui');
   }
+
+  // ---- AUTO-PERSIST TCODE untuk grup terkait ----
+  const gk = groupKey(obj);
+  if(gk && gk !== NO_BUKTI_KEY){
+    const m = getMeta(gk);
+    if(!m.tcode){
+      const derived = deriveTcode(gk);
+      if(derived){
+        m.tcode = derived;
+        setMeta(gk, m);
+      }
+    }
+  }
+
   saveData();
   renderTable();
   closeModal();
@@ -1221,6 +1311,10 @@ function recordToLabeled(d){
     let v;
     if(f.isMeta){
       v = meta[f.key] ?? '';
+      // ---- EXPORT TCODE: pakai nilai tersimpan, kalau kosong pakai turunan ----
+      if(f.key === 'tcode' && !v){
+        v = deriveTcode(groupKey(d));
+      }
       if(f.type === 'datetime-local' && v) v = String(v).replace('T',' ');
     }else{
       v = d[f.key] ?? '';
@@ -1269,7 +1363,8 @@ function exportExcel(){
     ['Filter Status', $('#statusFilter').value || 'Semua'],
     ['Kata Kunci', $('#searchInput').value.trim() || '-'],
     [''],
-    ['Catatan', 'Kolom info pengiriman berada di paling kanan (setelah Analisis SA)']
+    ['Catatan', 'Kolom info pengiriman berada di paling kanan (setelah Analisis SA)'],
+    ['Catatan', 'TCODE otomatis = 3 huruf pertama dari Bukti Transaksi Kirim']
   ];
   const wsInfo = XLSX.utils.aoa_to_sheet(info);
   wsInfo['!cols'] = [{wch:26},{wch:56}];
@@ -1328,7 +1423,7 @@ function downloadTemplateExcel(){
     else if(k === 'noTrukDriver') example[f.label] = 'B 9021 XYZ | Pak Budi';
     else if(k === 'diubahOleh') example[f.label] = 'admin_jkt';
     else if(k === 'diubahPada') example[f.label] = '2024-06-03 14:30';
-    else if(k === 'tcode') example[f.label] = 'TCODE-KPG-001';
+    else if(k === 'tcode') example[f.label] = 'KKG';
     else if(k === 'statusServiceCall') example[f.label] = 'Open';
     else if(k === 'kembaliKePabrik' || k === 'klaimKeHIT') example[f.label] = 'Tidak';
     else if(k === 'qty') example[f.label] = 1;
@@ -1348,7 +1443,11 @@ function downloadTemplateExcel(){
     ['4. Kolom INFO PENGIRIMAN ada di PALING KANAN (setelah Analisis SA):'],
     ['   Nomor Surat Jalan ke P3 s/d TCODE — berlaku PER GRUP Bukti Transaksi Kirim.'],
     ['   Cukup isi di salah satu baris, sistem memakai nilai pertama non-kosong.'],
-    ['5. Format tanggal: YYYY-MM-DD. Untuk "Diubah Pada": YYYY-MM-DD HH:MM.'],
+    ['5. Kolom TCODE otomatis terisi = 3 huruf pertama dari segmen pertama'],
+    ['   "Bukti Transaksi Kirim".'],
+    ['   Contoh: "KKG/KPG/SV/26/06/003" → "KKG", "TRU/KPG/SV/26/06/006" → "TRU".'],
+    ['   Kolom TCODE pada file boleh dikosongkan (akan diisi otomatis).'],
+    ['6. Format tanggal: YYYY-MM-DD. Untuk "Diubah Pada": YYYY-MM-DD HH:MM.'],
     [''],
     ['Daftar Kolom (urutan di file Excel):'],
     ...headers.map((h,i)=>[`${i+1}. ${h}`])
@@ -1530,6 +1629,15 @@ function handleFile(file){
         return obj;
       });
 
+      // ---- AUTO TCODE untuk semua grup yang diimpor ----
+      Object.keys(importMetaMap).forEach(k=>{
+        const m = importMetaMap[k];
+        if(!m.tcode){
+          const d = deriveTcode(k);
+          if(d) m.tcode = d;
+        }
+      });
+
       $('#fcMeta').textContent = (file.size/1024).toFixed(1) + ' KB · ' + importRows.length + ' baris siap diimport';
       renderImportPreview(headers);
       renderMappingStatus(metaMap);
@@ -1618,6 +1726,15 @@ function confirmImport(){
   const mode = document.querySelector('input[name="importMode"]:checked').value;
   const baseId = data.length ? Math.max(...data.map(d=>d.id)) : 0;
   const newRecords = importRows.map((r, i)=>({ ...r, id: baseId + i + 1 }));
+
+  // Pastikan semua grup (termasuk existing) punya TCODE turunan
+  Object.keys(importMetaMap).forEach(k=>{
+    const m = importMetaMap[k];
+    if(!m.tcode){
+      const d = deriveTcode(k);
+      if(d) m.tcode = d;
+    }
+  });
 
   if(mode === 'replace'){
     if(!confirm(`Ganti SEMUA data existing (${data.length} baris) dengan ${newRecords.length} baris dari file?`)) return;
