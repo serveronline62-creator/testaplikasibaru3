@@ -328,6 +328,29 @@
     padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;transition:.15s}
   .user-chip button:hover{background:rgba(239,68,68,.9)}
 
+  /* ====== EXPORT DROPDOWN ====== */
+  .export-wrap{position:relative;display:inline-block}
+  .export-menu{
+    position:absolute;top:calc(100% + 6px);left:0;z-index:30;
+    background:#fff;border:1px solid var(--line);border-radius:10px;
+    box-shadow:0 12px 28px rgba(15,23,42,.18);
+    min-width:300px;padding:6px;display:none;
+  }
+  .export-menu.show{display:block;animation:pop .15s ease}
+  .export-menu button{
+    display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;
+    background:transparent;border:none;padding:11px 12px;border-radius:8px;
+    cursor:pointer;font-size:12.5px;color:#1e293b;font-weight:700;
+    font-family:inherit;transition:.12s;
+  }
+  .export-menu button:hover{background:#eff6ff;color:var(--brand)}
+  .export-menu button .em-icon{font-size:18px;flex:none;line-height:1.1}
+  .export-menu button .em-sub{
+    display:block;font-size:10.5px;color:#94a3b8;font-weight:500;margin-top:2px;
+  }
+  .export-menu button:hover .em-sub{color:var(--brand)}
+  .export-menu .em-sep{height:1px;background:var(--line);margin:4px 8px}
+
   @media(max-width:640px){
     body{padding:10px}
     .page-head{padding:16px}
@@ -403,7 +426,26 @@
     <option>Open</option><option>Proses</option><option>Selesai</option><option>Batal</option>
   </select>
   <button class="btn green" id="importBtn">📥 Upload Excel</button>
-  <button class="btn excel" id="exportBtn">⬇ Download Excel</button>
+  <div class="export-wrap">
+    <button class="btn excel" id="exportBtn">⬇ Download Excel ▾</button>
+    <div class="export-menu" id="exportMenu">
+      <button data-mode="full" type="button">
+        <span class="em-icon">📋</span>
+        <span>
+          <span style="display:block">Data Lengkap (per Item)</span>
+          <span class="em-sub">Semua kolom · 1 baris = 1 part number · Nomor urut direset per grup</span>
+        </span>
+      </button>
+      <div class="em-sep"></div>
+      <button data-mode="front" type="button">
+        <span class="em-icon">📊</span>
+        <span>
+          <span style="display:block">Tampilan Depan (per Grup)</span>
+          <span class="em-sub">Sesuai tabel utama · 1 baris = 1 Bukti Transaksi</span>
+        </span>
+      </button>
+    </div>
+  </div>
   <button class="btn ghost" id="templateBtn">📄 Template Excel</button>
   <button class="btn primary" id="addBtn">＋ Tambah Data</button>
 </div>
@@ -415,6 +457,7 @@
     Kolom <b>TCODE</b> otomatis terisi <b>3 huruf pertama</b> dari <b>Bukti Transaksi Kirim</b>
     (contoh: <code>KKG/KPG/SV/26/06/003</code> → <b>KKG</b>, <code>TRU/KPG/SV/26/06/006</code> → <b>TRU</b>).
     Tekan <b>Enter</b> untuk simpan, <b>Esc</b> untuk batal.
+    <br><span style="color:#78350f">💾 Tombol <b>Download Excel</b> punya 2 opsi: <b>Data Lengkap (per Item)</b> dan <b>Tampilan Depan (per Grup)</b>. Nomor urut di-export otomatis dibuat baru & berurutan (1, 2, 3, …) direset per grup Bukti Transaksi Kirim.</span>
   </span>
 </div>
 
@@ -623,7 +666,6 @@ function deriveTcode(btk){
   const s = String(btk || '').trim();
   if(!s || s === NO_BUKTI_KEY) return '';
   const firstSeg = s.split('/')[0].trim();
-  // ambil huruf/angka pertama saja, lalu 3 karakter
   const clean = firstSeg.replace(/[^A-Za-z0-9]/g, '');
   return clean.slice(0, 3).toUpperCase();
 }
@@ -778,7 +820,6 @@ function getFilteredData(){
       const hitRow = FIELDS.some(f => String(d[f.key] ?? '').toLowerCase().includes(q));
       const meta = getMeta(groupKey(d));
       const hitMeta = GROUP_FIELDS.some(f => String(meta[f.key] ?? '').toLowerCase().includes(q));
-      // TCODE turunan juga ikut dicari
       const hitTcode = deriveTcode(groupKey(d)).toLowerCase().includes(q);
       return hitRow || hitMeta || hitTcode;
     }
@@ -840,7 +881,6 @@ function renderTable(){
         let raw = meta[f.key] ?? '';
         let isAuto = false;
 
-        // ---- AUTO-FILL TCODE dari Bukti Transaksi Kirim ----
         if(f.key === 'tcode' && !raw){
           raw = deriveTcode(key);
           if(raw) isAuto = true;
@@ -935,7 +975,6 @@ function startEditCell(td){
   const meta     = getMeta(key);
   let   curVal   = meta[fieldKey] || '';
 
-  // ---- AUTO-PREFILL TCODE saat sel diklik & belum tersimpan ----
   if(fieldKey === 'tcode' && !curVal){
     curVal = deriveTcode(key);
   }
@@ -966,7 +1005,6 @@ function startEditCell(td){
       }else{
         m[fieldKey] = newVal;
       }
-      // otomatis isi "Diubah Oleh" dari user yang login
       if(currentUser && fieldKey !== 'diubahOleh'){
         m.diubahOleh = emailToUsername(currentUser.email || '');
       }
@@ -974,7 +1012,6 @@ function startEditCell(td){
 
       let disp;
       let isAuto = false;
-      // kalau TCODE dikosongkan, tampilkan versi auto
       if(fieldKey === 'tcode' && newVal === ''){
         const auto = deriveTcode(key);
         if(auto){ disp = esc(auto); isAuto = true; }
@@ -1064,13 +1101,11 @@ function openMetaModal(key){
     const el = form.elements[f.key];
     if(!el) return;
     let v = meta[f.key] ?? '';
-    // ---- AUTO-PREFILL TCODE kalau belum ada ----
     if(f.key === 'tcode' && !v){
       v = deriveTcode(key);
     }
     el.value = v;
   });
-  // prefill "Diubah Oleh" dengan user aktif
   if(currentUser && form.elements['diubahOleh'] && !form.elements['diubahOleh'].value){
     form.elements['diubahOleh'].value = emailToUsername(currentUser.email || '');
   }
@@ -1266,7 +1301,6 @@ function saveRecord(){
     toast('✅ Data berhasil diperbarui');
   }
 
-  // ---- AUTO-PERSIST TCODE untuk grup terkait ----
   const gk = groupKey(obj);
   if(gk && gk !== NO_BUKTI_KEY){
     const m = getMeta(gk);
@@ -1311,7 +1345,6 @@ function recordToLabeled(d){
     let v;
     if(f.isMeta){
       v = meta[f.key] ?? '';
-      // ---- EXPORT TCODE: pakai nilai tersimpan, kalau kosong pakai turunan ----
       if(f.key === 'tcode' && !v){
         v = deriveTcode(groupKey(d));
       }
@@ -1336,12 +1369,33 @@ function autoWidths(rows, headers){
     return { wch: Math.min(Math.max(maxLen + 2, 10), 45) };
   });
 }
+
+/* ---------------------------------------------------------
+   EXPORT: Data Lengkap (per Item)
+   Nomor urut BARU — direset per grup (1, 2, 3, …)
+   --------------------------------------------------------- */
 function exportExcel(){
   const filtered = getFilteredData();
   if(!filtered.length){ toast('⚠️ Tidak ada data untuk di-export'); return; }
 
+  // 1) Urutkan: per grup Bukti Transaksi Kirim dulu,
+  //    lalu di dalam grup urut berdasarkan nomor lama (numerik).
+  const sorted = [...filtered].sort((a,b)=>{
+    const ka = groupKey(a), kb = groupKey(b);
+    if(ka !== kb) return ka.localeCompare(kb, 'id');
+    return (parseInt(a.nomor) || 0) - (parseInt(b.nomor) || 0);
+  });
+
+  // 2) Nomor urut BARU — direset per grup (1, 2, 3, …)
+  const counters = {};
   const headers = getExportFields().map(f=>f.label);
-  const rows = filtered.map(recordToLabeled);
+  const rows = sorted.map(d=>{
+    const gk = groupKey(d);
+    counters[gk] = (counters[gk] || 0) + 1;
+    const o = recordToLabeled(d);
+    o['Nomor'] = counters[gk];   // overwrite nomor lama
+    return o;
+  });
 
   const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
   ws['!cols'] = autoWidths(rows, headers);
@@ -1354,6 +1408,7 @@ function exportExcel(){
 
   const info = [
     ['Laporan', 'Kontrol Pengiriman Sparepart'],
+    ['Mode Export', 'Data Lengkap (per Item)'],
     ['Tanggal Export', new Date().toLocaleString('id-ID')],
     ['Diekspor Oleh', currentUser ? emailToUsername(currentUser.email) : '-'],
     ['Total Baris', filtered.length],
@@ -1363,6 +1418,8 @@ function exportExcel(){
     ['Filter Status', $('#statusFilter').value || 'Semua'],
     ['Kata Kunci', $('#searchInput').value.trim() || '-'],
     [''],
+    ['Catatan', 'Nomor urut di-reset per grup Bukti Transaksi Kirim (1, 2, 3, …)'],
+    ['Catatan', 'Baris diurutkan per Bukti Transaksi Kirim lalu nomor lama'],
     ['Catatan', 'Kolom info pengiriman berada di paling kanan (setelah Analisis SA)'],
     ['Catatan', 'TCODE otomatis = 3 huruf pertama dari Bukti Transaksi Kirim']
   ];
@@ -1375,15 +1432,101 @@ function exportExcel(){
   toast('⬇ File Excel berhasil diunduh');
 }
 
+/* ---------------------------------------------------------
+   EXPORT: Tampilan Depan (per Grup)
+   --------------------------------------------------------- */
+function exportFrontViewExcel(){
+  const groups = getGroups();
+  if(!groups.size){ toast('⚠️ Tidak ada data untuk di-export'); return; }
+
+  const entries = [...groups.entries()].sort((a,b)=> a[0].localeCompare(b[0]));
+
+  const headers = [
+    'Bukti Transaksi Kirim',
+    'Site',
+    ...GROUP_FIELDS.map(f => f.label),
+    'Jumlah Item',
+    'Total Qty'
+  ];
+
+  const rows = entries.map(([key, items])=>{
+    const meta     = getMeta(key);
+    const totalQty = items.reduce((a,d)=> a + (parseInt(d.qty)||0), 0);
+    const sites    = [...new Set(items.map(d=>d.site).filter(Boolean))].join(', ') || '-';
+
+    const o = {};
+    o['Bukti Transaksi Kirim'] = key;
+    o['Site'] = sites;
+
+    GROUP_FIELDS.forEach(f=>{
+      let v = meta[f.key] ?? '';
+      if(f.key === 'tcode' && !v) v = deriveTcode(key);
+      if(f.type === 'datetime-local' && v) v = String(v).replace('T',' ');
+      o[f.label] = v;
+    });
+
+    o['Jumlah Item'] = items.length;
+    o['Total Qty']   = totalQty;
+    return o;
+  });
+
+  const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
+  ws['!cols'] = autoWidths(rows, headers);
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({
+    s:{r:0,c:0}, e:{r:rows.length, c:headers.length-1}
+  })};
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Tampilan Depan');
+
+  const totalItems = entries.reduce((a,[,items])=> a + items.length, 0);
+  const grandQty   = entries.reduce(
+    (a,[,items])=> a + items.reduce((s,d)=> s+(parseInt(d.qty)||0), 0), 0
+  );
+
+  const info = [
+    ['Laporan', 'Kontrol Pengiriman Sparepart — Tampilan Depan'],
+    ['Mode Export', 'Tampilan Depan (per Grup / Bukti Transaksi Kirim)'],
+    ['Tanggal Export', new Date().toLocaleString('id-ID')],
+    ['Diekspor Oleh', currentUser ? emailToUsername(currentUser.email) : '-'],
+    ['Total Grup Bukti Transaksi', rows.length],
+    ['Total Item', totalItems],
+    ['Total Qty', grandQty],
+    ['Filter Site', $('#siteFilter').value || 'Semua'],
+    ['Filter Status', $('#statusFilter').value || 'Semua'],
+    ['Kata Kunci', $('#searchInput').value.trim() || '-'],
+    [''],
+    ['Catatan', 'Satu baris = satu Bukti Transaksi Kirim (grup)'],
+    ['Catatan', 'Kolom info pengiriman mengikuti nilai yang tampil di tabel utama'],
+    ['Catatan', 'TCODE otomatis = 3 huruf pertama dari Bukti Transaksi Kirim']
+  ];
+  const wsInfo = XLSX.utils.aoa_to_sheet(info);
+  wsInfo['!cols'] = [{wch:28},{wch:56}];
+  XLSX.utils.book_append_sheet(wb, wsInfo, 'Info');
+
+  const tgl = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `kontrol-pengiriman-sparepart-tampilan-depan-${tgl}.xlsx`);
+  toast('⬇ File Excel tampilan depan berhasil diunduh');
+}
+
+/* ---------------------------------------------------------
+   EXPORT: Satu Grup (dari modal Detail)
+   Nomor urut baru 1, 2, 3, … (sudah reset per grup)
+   --------------------------------------------------------- */
 function exportGroupExcel(){
   if(!currentDetailKey) return;
   const items = data.filter(d => groupKey(d) === currentDetailKey);
   if(!items.length){ toast('⚠️ Tidak ada data pada grup ini'); return; }
 
+  // Urutkan berdasarkan nomor lama agar hasil konsisten
+  const sorted = [...items].sort((a,b)=>
+    (parseInt(a.nomor) || 0) - (parseInt(b.nomor) || 0)
+  );
+
   const headers = getExportFields().map(f=>f.label);
-  const rows = items.map((d, idx)=>{
+  const rows = sorted.map((d, idx)=>{
     const o = recordToLabeled(d);
-    o['Nomor'] = idx + 1;
+    o['Nomor'] = idx + 1;   // nomor urut baru 1, 2, 3, …
     return o;
   });
 
@@ -1448,6 +1591,9 @@ function downloadTemplateExcel(){
     ['   Contoh: "KKG/KPG/SV/26/06/003" → "KKG", "TRU/KPG/SV/26/06/006" → "TRU".'],
     ['   Kolom TCODE pada file boleh dikosongkan (akan diisi otomatis).'],
     ['6. Format tanggal: YYYY-MM-DD. Untuk "Diubah Pada": YYYY-MM-DD HH:MM.'],
+    [''],
+    ['Catatan Export: Saat download dari aplikasi, kolom "Nomor" akan'],
+    ['dibuat ulang berurutan (1, 2, 3, …) direset per grup Bukti Transaksi.'],
     [''],
     ['Daftar Kolom (urutan di file Excel):'],
     ...headers.map((h,i)=>[`${i+1}. ${h}`])
@@ -1629,7 +1775,6 @@ function handleFile(file){
         return obj;
       });
 
-      // ---- AUTO TCODE untuk semua grup yang diimpor ----
       Object.keys(importMetaMap).forEach(k=>{
         const m = importMetaMap[k];
         if(!m.tcode){
@@ -1727,7 +1872,6 @@ function confirmImport(){
   const baseId = data.length ? Math.max(...data.map(d=>d.id)) : 0;
   const newRecords = importRows.map((r, i)=>({ ...r, id: baseId + i + 1 }));
 
-  // Pastikan semua grup (termasuk existing) punya TCODE turunan
   Object.keys(importMetaMap).forEach(k=>{
     const m = importMetaMap[k];
     if(!m.tcode){
@@ -1799,7 +1943,24 @@ function init(){
     openMetaModal(key);
   });
 
-  $('#exportBtn').addEventListener('click', exportExcel);
+  /* ---- Dropdown Export Excel (2 opsi) ---- */
+  $('#exportBtn').addEventListener('click', e=>{
+    e.stopPropagation();
+    $('#exportMenu').classList.toggle('show');
+  });
+  $('#exportMenu').querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', e=>{
+      e.stopPropagation();
+      $('#exportMenu').classList.remove('show');
+      if(b.dataset.mode === 'front') exportFrontViewExcel();
+      else exportExcel();
+    });
+  });
+  document.addEventListener('click', ()=>{
+    const m = $('#exportMenu');
+    if(m && m.classList.contains('show')) m.classList.remove('show');
+  });
+
   $('#templateBtn').addEventListener('click', downloadTemplateExcel);
 
   $('#importBtn').addEventListener('click', openImportModal);
@@ -1861,9 +2022,6 @@ const firebaseConfig = {
   measurementId: "G-D7YWLLTX7Q"
 };
 
-/* Domain "email" semu untuk username.
-   Di Firebase Console, buat user dengan email:  namauser@kontrol-sparepart.local
-   User cukup mengetik "namauser" di form login. */
 const EMAIL_DOMAIN = '@kontrol-sparepart.local';
 
 firebase.initializeApp(firebaseConfig);
@@ -1872,13 +2030,12 @@ const db   = firebase.firestore();
 const DOC_REF = db.collection('kontrol').doc('main');
 
 let currentUser   = null;
-let fsReady       = false;   // true bila sinkronisasi Firestore aktif
-let suppressPush  = false;   // true saat menerima snapshot dari server
+let fsReady       = false;
+let suppressPush  = false;
 let pushTimer     = null;
 let unsubSnap     = null;
 let appStarted    = false;
 
-/* ---------- helper username <-> email ---------- */
 function usernameToEmail(u){
   const s = String(u || '').trim().toLowerCase();
   if(!s) return '';
@@ -1888,7 +2045,6 @@ function emailToUsername(e){
   return String(e || '').replace(EMAIL_DOMAIN, '');
 }
 
-/* ---------- pesan error Bahasa Indonesia ---------- */
 const AUTH_ERRORS = {
   'auth/invalid-email'              : 'Format username tidak valid.',
   'auth/user-disabled'              : 'Akun ini dinonaktifkan. Hubungi admin.',
@@ -1904,7 +2060,6 @@ function authMsg(err){
   return AUTH_ERRORS[err && err.code] || (err && err.message) || 'Terjadi kesalahan.';
 }
 
-/* ---------- LOGIN FORM ---------- */
 function bindLogin(){
   $('#loginForm').addEventListener('submit', async e=>{
     e.preventDefault();
@@ -1948,7 +2103,6 @@ function bindLogin(){
   });
 }
 
-/* ---------- AUTH STATE ---------- */
 function initAuth(){
   auth.onAuthStateChanged(async user=>{
     $('#loadingScreen').classList.remove('show');
@@ -1966,8 +2120,8 @@ function initAuth(){
 
       $('#loginPass').value = '';
 
-      await startApp();        // bangun UI sekali saja
-      startFirestoreSync();    // lalu mulai sinkronisasi
+      await startApp();
+      startFirestoreSync();
     }else{
       currentUser = null;
       stopFirestoreSync();
@@ -1987,13 +2141,11 @@ async function startApp(){
   init();
 }
 
-/* ---------- FIRESTORE SYNC ---------- */
 function startFirestoreSync(){
   if(unsubSnap) return;
   fsReady = false;
 
   unsubSnap = DOC_REF.onSnapshot(snap=>{
-    // Abaikan snapshot yang masih berisi tulisan lokal yang belum terkirim
     if(snap.metadata.hasPendingWrites) return;
 
     const d = snap.data();
@@ -2003,22 +2155,19 @@ function startFirestoreSync(){
     if(d && Array.isArray(d.data) && d.data.length){
       data      = d.data;
       groupMeta = (d.groupMeta && typeof d.groupMeta === 'object') ? d.groupMeta : {};
-      // simpan salinan lokal untuk offline
       try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
       try{ localStorage.setItem(META_KEY, JSON.stringify(groupMeta)); }catch(e){}
     }else{
-      // Dokumen belum ada -> unggah data awal (seed / localStorage)
       suppressPush = false;
       fsReady = true;
       pushToFirestore();
       return;
     }
 
-    fsReady = false;   // tahan push dulu
+    fsReady = false;
     suppressPush = false;
     fsReady = true;
 
-    // Jangan render ulang jika user sedang mengetik di sel
     if(!document.querySelector('.editable-cell.editing')){
       renderTable();
       if(currentDetailKey && $('#detailOverlay').classList.contains('show')) renderDetail();
@@ -2049,7 +2198,7 @@ function pushToFirestore(){
       console.error('Gagal simpan ke Firestore:', err);
       toast('⚠️ Gagal menyimpan ke server');
     });
-  }, 400);   // debounce 400ms
+  }, 400);
 }
 
 /* =========================================================
