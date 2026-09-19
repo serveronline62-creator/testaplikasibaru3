@@ -418,7 +418,7 @@
 
 <div class="toolbar">
   <div class="search">
-    <input type="text" id="searchInput" placeholder="Cari bukti transaksi, no resi, expedisi, part number, site, tanggal (dd-mm-yyyy)...">
+    <input type="text" id="searchInput" placeholder="Cari bukti transaksi, no resi, expedisi, part number, site...">
   </div>
   <select class="filter" id="siteFilter"><option value="">Semua Site</option></select>
   <select class="filter" id="statusFilter">
@@ -457,8 +457,7 @@
     Kolom <b>TCODE</b> otomatis terisi <b>3 huruf pertama</b> dari <b>Bukti Transaksi Kirim</b>
     (contoh: <code>KKG/KPG/SV/26/06/003</code> → <b>KKG</b>, <code>TRU/KPG/SV/26/06/006</code> → <b>TRU</b>).
     Tekan <b>Enter</b> untuk simpan, <b>Esc</b> untuk batal.
-    Tanggal tampil format <b>dd-mm-yyyy</b> (hari-bulan-tahun).
-    <br><span style="color:#78350f">💾 Tombol <b>Download Excel</b> punya 2 opsi: <b>Data Lengkap (per Item)</b> dan <b>Tampilan Depan (per Grup)</b>. Nomor urut di-export otomatis dibuat baru & berurutan (1, 2, 3, …) direset per grup Bukti Transaksi Kirim.</span>
+    <br><span style="color:#78350f">💾 Tombol <b>Download Excel</b> punya 2 opsi: <b>Data Lengkap (per Item)</b> dan <b>Tampilan Depan (per Grup)</b>. Nomor urut di-export otomatis dibuat baru & berurutan (1, 2, 3, …) direset per grup Bukti Transaksi Kirim. 📅 Semua tanggal di tampilan web memakai format <b>DD-MM-YYYY</b> (hari-bulan-tahun).</span>
   </span>
 </div>
 
@@ -505,7 +504,7 @@
           <span class="key" id="detailKey">-</span>
           <span class="count-pill" id="detailCount">0 item</span>
         </div>
-        <div class="detail-hint">Tampilan spreadsheet — kolom <b>Nomor</b> di sini menampilkan nomor urut baru sesuai urutan item (1, 2, 3, …) · Tanggal format <b>dd-mm-yyyy</b></div>
+        <div class="detail-hint">Tampilan spreadsheet — kolom <b>Nomor</b> di sini menampilkan nomor urut baru sesuai urutan item (1, 2, 3, …)</div>
       </div>
       <button class="close-x" id="detailCloseX">✕</button>
     </div>
@@ -657,6 +656,31 @@ const STORAGE_KEY  = 'kontrol_sparepart_v1';
 const META_KEY     = 'kontrol_sparepart_groupmeta_v1';
 
 /* =========================================================
+   HELPERS — FORMAT TANGGAL DD-MM-YYYY
+   ========================================================= */
+function pad2(n){ return String(n).padStart(2,'0'); }
+
+/* Konversi tanggal ISO (YYYY-MM-DD) → DD-MM-YYYY */
+function fmtDate(v){
+  if(v === null || v === undefined || v === '') return '';
+  const s = String(v).trim();
+  const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return `${pad2(m[3])}-${pad2(m[2])}-${m[1]}`;
+  return s;
+}
+
+/* Konversi datetime (YYYY-MM-DDTHH:MM atau YYYY-MM-DD HH:MM) → DD-MM-YYYY HH:MM */
+function fmtDateTime(v){
+  if(v === null || v === undefined || v === '') return '';
+  const s = String(v).trim().replace('T', ' ');
+  const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[ ]?(\d{1,2}):(\d{1,2})/);
+  if(m) return `${pad2(m[3])}-${pad2(m[2])}-${m[1]} ${pad2(m[4])}:${pad2(m[5])}`;
+  const d = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(d) return `${pad2(d[3])}-${pad2(d[2])}-${d[1]}`;
+  return s;
+}
+
+/* =========================================================
    AUTO TCODE — 3 huruf pertama dari segmen pertama
    ========================================================= */
 function deriveTcode(btk){
@@ -665,30 +689,6 @@ function deriveTcode(btk){
   const firstSeg = s.split('/')[0].trim();
   const clean = firstSeg.replace(/[^A-Za-z0-9]/g, '');
   return clean.slice(0, 3).toUpperCase();
-}
-
-/* =========================================================
-   FORMAT TANGGAL DISPLAY: dd-mm-yyyy (hari-bulan-tahun)
-   - Data tetap disimpan sebagai ISO (yyyy-mm-dd) di state
-   - Yang diubah hanya saat ditampilkan ke user
-   ========================================================= */
-function fmtDate(v){
-  if(v === null || v === undefined) return '';
-  const s = String(v).trim();
-  if(!s) return '';
-  // Cocokkan: yyyy-mm-dd (opsional ada jam)
-  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if(!m) return s;
-  return `${m[3]}-${m[2]}-${m[1]}`;
-}
-function fmtDateTime(v){
-  if(v === null || v === undefined) return '';
-  const s = String(v).trim();
-  if(!s) return '';
-  // Cocokkan: yyyy-mm-ddTHH:MM atau yyyy-mm-dd HH:MM
-  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ]?(\d{2}):(\d{2})/);
-  if(!m) return s;
-  return `${m[3]}-${m[2]}-${m[1]} ${m[4]}:${m[5]}`;
 }
 
 /* =========================================================
@@ -838,24 +838,20 @@ function getFilteredData(){
     if(site   && (d.site || '') !== site) return false;
     if(status && (d.statusServiceCall || '') !== status) return false;
     if(q){
-      // Pencarian juga mendukung format tanggal tampilan (dd-mm-yyyy)
-      const hitRow = FIELDS.some(f => {
-        const raw = String(d[f.key] ?? '').toLowerCase();
-        if(raw.includes(q)) return true;
-        if(f.type === 'date' && fmtDate(d[f.key]).toLowerCase().includes(q)) return true;
-        if(f.type === 'datetime-local' && fmtDateTime(d[f.key]).toLowerCase().includes(q)) return true;
-        return false;
-      });
+      const hitRow = FIELDS.some(f => String(d[f.key] ?? '').toLowerCase().includes(q));
       const meta = getMeta(groupKey(d));
-      const hitMeta = GROUP_FIELDS.some(f => {
-        const raw = String(meta[f.key] ?? '').toLowerCase();
-        if(raw.includes(q)) return true;
-        if(f.type === 'date' && fmtDate(meta[f.key]).toLowerCase().includes(q)) return true;
-        if(f.type === 'datetime-local' && fmtDateTime(meta[f.key]).toLowerCase().includes(q)) return true;
-        return false;
-      });
+      const hitMeta = GROUP_FIELDS.some(f => String(meta[f.key] ?? '').toLowerCase().includes(q));
       const hitTcode = deriveTcode(groupKey(d)).toLowerCase().includes(q);
-      return hitRow || hitMeta || hitTcode;
+      // Tambahan: cari juga di format tanggal DD-MM-YYYY
+      const hitDate = FIELDS.some(f=>{
+        if(f.type !== 'date') return false;
+        return fmtDate(d[f.key]).toLowerCase().includes(q);
+      }) || GROUP_FIELDS.some(f=>{
+        if(f.type !== 'date' && f.type !== 'datetime-local') return false;
+        return String(meta[f.key] ?? '').replace(/[T ]/g,' ').length && 
+          (f.type === 'date' ? fmtDate(meta[f.key]) : fmtDateTime(meta[f.key])).toLowerCase().includes(q);
+      });
+      return hitRow || hitMeta || hitTcode || hitDate;
     }
     return true;
   });
@@ -1017,13 +1013,24 @@ function startEditCell(td){
 
   const prevHtml = td.innerHTML;
 
+  // Input type=date & datetime-local HARUS pakai format ISO (YYYY-MM-DD[THH:MM])
   let inputType = 'text';
-  if(type === 'date') inputType = 'date';
-  else if(type === 'datetime-local') inputType = 'datetime-local';
-  else if(type === 'number') inputType = 'number';
+  let inputValue = curVal;
+  if(type === 'date'){
+    inputType = 'date';
+    // normalisasi ke YYYY-MM-DD
+    const m = String(curVal).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m) inputValue = `${m[1]}-${pad2(m[2])}-${pad2(m[3])}`;
+  }else if(type === 'datetime-local'){
+    inputType = 'datetime-local';
+    const m = String(curVal).replace('T',' ').match(/^(\d{4})-(\d{1,2})-(\d{1,2})[ ]?(\d{1,2}):(\d{1,2})/);
+    if(m) inputValue = `${m[1]}-${pad2(m[2])}-${pad2(m[3])}T${pad2(m[4])}:${pad2(m[5])}`;
+  }else if(type === 'number'){
+    inputType = 'number';
+  }
 
   td.classList.add('editing');
-  td.innerHTML = `<input class="cell-input" type="${inputType}" value="${esc(curVal)}"
+  td.innerHTML = `<input class="cell-input" type="${inputType}" value="${esc(inputValue)}"
                         placeholder="Ketik ${esc(fieldDef?.label || fieldKey)}...">`;
 
   const inp = td.querySelector('input');
@@ -1118,9 +1125,9 @@ function buildMetaForm(){
     if(f.key === 'tcode'){
       hint = `<div class="field-hint">⚡ Otomatis terisi 3 huruf pertama dari Bukti Transaksi Kirim (bisa diubah manual)</div>`;
     }else if(f.type === 'date'){
-      hint = `<div class="field-hint">Format tampilan: dd-mm-yyyy</div>`;
+      hint = `<div class="field-hint">Format: DD-MM-YYYY (hari-bulan-tahun)</div>`;
     }else if(f.type === 'datetime-local'){
-      hint = `<div class="field-hint">Format tampilan: dd-mm-yyyy hh:mm</div>`;
+      hint = `<div class="field-hint">Format: DD-MM-YYYY HH:MM (hari-bulan-tahun jam:menit)</div>`;
     }
     if(f.type === 'select'){
       input = `<select name="${f.key}"><option value="">-- Pilih --</option>
@@ -1146,6 +1153,8 @@ function openMetaModal(key){
     if(f.key === 'tcode' && !v){
       v = deriveTcode(key);
     }
+    // input type=date/datetime-local butuh format ISO; biarkan browser
+    // yang menampilkan sesuai locale (DD/MM/YYYY)
     el.value = v;
   });
   if(currentUser && form.elements['diubahOleh'] && !form.elements['diubahOleh'].value){
@@ -1173,7 +1182,7 @@ function saveMetaRecord(){
 }
 
 /* =========================================================
-   DETAIL MODAL
+   DETAIL MODAL — NOMOR URUT BARU (1, 2, 3, …)
    ========================================================= */
 function openDetail(key){
   currentDetailKey = key;
@@ -1214,6 +1223,10 @@ function renderDetail(){
         return `<td class="qty-cell" style="color:#2563eb;font-weight:700">${idx + 1}</td>`;
       }
 
+      if(f.key === 'tanggalReservasi'){
+        return `<td>${esc(v ? fmtDate(v) : '-')}</td>`;
+      }
+
       if(f.key === 'statusServiceCall'){
         const cls = String(v).toLowerCase();
         return `<td><span class="pill ${cls}">${esc(v || '-')}</span></td>`;
@@ -1227,14 +1240,6 @@ function renderDetail(){
       if(f.key === 'nomorPO') return `<td class="po-cell">${esc(v || '-')}</td>`;
       if(f.key === 'deskripsiPartNumber') return `<td class="desc-cell" title="${esc(v)}">${esc(v || '-')}</td>`;
       if(f.key === 'analisisSA') return `<td class="ana-cell" title="${esc(v)}">${esc(v || '-')}</td>`;
-
-      // Tanggal → tampilkan dd-mm-yyyy
-      if(f.type === 'date'){
-        return `<td>${esc(v === '' ? '-' : fmtDate(v))}</td>`;
-      }
-      if(f.type === 'datetime-local'){
-        return `<td>${esc(v === '' ? '-' : fmtDateTime(v))}</td>`;
-      }
       return `<td>${esc(v === '' ? '-' : v)}</td>`;
     }).join('');
 
@@ -1286,7 +1291,7 @@ function buildForm(){
     let input;
     let hint = '';
     if(f.type === 'date'){
-      hint = `<div class="field-hint">Format tampilan: dd-mm-yyyy</div>`;
+      hint = `<div class="field-hint">Format: DD-MM-YYYY (hari-bulan-tahun)</div>`;
     }
     if(f.type === 'select'){
       input = `<select name="${f.key}">
@@ -1402,7 +1407,8 @@ function recordToLabeled(d){
       if(f.key === 'tcode' && !v){
         v = deriveTcode(groupKey(d));
       }
-      // Excel tetap pakai format ISO agar mudah disortir
+      // Excel tetap pakai format asli (ISO) agar mudah di-sort/filter
+      if(f.type === 'datetime-local' && v) v = String(v).replace('T',' ');
     }else{
       v = d[f.key] ?? '';
       if(f.key === 'tanggalReservasi' && v){
@@ -1512,6 +1518,7 @@ function exportFrontViewExcel(){
     GROUP_FIELDS.forEach(f=>{
       let v = meta[f.key] ?? '';
       if(f.key === 'tcode' && !v) v = deriveTcode(key);
+      if(f.type === 'datetime-local' && v) v = String(v).replace('T',' ');
       o[f.label] = v;
     });
 
@@ -1638,8 +1645,8 @@ function downloadTemplateExcel(){
     ['   "Bukti Transaksi Kirim".'],
     ['   Contoh: "KKG/KPG/SV/26/06/003" → "KKG", "TRU/KPG/SV/26/06/006" → "TRU".'],
     ['   Kolom TCODE pada file boleh dikosongkan (akan diisi otomatis).'],
-    ['6. Format tanggal di FILE: YYYY-MM-DD. Untuk "Diubah Pada": YYYY-MM-DD HH:MM.'],
-    ['   (Di tampilan aplikasi, tanggal otomatis ditampilkan sebagai dd-mm-yyyy.)'],
+    ['6. Format tanggal di file Excel: YYYY-MM-DD. Untuk "Diubah Pada": YYYY-MM-DD HH:MM.'],
+    ['   (Di tampilan web akan otomatis ditampilkan sebagai DD-MM-YYYY.)'],
     [''],
     ['Catatan Export: Saat download dari aplikasi, kolom "Nomor" akan'],
     ['dibuat ulang berurutan (1, 2, 3, …) direset per grup Bukti Transaksi.'],
@@ -1885,15 +1892,15 @@ function renderImportPreview(headers){
     const meta = importMetaMap[gk] || {};
     html += '<tr>' + useCols.map(k=>{
       let v;
-      let fDef = FIELDS.find(x=>x.key===k) || GROUP_FIELDS.find(x=>x.key===k);
+      const fDef = FIELDS.find(x=>x.key===k) || GROUP_FIELDS.find(x=>x.key===k);
       if(GROUP_FIELDS.some(gf=>gf.key===k)){
         v = meta[k] ?? '';
       }else{
         v = r[k] ?? '';
       }
-      // Preview: tampilkan tanggal sebagai dd-mm-yyyy agar konsisten dengan UI
-      if(fDef && fDef.type === 'date' && v) v = fmtDate(v);
-      if(fDef && fDef.type === 'datetime-local' && v) v = fmtDateTime(v);
+      // Preview: tampilkan tanggal sebagai DD-MM-YYYY
+      if(v && fDef && fDef.type === 'date') v = fmtDate(v);
+      else if(v && fDef && fDef.type === 'datetime-local') v = fmtDateTime(v);
       return `<td>${esc(v === '' ? '-' : v)}</td>`;
     }).join('') + '</tr>';
   });
@@ -1956,9 +1963,8 @@ function confirmImport(){
    INIT (UI + EVENTS)
    ========================================================= */
 function init(){
-  // Tanggal header hari ini — pakai format lokal Indonesia (Sudah OK)
   $('#today').textContent = new Date().toLocaleDateString('id-ID',
-    { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' });
 
   loadData();
   loadMeta();
