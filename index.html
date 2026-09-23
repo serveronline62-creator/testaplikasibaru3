@@ -10,50 +10,29 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <style>
-    /* ============================================================
-       DESIGN TOKENS
-       ============================================================ */
     :root {
-      --bg: #0a0d14;
-      --bg2: #0f1420;
-      --card: rgba(21, 27, 40, 0.72);
-      --card-solid: #151b28;
-      --card2: #1a2233;
-      --border: rgba(37, 48, 69, 0.9);
-      --border-hover: rgba(240, 185, 11, 0.45);
-      --fg: #e6edf5;
-      --muted: #7a8ba8;
-      --accent: #e94560;
-      --accent2: #ff6b81;
-      --green: #00d68f;
-      --green2: #00f5a0;
-      --gold: #f0b90b;
-      --gold2: #ffd60a;
+      --bg: #0a0d14; --bg2: #0f1420;
+      --card: rgba(21, 27, 40, 0.72); --card-solid: #151b28; --card2: #1a2233;
+      --border: rgba(37, 48, 69, 0.9); --border-hover: rgba(240, 185, 11, 0.45);
+      --fg: #e6edf5; --muted: #7a8ba8;
+      --accent: #e94560; --accent2: #ff6b81;
+      --green: #00d68f; --green2: #00f5a0;
+      --gold: #f0b90b; --gold2: #ffd60a;
       --input-bg: rgba(17, 22, 33, 0.85);
       --shadow: rgba(0, 0, 0, 0.5);
       --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
       --header-bg: rgba(10, 13, 20, 0.78);
-      --radius: 16px;
-      --radius-sm: 12px;
-      --radius-lg: 22px;
+      --radius: 16px; --radius-sm: 12px; --radius-lg: 22px;
       --safe-b: env(safe-area-inset-bottom, 0px);
     }
     [data-theme="light"] {
-      --bg: #f4f6fa;
-      --bg2: #ffffff;
-      --card: rgba(255, 255, 255, 0.85);
-      --card-solid: #ffffff;
-      --card2: #f4f6fa;
-      --border: rgba(209, 217, 230, 0.9);
-      --border-hover: rgba(214, 52, 71, 0.4);
-      --fg: #131a2b;
-      --muted: #5a6478;
-      --accent: #d63447;
-      --accent2: #e94560;
-      --green: #00b377;
-      --green2: #00d68f;
-      --gold: #c9930b;
-      --gold2: #d4a017;
+      --bg: #f4f6fa; --bg2: #ffffff;
+      --card: rgba(255, 255, 255, 0.85); --card-solid: #ffffff; --card2: #f4f6fa;
+      --border: rgba(209, 217, 230, 0.9); --border-hover: rgba(214, 52, 71, 0.4);
+      --fg: #131a2b; --muted: #5a6478;
+      --accent: #d63447; --accent2: #e94560;
+      --green: #00b377; --green2: #00d68f;
+      --gold: #c9930b; --gold2: #d4a017;
       --input-bg: rgba(240, 242, 245, 0.9);
       --shadow: rgba(163, 177, 198, 0.25);
       --shadow-lg: 0 20px 50px rgba(163, 177, 198, 0.35);
@@ -64,17 +43,12 @@
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Space Grotesk', sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      min-height: 100vh;
-      overflow-x: hidden;
+      background: var(--bg); color: var(--fg);
+      min-height: 100vh; overflow-x: hidden;
       transition: background 0.4s ease, color 0.4s ease;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ============================================================
-       BACKGROUND
-       ============================================================ */
     .bg-grid {
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background-image:
@@ -101,27 +75,22 @@
       100% { opacity: 0; transform: translateY(-100vh) scale(1.2); }
     }
 
-    /* ============================================================
-       LOGIN
-       ============================================================ */
     #loginScreen {
       position: fixed; inset: 0; z-index: 200;
       display: flex; align-items: center; justify-content: center;
-      background: var(--bg);
-      padding: 20px;
+      background: var(--bg); padding: 20px;
       transition: opacity 0.4s, visibility 0.4s;
+      overflow-y: auto;
     }
     #loginScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
     .login-box {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--card); border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       padding: 36px 28px;
       width: 100%; max-width: 400px;
-      box-shadow: var(--shadow-lg);
-      text-align: center;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-lg); text-align: center;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      margin: auto;
     }
     .login-icon {
       width: 68px; height: 68px; border-radius: 50%;
@@ -141,12 +110,9 @@
     }
     .login-field input {
       width: 100%; padding: 14px 14px 14px 42px;
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--fg);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--fg);
+      font-family: 'JetBrains Mono', monospace; font-size: 14px;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .login-field input:focus {
@@ -179,10 +145,11 @@
       border-radius: 8px;
     }
     .login-hint { font-size: 11px; color: var(--muted); margin-top: 18px; line-height: 1.6; }
+    .login-hint code {
+      background: var(--card2); padding: 1px 6px; border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gold);
+    }
 
-    /* ============================================================
-       APP SHELL
-       ============================================================ */
     #appScreen { display: none; }
     .container {
       position: relative; z-index: 1;
@@ -190,25 +157,17 @@
       padding: 16px 16px calc(90px + var(--safe-b));
     }
 
-    /* ============================================================
-       HEADER
-       ============================================================ */
     .header {
       display: flex; align-items: center; gap: 14px;
-      margin-bottom: 22px;
-      padding: 14px 18px;
+      margin-bottom: 22px; padding: 14px 18px;
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       background-color: var(--header-bg);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
       position: sticky; top: 12px; z-index: 50;
       transition: background-color 0.4s ease, box-shadow 0.3s ease, border-color 0.3s;
     }
-    .header.is-scrolled {
-      box-shadow: 0 8px 32px var(--shadow);
-      border-color: transparent;
-    }
+    .header.is-scrolled { box-shadow: 0 8px 32px var(--shadow); border-color: transparent; }
     .header-brand { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
     .coin-icon {
       width: 46px; height: 46px; border-radius: 50%;
@@ -221,8 +180,7 @@
     }
     .coin-icon::after {
       content: ''; position: absolute; inset: -4px;
-      border-radius: 50%;
-      border: 2px solid rgba(240,185,11,0.35);
+      border-radius: 50%; border: 2px solid rgba(240,185,11,0.35);
       animation: coinPulse 3s ease-in-out infinite;
     }
     @keyframes coinGlow {
@@ -259,8 +217,7 @@
     .user-chip, .status-badge {
       display: flex; align-items: center; gap: 6px;
       padding: 6px 12px;
-      background: var(--card2);
-      border: 1px solid var(--border);
+      background: var(--card2); border: 1px solid var(--border);
       border-radius: 100px;
       font-size: 11px; color: var(--muted);
       white-space: nowrap;
@@ -273,42 +230,30 @@
     }
     .status-dot.ok { background: var(--green); box-shadow: 0 0 8px rgba(0,214,143,0.6); }
     .theme-toggle {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      width: 36px; height: 36px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 50%; width: 36px; height: 36px;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; color: var(--fg); font-size: 14px;
       transition: all 0.25s; flex-shrink: 0;
     }
     .theme-toggle:hover { border-color: var(--gold); color: var(--gold); transform: rotate(20deg); }
     .btn-logout {
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 8px 12px;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 12px;
       color: var(--muted);
       font-family: 'Space Grotesk', sans-serif;
       font-size: 12px; font-weight: 600;
-      cursor: pointer;
-      display: flex; align-items: center; gap: 6px;
-      transition: all 0.2s;
-      min-height: 36px;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: all 0.2s; min-height: 36px;
     }
     .btn-logout:hover { border-color: var(--accent); color: var(--accent); }
     .btn-logout span { display: none; }
 
-    /* ============================================================
-       CHART SECTION
-       ============================================================ */
     .chart-section {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 20px;
       margin-bottom: 18px;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     }
     .chart-header {
       display: flex; align-items: flex-start; justify-content: space-between;
@@ -321,12 +266,42 @@
       text-transform: uppercase; letter-spacing: 0.5px;
     }
     .chart-title i { color: var(--gold); font-size: 14px; }
+
+    /* === COIN SELECTOR BARU === */
+    .chart-coin-selector {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px 8px 4px 12px;
+      margin-top: 6px;
+    }
+    .chart-coin-selector label {
+      font-size: 11px; color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
+      font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.4px; white-space: nowrap;
+    }
+    .chart-coin-selector label i { color: var(--gold); }
+    .chart-coin-selector select {
+      background: transparent; border: none;
+      color: var(--fg); font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; font-weight: 700;
+      padding: 6px 24px 6px 6px; cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8ba8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      outline: none;
+    }
+    .chart-coin-selector select option {
+      background: var(--card-solid); color: var(--fg);
+    }
+
     .chart-price {
       font-family: 'JetBrains Mono', monospace;
       font-size: 24px; font-weight: 700;
       display: flex; align-items: center; gap: 10px;
-      letter-spacing: -0.5px;
-      line-height: 1.1;
+      letter-spacing: -0.5px; line-height: 1.1;
     }
     .chart-change {
       font-size: 12px; font-family: 'JetBrains Mono', monospace;
@@ -346,9 +321,6 @@
     }
     .chart-status .dot.off { background: var(--accent); animation: none; }
 
-    /* ============================================================
-       ADD BUTTON
-       ============================================================ */
     .add-tx-section { margin-bottom: 18px; }
     .btn-add-inline {
       width: 100%; padding: 16px;
@@ -360,49 +332,33 @@
       font-size: 14px; font-weight: 600;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 10px;
-      transition: all 0.25s;
-      min-height: 56px;
+      transition: all 0.25s; min-height: 56px;
     }
     .btn-add-inline i { color: var(--accent); font-size: 18px; }
     .btn-add-inline:hover {
       background: linear-gradient(135deg, rgba(233,69,96,0.16), rgba(240,185,11,0.1));
-      border-color: var(--accent);
-      border-style: solid;
+      border-color: var(--accent); border-style: solid;
       transform: translateY(-1px);
     }
-    .btn-add-inline:active { transform: translateY(0); }
 
-    /* FAB untuk mobile */
     .fab {
-      display: none;
-      position: fixed;
-      right: 20px;
-      bottom: calc(20px + var(--safe-b));
-      width: 56px; height: 56px;
-      border-radius: 50%;
+      display: none; position: fixed;
+      right: 20px; bottom: calc(20px + var(--safe-b));
+      width: 56px; height: 56px; border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), #c23152);
-      color: #fff; border: none;
-      font-size: 22px;
-      cursor: pointer;
-      z-index: 60;
+      color: #fff; border: none; font-size: 22px;
+      cursor: pointer; z-index: 60;
       box-shadow: 0 8px 28px rgba(233,69,96,0.5);
       align-items: center; justify-content: center;
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .fab:hover { transform: scale(1.06); box-shadow: 0 12px 36px rgba(233,69,96,0.6); }
-    .fab:active { transform: scale(0.95); }
 
-    /* ============================================================
-       CURRENT PRICE
-       ============================================================ */
     .current-price-section {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 18px 20px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 18px 20px;
       margin-bottom: 18px;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     }
     .current-price-section .cp-row {
       display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -421,12 +377,9 @@
       display: flex; align-items: center; gap: 8px;
     }
     .price-input-wrapper input {
-      width: 100%;
-      padding: 12px 14px;
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--fg);
+      width: 100%; padding: 12px 14px;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--fg);
       font-family: 'JetBrains Mono', monospace;
       font-size: 15px; font-weight: 600;
       transition: border-color 0.2s, background 0.3s, box-shadow 0.2s;
@@ -434,13 +387,11 @@
     }
     .price-input-wrapper input:focus { outline: none; }
     .price-input-wrapper.auto input {
-      border-color: rgba(0,214,143,0.4);
-      background: rgba(0,214,143,0.06);
+      border-color: rgba(0,214,143,0.4); background: rgba(0,214,143,0.06);
     }
     .price-input-wrapper.auto input:focus { box-shadow: 0 0 0 3px rgba(0,214,143,0.15); }
     .price-input-wrapper.manual input {
-      border-color: rgba(240,185,11,0.4);
-      background: rgba(240,185,11,0.06);
+      border-color: rgba(240,185,11,0.4); background: rgba(240,185,11,0.06);
     }
     .price-input-wrapper.manual input:focus { box-shadow: 0 0 0 3px rgba(240,185,11,0.15); }
 
@@ -449,8 +400,7 @@
       border-radius: var(--radius-sm);
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px; font-weight: 700; letter-spacing: 0.6px;
-      cursor: pointer;
-      border: 1px solid;
+      cursor: pointer; border: 1px solid;
       display: flex; align-items: center; gap: 6px;
       white-space: nowrap;
       transition: all 0.2s; user-select: none; flex-shrink: 0;
@@ -459,7 +409,6 @@
     .price-mode-badge.auto { color: var(--green); border-color: rgba(0,214,143,0.5); background: rgba(0,214,143,0.1); }
     .price-mode-badge.manual { color: var(--gold); border-color: rgba(240,185,11,0.5); background: rgba(240,185,11,0.1); }
     .price-mode-badge:hover { transform: translateY(-1px); }
-    .price-mode-badge:active { transform: translateY(0); }
     .price-mode-badge i { animation: spinSlow 3s linear infinite; }
     .price-mode-badge.manual i { animation: none; }
     @keyframes spinSlow { from { transform: rotate(0); } to { transform: rotate(360deg); } }
@@ -473,23 +422,16 @@
     .cp-hint.auto i { color: var(--green); }
     .cp-hint.manual i { color: var(--gold); }
 
-    /* ============================================================
-       SUMMARY CARDS
-       ============================================================ */
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 12px; margin-bottom: 18px;
     }
     .summary-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px;
       position: relative; overflow: hidden;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
       transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
     .summary-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--shadow); }
@@ -512,8 +454,7 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 16px; font-weight: 700;
       display: flex; align-items: center; gap: 6px;
-      flex-wrap: wrap;
-      line-height: 1.2;
+      flex-wrap: wrap; line-height: 1.2;
       word-break: break-word;
     }
     .card-sub {
@@ -525,17 +466,11 @@
     .t-g { color: var(--green); } .t-r { color: var(--accent); }
     .t-y { color: var(--gold); } .t-f { color: var(--fg); }
 
-    /* ============================================================
-       PNL DETAIL
-       ============================================================ */
     .pnl-bar {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 20px;
       margin-bottom: 18px;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     }
     .pnl-bar h3 {
       font-size: 13px; font-weight: 700;
@@ -547,8 +482,7 @@
     .pnl-bar h3 i { color: var(--green); }
     .pnl-row {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 12px;
-      padding: 11px 0;
+      gap: 12px; padding: 11px 0;
       border-bottom: 1px solid var(--border);
       font-size: 13px;
     }
@@ -572,9 +506,6 @@
       min-width: 2px;
     }
 
-    /* ============================================================
-       TREND ICONS
-       ============================================================ */
     .trend-icon {
       font-size: 14px;
       display: inline-flex; align-items: center; justify-content: center;
@@ -586,17 +517,11 @@
     @keyframes pulseUp { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
     @keyframes pulseDown { 0%,100% { transform: translateY(0); } 50% { transform: translateY(2px); } }
 
-    /* ============================================================
-       TABLE / TRANSACTIONS
-       ============================================================ */
     .table-section {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
       margin-bottom: 24px;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     }
     .table-top {
       padding: 18px 20px;
@@ -652,26 +577,20 @@
     .action-group { display: flex; gap: 6px; align-items: center; }
     .btn-action {
       border: 1px solid var(--border);
-      background: var(--card2);
-      padding: 6px 10px;
-      border-radius: 8px;
-      cursor: pointer; font-size: 12px;
+      background: var(--card2); padding: 6px 10px;
+      border-radius: 8px; cursor: pointer; font-size: 12px;
       color: var(--muted);
       transition: all 0.15s;
       display: flex; align-items: center; justify-content: center;
-      width: 34px; height: 34px;
-      flex-shrink: 0;
+      width: 34px; height: 34px; flex-shrink: 0;
     }
     .btn-action:hover { border-color: var(--fg); color: var(--fg); }
-    .btn-action:active { transform: scale(0.94); }
     .btn-action.locked {
-      color: var(--gold);
-      border-color: rgba(240,185,11,0.4);
+      color: var(--gold); border-color: rgba(240,185,11,0.4);
       background: rgba(240,185,11,0.1);
     }
     .btn-del {
-      color: var(--accent);
-      border-color: rgba(233,69,96,0.25);
+      color: var(--accent); border-color: rgba(233,69,96,0.25);
       background: rgba(233,69,96,0.08);
     }
     .btn-del:hover:not(:disabled) { background: var(--accent); color: #fff; border-color: var(--accent); }
@@ -681,57 +600,41 @@
     .empty-state i { font-size: 44px; margin-bottom: 12px; opacity: 0.3; display: block; }
     .empty-state p { font-size: 13px; }
 
-    /* ============================================================
-       SORTABLE TABLE HEADERS
-       ============================================================ */
     thead th.sortable {
-      cursor: pointer;
-      user-select: none;
+      cursor: pointer; user-select: none;
       transition: color 0.2s, background 0.2s;
       position: relative;
     }
     thead th.sortable:hover { color: var(--fg); background: rgba(240,185,11,0.08); }
     thead th.sortable.active { color: var(--gold); background: rgba(240,185,11,0.1); }
     thead th .sort-icon {
-      margin-left: 6px;
-      font-size: 9px;
-      opacity: 0.35;
-      transition: opacity 0.2s;
+      margin-left: 6px; font-size: 9px;
+      opacity: 0.35; transition: opacity 0.2s;
       display: inline-block;
     }
     thead th.sortable.active .sort-icon { opacity: 1; }
 
-    /* Mobile sort selector */
     .sort-mobile-bar {
-      display: none;
-      padding: 12px 14px;
+      display: none; padding: 12px 14px;
       border-bottom: 1px solid var(--border);
-      gap: 8px;
-      align-items: center;
+      gap: 8px; align-items: center;
       background: var(--card2);
     }
     .sort-mobile-bar label {
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 10px; font-weight: 700;
       color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      text-transform: uppercase; letter-spacing: 0.5px;
       white-space: nowrap;
       display: flex; align-items: center; gap: 6px;
     }
     .sort-mobile-bar label i { color: var(--gold); }
     .sort-mobile-bar select {
-      flex: 1;
-      padding: 8px 32px 8px 12px;
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--fg);
+      flex: 1; padding: 8px 32px 8px 12px;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--fg);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 600;
-      appearance: none;
-      -webkit-appearance: none;
+      font-size: 12px; font-weight: 600;
+      appearance: none; -webkit-appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8ba8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
@@ -740,23 +643,15 @@
     .sort-mobile-bar select:focus { outline: none; border-color: var(--gold); }
     .sort-mobile-bar select option { background: var(--card-solid); color: var(--fg); }
     .sort-dir-btn {
-      width: 38px; height: 38px;
-      border-radius: 10px;
+      width: 38px; height: 38px; border-radius: 10px;
       border: 1px solid var(--border);
-      background: var(--input-bg);
-      color: var(--gold);
-      font-size: 13px;
-      cursor: pointer;
+      background: var(--input-bg); color: var(--gold);
+      font-size: 13px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s;
-      flex-shrink: 0;
+      transition: all 0.2s; flex-shrink: 0;
     }
     .sort-dir-btn:hover { border-color: var(--gold); }
-    .sort-dir-btn:active { transform: scale(0.94); }
 
-    /* ============================================================
-       TOAST
-       ============================================================ */
     .toast-box {
       position: fixed; top: 16px; right: 16px; left: 16px;
       z-index: 9999;
@@ -764,17 +659,13 @@
       pointer-events: none;
     }
     .toast {
-      padding: 13px 18px;
-      border-radius: var(--radius-sm);
+      padding: 13px 18px; border-radius: var(--radius-sm);
       font-size: 13px; font-weight: 500;
       display: flex; align-items: center; gap: 10px;
       animation: toastIn 0.3s ease;
       box-shadow: var(--shadow-lg);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      pointer-events: auto;
-      max-width: 420px;
-      margin-left: auto;
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      pointer-events: auto; max-width: 420px; margin-left: auto;
     }
     .toast.success { background: rgba(10,46,31,0.95); border: 1px solid var(--green); color: var(--green2); }
     .toast.error { background: rgba(46,10,20,0.95); border: 1px solid var(--accent); color: var(--accent2); }
@@ -786,26 +677,17 @@
     [data-theme="light"] .toast.warning { background: rgba(255,251,235,0.97); color: #b45309; }
     @keyframes toastIn { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
 
-    /* ============================================================
-       FOOTER
-       ============================================================ */
     .footer {
-      text-align: center;
-      padding: 20px 0;
-      color: var(--muted); font-size: 11px;
-      line-height: 1.7;
+      text-align: center; padding: 20px 0;
+      color: var(--muted); font-size: 11px; line-height: 1.7;
     }
     .footer a { color: var(--gold); text-decoration: none; }
     .footer a:hover { text-decoration: underline; }
 
-    /* ============================================================
-       MODAL
-       ============================================================ */
     .modal-overlay {
       position: fixed; inset: 0; z-index: 100;
       background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
       display: flex; align-items: flex-start; justify-content: center;
       padding: 60px 16px 40px;
       opacity: 0; visibility: hidden;
@@ -821,14 +703,12 @@
       width: 100%; max-width: 520px;
       transform: translateY(-30px) scale(0.96);
       transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
-      box-shadow: var(--shadow-lg);
-      margin: auto 0;
+      box-shadow: var(--shadow-lg); margin: auto 0;
     }
     .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
     .modal-header {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px;
-      gap: 12px;
+      margin-bottom: 20px; gap: 12px;
     }
     .modal-header h2 {
       font-size: 17px; font-weight: 700;
@@ -836,16 +716,13 @@
     }
     .modal-header h2 i { color: var(--accent); }
     .modal-close {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      width: 38px; height: 38px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 50%; width: 38px; height: 38px;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; color: var(--muted); font-size: 14px;
       transition: all 0.2s; flex-shrink: 0;
     }
     .modal-close:hover { color: var(--accent); border-color: var(--accent); transform: rotate(90deg); }
-    .modal-close:active { transform: rotate(90deg) scale(0.92); }
 
     .form-grid {
       display: grid;
@@ -860,14 +737,10 @@
     }
     .form-group label .req { color: var(--accent); margin-left: 2px; }
     .form-group input, .form-group select {
-      width: 100%;
-      padding: 12px 14px;
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--fg);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
+      width: 100%; padding: 12px 14px;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--fg);
+      font-family: 'JetBrains Mono', monospace; font-size: 14px;
       transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
       min-height: 46px;
     }
@@ -876,12 +749,10 @@
       box-shadow: 0 0 0 3px rgba(233,69,96,0.15);
     }
     .form-group input.invalid {
-      border-color: var(--accent);
-      background: rgba(233,69,96,0.08);
+      border-color: var(--accent); background: rgba(233,69,96,0.08);
     }
     .form-group select {
-      appearance: none;
-      -webkit-appearance: none;
+      appearance: none; -webkit-appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8ba8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 14px center;
@@ -890,12 +761,9 @@
     .form-group select option { background: var(--card-solid); color: var(--fg); }
 
     .coin-preview {
-      margin-top: 16px;
-      padding: 13px 16px;
-      background: var(--card2);
-      border: 1px dashed var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 13px;
+      margin-top: 16px; padding: 13px 16px;
+      background: var(--card2); border: 1px dashed var(--border);
+      border-radius: var(--radius-sm); font-size: 13px;
       display: flex; align-items: center; justify-content: space-between;
       gap: 12px; flex-wrap: wrap;
     }
@@ -908,16 +776,13 @@
     .coin-preview .cp-label i { color: var(--gold); }
     .coin-preview .cp-val {
       font-family: 'JetBrains Mono', monospace;
-      font-weight: 700; color: var(--green);
-      font-size: 15px;
+      font-weight: 700; color: var(--green); font-size: 15px;
     }
 
     .btn-submit-form {
-      margin-top: 18px; width: 100%;
-      padding: 15px;
+      margin-top: 18px; width: 100%; padding: 15px;
       background: linear-gradient(135deg, var(--accent), #c23152);
-      color: #fff; border: none;
-      border-radius: var(--radius-sm);
+      color: #fff; border: none; border-radius: var(--radius-sm);
       font-family: 'Space Grotesk', sans-serif;
       font-size: 15px; font-weight: 700;
       cursor: pointer;
@@ -929,12 +794,8 @@
       transform: translateY(-1px);
       box-shadow: 0 8px 28px rgba(233,69,96,0.35);
     }
-    .btn-submit-form:active:not(:disabled) { transform: translateY(0); }
     .btn-submit-form:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ============================================================
-       RESPONSIVE — TABLET
-       ============================================================ */
     @media (min-width: 640px) {
       .container { padding: 22px 24px 70px; }
       .header { padding: 16px 22px; }
@@ -949,232 +810,149 @@
       .toast-box { left: auto; }
     }
 
-    /* ============================================================
-       RESPONSIVE — DESKTOP
-       ============================================================ */
     @media (min-width: 900px) {
       .container { padding: 24px 24px 70px; }
       .header { padding: 18px 26px; top: 16px; }
       .coin-icon { width: 52px; height: 52px; font-size: 22px; }
       .header-text h1 { font-size: 22px; }
-      .summary-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
-      }
+      .summary-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
       .card-value { font-size: 20px; }
       .chart-wrapper { height: 280px; }
     }
 
-    /* ============================================================
-       RESPONSIVE — MOBILE (<= 640px)
-       ============================================================ */
     @media (max-width: 640px) {
       .container { padding: 12px 12px calc(100px + var(--safe-b)); }
-
-      /* Header */
-      .header {
-        padding: 12px 14px;
-        gap: 10px;
-        border-radius: var(--radius);
-        top: 8px;
-        flex-wrap: wrap;
-      }
+      .header { padding: 12px 14px; gap: 10px; border-radius: var(--radius); top: 8px; flex-wrap: wrap; }
       .header-brand { gap: 10px; width: 100%; }
       .coin-icon { width: 42px; height: 42px; font-size: 18px; }
       .header-text h1 { font-size: 15px; }
       .live-clock { font-size: 10px; }
       .header-actions {
-        width: 100%;
-        gap: 6px;
-        overflow-x: auto;
+        width: 100%; gap: 6px; overflow-x: auto;
         padding-bottom: 2px;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+        scrollbar-width: none; -ms-overflow-style: none;
       }
       .header-actions::-webkit-scrollbar { display: none; }
       .user-chip, .status-badge { padding: 5px 10px; font-size: 10px; max-width: 130px; }
-      .user-chip span, .status-badge span { overflow: hidden; text-overflow: ellipsis; }
       .theme-toggle { width: 34px; height: 34px; font-size: 13px; }
       .btn-logout { padding: 8px 10px; font-size: 11px; }
 
-      /* Chart */
       .chart-section { padding: 16px; border-radius: var(--radius); margin-bottom: 14px; }
       .chart-price { font-size: 20px; gap: 6px; }
       .chart-change { font-size: 11px; padding: 2px 6px; }
       .chart-title { font-size: 11px; }
       .chart-wrapper { height: 180px; }
       .chart-header { margin-bottom: 12px; }
+      .chart-coin-selector { padding: 3px 6px 3px 10px; }
+      .chart-coin-selector select { font-size: 12px; }
 
-      /* Hide inline add button, show FAB */
       .add-tx-section { display: none; }
       .fab { display: flex; }
 
-      /* Current price */
-      .current-price-section {
-        padding: 14px 16px;
-        border-radius: var(--radius);
-        margin-bottom: 14px;
-      }
+      .current-price-section { padding: 14px 16px; border-radius: var(--radius); margin-bottom: 14px; }
       .current-price-section .cp-row { gap: 10px; }
       .current-price-section label { font-size: 11px; }
       .price-input-wrapper { width: 100%; min-width: 0; }
       .price-input-wrapper input { font-size: 14px; padding: 12px; min-height: 44px; }
       .price-mode-badge { padding: 10px 12px; min-height: 44px; font-size: 10px; }
 
-      /* Summary grid */
-      .summary-grid {
-        gap: 10px;
-        margin-bottom: 14px;
-      }
+      .summary-grid { gap: 10px; margin-bottom: 14px; }
       .summary-card { padding: 14px; border-radius: var(--radius-sm); }
       .card-label { font-size: 9px; letter-spacing: 0.6px; margin-bottom: 6px; }
       .card-value { font-size: 15px; }
       .card-sub { font-size: 10px; margin-top: 4px; }
 
-      /* PNL bar */
       .pnl-bar { padding: 16px; border-radius: var(--radius); margin-bottom: 14px; }
       .pnl-bar h3 { font-size: 11px; margin-bottom: 10px; }
       .pnl-row { padding: 10px 0; font-size: 12px; }
       .pnl-val { font-size: 12px; }
 
-      /* Sort mobile bar */
       .sort-mobile-bar { display: flex; }
 
-      /* ============================================================
-         TABLE → CARD VIEW ON MOBILE
-         ============================================================ */
       .table-section { border-radius: var(--radius); margin-bottom: 18px; }
       .table-top { padding: 14px 16px; }
       .table-top h2 { font-size: 12px; }
       .table-cnt { font-size: 10px; padding: 4px 10px; }
-      .table-wrap {
-        overflow: visible;
-        padding: 12px;
-        background: transparent;
-      }
+      .table-wrap { overflow: visible; padding: 12px; background: transparent; }
       table, thead, tbody, tr, td { display: block; width: 100%; }
       thead { display: none; }
 
       tbody tr {
-        background: var(--card2);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 14px;
-        margin-bottom: 10px;
-        position: relative;
+        background: var(--card2); border: 1px solid var(--border);
+        border-radius: var(--radius-sm); padding: 14px;
+        margin-bottom: 10px; position: relative;
         transition: border-color 0.2s, transform 0.15s;
       }
       tbody tr:last-child { margin-bottom: 0; }
       tbody tr:hover { background: var(--card2); }
-      tbody tr:active { transform: scale(0.995); }
 
       tbody td {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 7px 0;
-        font-size: 12px;
-        white-space: normal;
-        border: none;
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px; padding: 7px 0;
+        font-size: 12px; white-space: normal; border: none;
       }
       tbody td::before {
         content: attr(data-label);
         color: var(--muted);
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-size: 10px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.5px;
         flex-shrink: 0;
       }
 
-      /* Sembunyikan kolom "No" di mobile */
       tbody td[data-label="No"] { display: none; }
 
-      /* Baris pertama (coin) jadi header card */
       tbody td[data-label="Coin"] {
         justify-content: flex-start;
-        padding: 0 0 10px 0;
-        margin-bottom: 6px;
+        padding: 0 0 10px 0; margin-bottom: 6px;
         border-bottom: 1px solid var(--border);
       }
       tbody td[data-label="Coin"]::before { content: none; }
-      tbody td[data-label="Coin"] .td-coin {
-        font-size: 11px;
-        padding: 5px 12px;
-      }
+      tbody td[data-label="Coin"] .td-coin { font-size: 11px; padding: 5px 12px; }
 
-      /* Aksi di pojok kanan atas */
       tbody td[data-label="Aksi"] {
-        position: absolute;
-        top: 10px; right: 10px;
-        padding: 0;
-        width: auto;
-        border: none;
-        margin: 0;
+        position: absolute; top: 10px; right: 10px;
+        padding: 0; width: auto; border: none; margin: 0;
       }
       tbody td[data-label="Aksi"]::before { content: none; }
       tbody td[data-label="Aksi"] .action-group { gap: 4px; }
-      tbody td[data-label="Aksi"] .btn-action {
-        width: 30px; height: 30px;
-        padding: 4px;
-        font-size: 11px;
-      }
+      tbody td[data-label="Aksi"] .btn-action { width: 30px; height: 30px; padding: 4px; font-size: 11px; }
 
-      /* Override kolom tanggal di mobile */
       tbody td[data-label="Tanggal & Waktu"] {
         display: block;
-        padding: 0 0 10px 0;
-        margin-bottom: 8px;
+        padding: 0 0 10px 0; margin-bottom: 8px;
         border-bottom: 1px dashed var(--border);
         text-align: left;
       }
-      tbody td[data-label="Tanggal & Waktu"]::before {
-        display: block;
-        margin-bottom: 2px;
-      }
+      tbody td[data-label="Tanggal & Waktu"]::before { display: block; margin-bottom: 2px; }
       tbody td[data-label="Tanggal & Waktu"] .td-date {
-        display: block;
-        text-align: right;
-        font-size: 12px;
+        display: block; text-align: right; font-size: 12px;
       }
 
-      /* Modal → bottom sheet */
       .modal-overlay {
-        align-items: flex-end;
-        padding: 0;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
+        align-items: flex-end; padding: 0;
+        backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       }
       .modal-content {
         max-width: 100%;
         border-radius: 24px 24px 0 0;
         padding: 22px 20px calc(24px + var(--safe-b));
         transform: translateY(100%);
-        margin: 0;
-        max-height: 92vh;
-        overflow-y: auto;
+        margin: 0; max-height: 92vh; overflow-y: auto;
       }
       .modal-overlay.active .modal-content { transform: translateY(0); }
       .modal-header { margin-bottom: 18px; }
       .modal-header h2 { font-size: 16px; }
       .form-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-      .form-grid .form-group:nth-child(1),
-      .form-grid .form-group:nth-child(2) { grid-column: span 1; }
       .form-group input, .form-group select { font-size: 13px; padding: 11px 12px; min-height: 44px; }
       .form-group label { font-size: 10px; }
       .coin-preview { padding: 12px 14px; font-size: 12px; }
       .coin-preview .cp-val { font-size: 14px; }
       .btn-submit-form { padding: 14px; font-size: 14px; min-height: 50px; margin-top: 16px; }
 
-      /* Toast */
       .toast { font-size: 12px; padding: 11px 14px; }
     }
 
-    /* ============================================================
-       RESPONSIVE — SANGAT KECIL (<= 380px)
-       ============================================================ */
     @media (max-width: 380px) {
       .header-text h1 { font-size: 14px; }
       .live-clock { display: none; }
@@ -1182,9 +960,6 @@
       .card-value { font-size: 14px; }
     }
 
-    /* ============================================================
-       REDUCED MOTION
-       ============================================================ */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -1192,9 +967,6 @@
       }
     }
 
-    /* ============================================================
-       SCROLLBAR
-       ============================================================ */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 100px; }
@@ -1208,31 +980,47 @@
   <div class="toast-box" id="toastBox"></div>
 
   <!-- ============================================================
-       LOGIN SCREEN
+       LOGIN / REGISTER SCREEN
        ============================================================ -->
   <div id="loginScreen">
     <div class="login-box">
       <div class="login-icon"><i class="fas fa-cubes"></i></div>
-      <h2>Selamat Datang</h2>
-      <p>Masuk ke sistem Kalkulasi Pembelian CRYPTO</p>
+      <h2 id="authTitle">Selamat Datang</h2>
+      <p id="authSubtitle">Masuk ke sistem Kalkulasi Pembelian CRYPTO</p>
+
       <form id="loginForm" autocomplete="off" novalidate>
         <div class="login-field">
-          <label>Username / Email</label>
+          <label>Username</label>
           <i class="fas fa-user input-icon"></i>
-          <input type="text" id="loginUser" placeholder="Masukkan username atau email" autocomplete="username" required />
+          <input type="text" id="loginUser" placeholder="Masukkan username" autocomplete="username" required />
         </div>
         <div class="login-field">
           <label>Password</label>
           <i class="fas fa-lock input-icon"></i>
           <input type="password" id="loginPass" placeholder="Masukkan password" autocomplete="current-password" required />
         </div>
+
+        <div class="login-field" id="confirmPassField" style="display:none;">
+          <label>Konfirmasi Password</label>
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" id="loginPass2" placeholder="Ulangi password" autocomplete="new-password" />
+        </div>
+
         <button type="submit" class="login-btn" id="loginBtn">
-          <i class="fas fa-sign-in-alt"></i> Masuk
+          <i class="fas fa-sign-in-alt" id="loginBtnIcon"></i>
+          <span id="loginBtnText">Masuk</span>
         </button>
-        <div class="login-error" id="loginError">Username atau password salah!</div>
+
+        <div class="login-error" id="loginError"></div>
+
+        <div style="margin-top:16px;text-align:center;font-size:13px;color:var(--muted);">
+          <span id="switchText">Belum punya akun?</span>
+          <a href="#" id="switchAuth" style="color:var(--gold);font-weight:700;text-decoration:none;margin-left:4px;">Daftar Sekarang</a>
+        </div>
+
         <div class="login-hint">
           Autentikasi via <strong>Firebase Authentication</strong>.<br />
-          Buat user baru di Firebase Console &rarr; Authentication &rarr; Users.
+          Username akan otomatis menjadi <code>username@cryptoapp.local</code>
         </div>
       </form>
     </div>
@@ -1265,10 +1053,23 @@
         </div>
       </header>
 
-      <!-- CHART -->
       <section class="chart-section">
         <div class="chart-header">
-          <div class="chart-title"><i class="fas fa-chart-area"></i> Grafik DOGE / IDR</div>
+          <div>
+            <div class="chart-title"><i class="fas fa-chart-area"></i> Grafik <span id="chartCoinLabel">DOGE</span> / IDR</div>
+            <!-- === COIN SELECTOR BARU === -->
+            <div class="chart-coin-selector">
+              <label><i class="fas fa-coins"></i> Pilih Coin:</label>
+              <select id="chartCoinSelect">
+                <option value="dogecoin">DOGE</option>
+                <option value="bitcoin">BTC</option>
+                <option value="ethereum">ETH</option>
+                <option value="solana">SOL</option>
+                <option value="ripple">XRP</option>
+                <option value="cardano">ADA</option>
+              </select>
+            </div>
+          </div>
           <div style="text-align:right;">
             <div class="chart-price">
               <span id="chartPriceLabel">Rp 0</span>
@@ -1284,12 +1085,10 @@
         </div>
       </section>
 
-      <!-- ADD BUTTON (inline, desktop only) -->
       <div class="add-tx-section">
         <button class="btn-add-inline" id="btnOpenModal"><i class="fas fa-plus-circle"></i> Tambah Transaksi Baru</button>
       </div>
 
-      <!-- CURRENT PRICE -->
       <section class="current-price-section">
         <div class="cp-row">
           <label><i class="fas fa-chart-line"></i> Harga Saat Ini (Rp)</label>
@@ -1306,7 +1105,6 @@
         </div>
       </section>
 
-      <!-- SUMMARY -->
       <div class="summary-grid">
         <div class="summary-card sc-koin">
           <div class="card-label"><i class="fas fa-coins"></i> Total Koin</div>
@@ -1327,7 +1125,6 @@
         </div>
       </div>
 
-      <!-- PNL DETAIL -->
       <section class="pnl-bar" id="pnlBar" style="display:none;">
         <h3><i class="fas fa-signal"></i> Detail Perhitungan</h3>
         <div class="pnl-row"><span class="pnl-label"><i class="fas fa-coins"></i> Nilai Investasi Saat Ini</span><span class="pnl-val t-f" id="pnCur">Rp 0</span></div>
@@ -1337,14 +1134,12 @@
         <div class="pnl-progress"><div class="pnl-fill" id="pnFill" style="width:50%;background:var(--muted);"></div></div>
       </section>
 
-      <!-- TRANSACTIONS -->
       <section class="table-section">
         <div class="table-top">
           <h2><i class="fas fa-list-ul"></i> Riwayat Transaksi</h2>
           <span class="table-cnt" id="tCnt">0 transaksi</span>
         </div>
 
-        <!-- SORT MOBILE BAR -->
         <div class="sort-mobile-bar">
           <label><i class="fas fa-sort-amount-down"></i> Urutkan:</label>
           <select id="mobileSortSelect">
@@ -1386,12 +1181,8 @@
       </footer>
     </div>
 
-    <!-- FAB (mobile) -->
     <button class="fab" id="fabAdd" aria-label="Tambah transaksi"><i class="fas fa-plus"></i></button>
 
-    <!-- ============================================================
-         MODAL
-         ============================================================ -->
     <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
       <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-header">
@@ -1431,21 +1222,24 @@
           </div>
 
           <button type="submit" class="btn-submit-form" id="btnAdd">
-            <i class="fas fa-save"></i> Simpan Transaksi
+            <i class="fas fa-save" id="btnAddIcon"></i>
+            <span id="btnAddText">Simpan Transaksi</span>
           </button>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- ============================================================
-       FIREBASE SDK
-       ============================================================ -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <script>
+  // ============================================================
+  // BUNGKUS SEMUA DALAM DOMContentLoaded
+  // ============================================================
+  document.addEventListener('DOMContentLoaded', function () {
+
     /* ============================================================
        KONFIGURASI FIREBASE
        ============================================================ */
@@ -1459,16 +1253,20 @@
       appId: "1:416762367242:web:f02d6221ddeb672d813ef3"
     };
 
+    if (typeof firebase === 'undefined') {
+      console.error('Firebase SDK belum dimuat!');
+      alert('Gagal memuat Firebase SDK. Periksa koneksi internet Anda.');
+      return;
+    }
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db   = firebase.database();
 
-    const TX_PATH   = 'transactions';
-    const LOCK_PATH = 'locks';
-    const txRef   = db.ref(TX_PATH);
-    const lockRef = db.ref(LOCK_PATH);
-
     const USER_EMAIL_DOMAIN = '@cryptoapp.local';
+
+    let txRef   = null;
+    let lockRef = null;
 
     /* ============================================================
        HELPER
@@ -1485,21 +1283,25 @@
     function authErrorMessage(err) {
       const code = err && err.code ? err.code : '';
       switch (code) {
-        case 'auth/invalid-email':         return 'Format email tidak valid.';
-        case 'auth/user-not-found':        return 'User tidak terdaftar.';
-        case 'auth/wrong-password':        return 'Password salah.';
-        case 'auth/invalid-credential':    return 'Username / email atau password salah.';
-        case 'auth/invalid-login-credentials': return 'Username / email atau password salah.';
-        case 'auth/too-many-requests':     return 'Terlalu banyak percobaan. Coba lagi nanti.';
-        case 'auth/network-request-failed':return 'Koneksi jaringan bermasalah.';
-        case 'auth/user-disabled':         return 'Akun ini dinonaktifkan.';
-        case 'auth/missing-password':      return 'Password wajib diisi.';
-        default:                            return 'Login gagal: ' + (err && err.message ? err.message : code);
+        case 'auth/invalid-email':            return 'Format email tidak valid.';
+        case 'auth/user-not-found':           return 'Akun tidak ditemukan. Silakan daftar dulu.';
+        case 'auth/wrong-password':           return 'Password salah.';
+        case 'auth/invalid-credential':       return 'Username atau password salah.';
+        case 'auth/invalid-login-credentials':return 'Username atau password salah.';
+        case 'auth/email-already-in-use':     return 'Username sudah dipakai. Coba username lain.';
+        case 'auth/weak-password':            return 'Password terlalu lemah (minimal 6 karakter).';
+        case 'auth/too-many-requests':        return 'Terlalu banyak percobaan. Coba lagi nanti.';
+        case 'auth/network-request-failed':   return 'Koneksi jaringan bermasalah.';
+        case 'auth/user-disabled':            return 'Akun ini dinonaktifkan.';
+        case 'auth/missing-password':         return 'Password wajib diisi.';
+        case 'auth/operation-not-allowed':    return 'Registrasi email/password belum diaktifkan di Firebase Console.';
+        default:                              return 'Gagal: ' + (err && err.message ? err.message : code);
       }
     }
 
     function toast(msg, type = 'info') {
       const box = $('toastBox');
+      if (!box) return;
       const el = document.createElement('div');
       el.className = 'toast ' + type;
       const ic = type === 'success' ? 'fa-check-circle'
@@ -1517,41 +1319,135 @@
     }
 
     /* ============================================================
-       LOGIN
+       LOGIN / REGISTER
        ============================================================ */
+    let isRegisterMode = false;
+
+    const authTitle    = $('authTitle');
+    const authSubtitle = $('authSubtitle');
+    const confirmPassField = $('confirmPassField');
+    const switchText   = $('switchText');
+    const switchAuth   = $('switchAuth');
+    const loginBtnIcon = $('loginBtnIcon');
+    const loginBtnText = $('loginBtnText');
+
+    function setAuthMode(register) {
+      isRegisterMode = register;
+      const errEl = $('loginError');
+      if (errEl) errEl.style.display = 'none';
+
+      if (register) {
+        if (authTitle) authTitle.textContent = 'Buat Akun Baru';
+        if (authSubtitle) authSubtitle.textContent = 'Daftar untuk mulai mencatat transaksi crypto Anda';
+        if (confirmPassField) confirmPassField.style.display = 'block';
+        if ($('loginPass')) $('loginPass').setAttribute('autocomplete', 'new-password');
+        if (loginBtnIcon) loginBtnIcon.className = 'fas fa-user-plus';
+        if (loginBtnText) loginBtnText.textContent = 'Daftar';
+        if (switchText) switchText.textContent = 'Sudah punya akun?';
+        if (switchAuth) switchAuth.textContent = 'Masuk di sini';
+      } else {
+        if (authTitle) authTitle.textContent = 'Selamat Datang';
+        if (authSubtitle) authSubtitle.textContent = 'Masuk ke sistem Kalkulasi Pembelian CRYPTO';
+        if (confirmPassField) confirmPassField.style.display = 'none';
+        if ($('loginPass')) $('loginPass').setAttribute('autocomplete', 'current-password');
+        if (loginBtnIcon) loginBtnIcon.className = 'fas fa-sign-in-alt';
+        if (loginBtnText) loginBtnText.textContent = 'Masuk';
+        if (switchText) switchText.textContent = 'Belum punya akun?';
+        if (switchAuth) switchAuth.textContent = 'Daftar Sekarang';
+      }
+
+      if ($('loginUser')) $('loginUser').value = '';
+      if ($('loginPass')) $('loginPass').value = '';
+      if ($('loginPass2')) $('loginPass2').value = '';
+    }
+
+    switchAuth.addEventListener('click', (e) => {
+      e.preventDefault();
+      setAuthMode(!isRegisterMode);
+    });
+
     $('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const errEl  = $('loginError');
       const btn    = $('loginBtn');
-      const rawUser= $('loginUser').value;
+      const rawUser= $('loginUser').value.trim();
       const pass   = $('loginPass').value;
+      const pass2  = $('loginPass2') ? $('loginPass2').value : '';
 
-      errEl.style.display = 'none';
+      if (errEl) errEl.style.display = 'none';
 
       if (!rawUser || !pass) {
-        errEl.textContent = 'Username / email dan password wajib diisi.';
-        errEl.style.display = 'block';
+        if (errEl) {
+          errEl.textContent = 'Username dan password wajib diisi.';
+          errEl.style.display = 'block';
+        }
         return;
+      }
+
+      if (isRegisterMode && !rawUser.includes('@')) {
+        if (!/^[a-zA-Z0-9_.]{3,30}$/.test(rawUser)) {
+          if (errEl) {
+            errEl.textContent = 'Username hanya boleh huruf, angka, titik, underscore (3-30 karakter).';
+            errEl.style.display = 'block';
+          }
+          return;
+        }
+      }
+
+      if (isRegisterMode) {
+        if (pass.length < 6) {
+          if (errEl) {
+            errEl.textContent = 'Password minimal 6 karakter.';
+            errEl.style.display = 'block';
+          }
+          return;
+        }
+        if (pass !== pass2) {
+          if (errEl) {
+            errEl.textContent = 'Konfirmasi password tidak cocok.';
+            errEl.style.display = 'block';
+          }
+          return;
+        }
       }
 
       const email = usernameToEmail(rawUser);
 
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+      if (loginBtnIcon) loginBtnIcon.className = 'fas fa-spinner fa-spin';
+      if (loginBtnText) loginBtnText.textContent = isRegisterMode ? 'Mendaftar...' : 'Memproses...';
 
       try {
         await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-        await auth.signInWithEmailAndPassword(email, pass);
-        toast('Login berhasil', 'success');
-        $('loginPass').value = '';
+
+        if (isRegisterMode) {
+          const cred = await auth.createUserWithEmailAndPassword(email, pass);
+          await db.ref('users/' + cred.user.uid + '/profile').set({
+            username: rawUser,
+            email: email,
+            createdAt: Date.now()
+          });
+          toast('Akun berhasil dibuat! Selamat datang 🎉', 'success');
+        } else {
+          await auth.signInWithEmailAndPassword(email, pass);
+          toast('Login berhasil', 'success');
+        }
+
+        if ($('loginPass')) $('loginPass').value = '';
+        if ($('loginPass2')) $('loginPass2').value = '';
+        setAuthMode(false);
       } catch (err) {
-        console.error('Login error:', err);
-        errEl.textContent = authErrorMessage(err);
-        errEl.style.display = 'block';
-        $('loginPass').value = '';
+        console.error('Auth error:', err);
+        if (errEl) {
+          errEl.textContent = authErrorMessage(err);
+          errEl.style.display = 'block';
+        }
+        if ($('loginPass')) $('loginPass').value = '';
+        if ($('loginPass2')) $('loginPass2').value = '';
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
+        if (loginBtnIcon) loginBtnIcon.className = isRegisterMode ? 'fas fa-user-plus' : 'fas fa-sign-in-alt';
+        if (loginBtnText) loginBtnText.textContent = isRegisterMode ? 'Daftar' : 'Masuk';
       }
     });
 
@@ -1626,15 +1522,9 @@
             const bv = (b.coin || '').toString();
             return av.localeCompare(bv, 'id', { sensitivity: 'base' }) * dir;
           }
-          case 'harga': {
-            return ((Number(a.harga) || 0) - (Number(b.harga) || 0)) * dir;
-          }
-          case 'total': {
-            return ((Number(a.total) || 0) - (Number(b.total) || 0)) * dir;
-          }
-          case 'jumlah': {
-            return ((Number(a.jumlah) || 0) - (Number(b.jumlah) || 0)) * dir;
-          }
+          case 'harga':  return ((Number(a.harga) || 0) - (Number(b.harga) || 0)) * dir;
+          case 'total':  return ((Number(a.total) || 0) - (Number(b.total) || 0)) * dir;
+          case 'jumlah': return ((Number(a.jumlah) || 0) - (Number(b.jumlah) || 0)) * dir;
           case 'tanggal':
           case 'timestamp':
           default: {
@@ -1658,27 +1548,44 @@
         loginScreen.classList.add('hidden');
         appScreen.style.display = 'block';
 
-        const label = user.email || user.uid;
-        $('userEmail').textContent = label;
-        $('userChip').title = 'Login sebagai: ' + label;
+        txRef   = db.ref('users/' + user.uid + '/transactions');
+        lockRef = db.ref('users/' + user.uid + '/locks');
+
+        db.ref('users/' + user.uid + '/profile/username').once('value')
+          .then(snap => {
+            const uname = snap.val() || user.email;
+            if ($('userEmail')) $('userEmail').textContent = uname;
+            if ($('userChip')) $('userChip').title = 'Login sebagai: ' + uname;
+          })
+          .catch(() => {
+            if ($('userEmail')) $('userEmail').textContent = user.email;
+            if ($('userChip')) $('userChip').title = 'Login sebagai: ' + user.email;
+          });
 
         initApp();
       } else {
         loginScreen.classList.remove('hidden');
         appScreen.style.display = 'none';
-        $('userEmail').textContent = '—';
+        if ($('userEmail')) $('userEmail').textContent = '—';
 
         detachListeners();
         stopPriceChart();
         transactions = [];
         lockedRows   = [];
         appInitialized = false;
+        txRef = null;
+        lockRef = null;
+
+        if (priceChart) {
+          priceChart.destroy();
+          priceChart = null;
+        }
       }
     });
 
     function detachListeners() {
-      try { txRef.off(); } catch (e) {}
-      try { lockRef.off(); } catch (e) {}
+      try { if (txRef) txRef.off(); } catch (e) {}
+      try { if (lockRef) lockRef.off(); } catch (e) {}
       listenerAttached = false;
       lockListenerAttached = false;
     }
@@ -1693,8 +1600,13 @@
       return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
     }
     function applyTheme(theme) {
-      if (theme === 'light') { htmlEl.setAttribute('data-theme', 'light'); themeIcon.className = 'fas fa-sun'; }
-      else { htmlEl.removeAttribute('data-theme'); themeIcon.className = 'fas fa-moon'; }
+      if (theme === 'light') {
+        htmlEl.setAttribute('data-theme', 'light');
+        if (themeIcon) themeIcon.className = 'fas fa-sun';
+      } else {
+        htmlEl.removeAttribute('data-theme');
+        if (themeIcon) themeIcon.className = 'fas fa-moon';
+      }
       localStorage.setItem('theme', theme);
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.setAttribute('content', theme === 'light' ? '#f4f6fa' : '#0a0d14');
@@ -1712,6 +1624,8 @@
     const btnOpenModal = $('btnOpenModal');
     const fabAdd       = $('fabAdd');
     const txForm       = $('txForm');
+    const btnAddIcon   = $('btnAddIcon');
+    const btnAddText   = $('btnAddText');
 
     let formDirty = false;
     function markDirty() { formDirty = true; }
@@ -1787,6 +1701,7 @@
 
     ['inCoin', 'inDate', 'inPrice', 'inTotal'].forEach(id => {
       const el = $(id);
+      if (!el) return;
       el.addEventListener('input',  () => { markDirty(); updateCoinPreview(); });
       el.addEventListener('change', () => { markDirty(); updateCoinPreview(); });
     });
@@ -1829,6 +1744,7 @@
       const text  = $('priceModeText');
       const hint  = $('cpHint');
       const hintText = $('cpHintText');
+      if (!wrap || !badge || !text || !hint || !hintText) return;
 
       if (autoPriceMode) {
         wrap.classList.add('auto'); wrap.classList.remove('manual');
@@ -1858,27 +1774,21 @@
           isAutoUpdating = false;
           calc();
         } else {
-          fetchDogecoinPrice().then(() => calc());
+          fetchCoinPrice().then(() => calc());
         }
       } else {
         toast('Mode MANUAL aktif — kamu bisa isi harga sendiri', 'info');
       }
     });
 
-    /* ============================================================
-       HANDLER HARGA MANUAL
-       ============================================================ */
     function handleManualPriceInput() {
       if (isAutoUpdating) return;
-
       if (autoPriceMode) {
         autoPriceMode = false;
         localStorage.setItem('price_auto_mode', 'false');
         applyPriceModeUI();
         toast('Beralih ke mode MANUAL', 'info');
       }
-
-      // PENTING: tetap hitung ulang seperti mode AUTO
       calc();
     }
 
@@ -1886,9 +1796,18 @@
     $('curPrice').addEventListener('change', handleManualPriceInput);
 
     /* ============================================================
-       GRAFIK REAL-TIME — CoinGecko
+       GRAFIK REAL-TIME — CoinGecko (MULTI COIN)
        ============================================================ */
-    const COINGECKO_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=dogecoin&vs_currencies=idr&include_24hr_change=true';
+    // Mapping coin id CoinGecko -> label pendek
+    const COIN_META = {
+      dogecoin: { symbol: 'DOGE', color: '#f0b90b', fill: 'rgba(240,185,11,0.12)' },
+      bitcoin:  { symbol: 'BTC',  color: '#f7931a', fill: 'rgba(247,147,26,0.12)' },
+      ethereum: { symbol: 'ETH',  color: '#627eea', fill: 'rgba(98,126,234,0.12)' },
+      solana:   { symbol: 'SOL',  color: '#14f195', fill: 'rgba(20,241,149,0.12)' },
+      ripple:   { symbol: 'XRP',  color: '#23292f', fill: 'rgba(35,41,47,0.12)' },
+      cardano:  { symbol: 'ADA',  color: '#0033ad', fill: 'rgba(0,51,173,0.12)' }
+    };
+
     const MAX_DATA_POINTS = 60;
     const REFRESH_INTERVAL = 30000;
 
@@ -1898,34 +1817,71 @@
     let lastPrice   = null;
     let chartFetchTimer = null;
 
+    // Coin yang sedang dipilih untuk grafik
+    let selectedCoinId = localStorage.getItem('chart_coin_id') || 'dogecoin';
+
+    function getChartStorageKey() {
+      return 'chart_history_' + selectedCoinId;
+    }
+
+    function getCurrentSymbol() {
+      return (COIN_META[selectedCoinId] || COIN_META.dogecoin).symbol;
+    }
+
+    function saveChartHistory() {
+      try {
+        localStorage.setItem(getChartStorageKey(), JSON.stringify({
+          labels: chartLabels, data: chartData,
+          lastPrice: lastPrice, savedAt: Date.now()
+        }));
+      } catch (e) {}
+    }
+
+    function loadChartHistory() {
+      try {
+        const raw = localStorage.getItem(getChartStorageKey());
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.labels) || !Array.isArray(parsed.data)) return false;
+        if (parsed.savedAt && (Date.now() - parsed.savedAt) > (6 * 60 * 60 * 1000)) {
+          localStorage.removeItem(getChartStorageKey());
+          return false;
+        }
+        chartLabels = parsed.labels.slice();
+        chartData   = parsed.data.slice();
+        lastPrice   = (typeof parsed.lastPrice === 'number') ? parsed.lastPrice : null;
+        while (chartLabels.length > MAX_DATA_POINTS) { chartLabels.shift(); chartData.shift(); }
+        return chartLabels.length > 0;
+      } catch (e) { return false; }
+    }
+
     function initChart() {
-      const ctx = $('priceChart').getContext('2d');
+      if (!chartLabels.length) loadChartHistory();
+      const canvas = $('priceChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
       const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
       const textColor = isLight ? '#5a6478' : '#7a8ba8';
+      const meta = COIN_META[selectedCoinId] || COIN_META.dogecoin;
 
       priceChart = new Chart(ctx, {
         type: 'line',
         data: {
           labels: chartLabels,
           datasets: [{
-            label: 'DOGE / IDR',
+            label: meta.symbol + ' / IDR',
             data: chartData,
-            borderColor: '#f0b90b',
-            backgroundColor: 'rgba(240,185,11,0.12)',
-            borderWidth: 2,
-            tension: 0.35,
-            fill: true,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            pointHoverBackgroundColor: '#f0b90b',
-            pointHoverBorderColor: '#fff',
-            pointHoverBorderWidth: 2
+            borderColor: meta.color,
+            backgroundColor: meta.fill,
+            borderWidth: 2, tension: 0.35, fill: true,
+            pointRadius: 0, pointHoverRadius: 4,
+            pointHoverBackgroundColor: meta.color,
+            pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2
           }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           interaction: { intersect: false, mode: 'index' },
           plugins: {
             legend: { display: false },
@@ -1934,9 +1890,7 @@
               titleColor: isLight ? '#131a2b' : '#e6edf5',
               bodyColor: isLight ? '#131a2b' : '#e6edf5',
               borderColor: isLight ? '#d1d9e6' : '#253045',
-              borderWidth: 1,
-              padding: 10,
-              displayColors: false,
+              borderWidth: 1, padding: 10, displayColors: false,
               callbacks: {
                 label: function (context) {
                   return 'Rp ' + Number(context.parsed.y).toLocaleString('id-ID', { maximumFractionDigits: 2 });
@@ -1951,18 +1905,11 @@
             },
             y: {
               grid: { color: gridColor, drawBorder: false },
-              /* ============================================================
-                 PERBAIKAN: label Y-axis lebih presisi (per 100 → pakai
-                 .toFixed(2) untuk rentang rb/jt, bukan pembulatan integer).
-                 Sebelumnya: 2.500 → "3rb" (dibulatkan)
-                 Sekarang   : 2.500 → "2.50rb"
-                 ============================================================ */
               ticks: {
-                color: textColor,
-                font: { family: 'JetBrains Mono', size: 10 },
-                maxTicksLimit: 8,
-                autoSkip: true,
+                color: textColor, font: { family: 'JetBrains Mono', size: 10 },
+                maxTicksLimit: 8, autoSkip: true,
                 callback: function (v) {
+                  if (v >= 1000000000) return (v / 1000000000).toFixed(2) + 'M';
                   if (v >= 1000000) return (v / 1000000).toFixed(2) + 'jt';
                   if (v >= 1000)    return (v / 1000).toFixed(2) + 'rb';
                   if (v >= 100)     return v.toFixed(0);
@@ -1976,68 +1923,99 @@
       });
     }
 
-    async function fetchDogecoinPrice() {
+    async function fetchCoinPrice() {
       const statusEl = $('chartStatusText');
-      const dotEl = $('chartStatus').querySelector('.dot');
+      const statusContainer = $('chartStatus');
+      const dotEl = statusContainer ? statusContainer.querySelector('.dot') : null;
+      const url = 'https://api.coingecko.com/api/v3/simple/price?ids=' + selectedCoinId + '&vs_currencies=idr&include_24hr_change=true';
+
       try {
-        const res = await fetch(COINGECKO_URL, { cache: 'no-store' });
+        const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const json = await res.json();
-        const doge = json.dogecoin;
-        if (!doge || typeof doge.idr !== 'number') throw new Error('Data tidak valid');
+        const coin = json[selectedCoinId];
+        if (!coin || typeof coin.idr !== 'number') throw new Error('Data tidak valid');
 
-        const price = doge.idr;
-        const change24h = typeof doge.idr_24h_change === 'number' ? doge.idr_24h_change : 0;
+        const price = coin.idr;
+        const change24h = typeof coin.idr_24h_change === 'number' ? coin.idr_24h_change : 0;
 
-        $('chartPriceLabel').textContent = fRp(price);
+        if ($('chartPriceLabel')) $('chartPriceLabel').textContent = fRp(price);
         const changeEl = $('chartChangeLabel');
-        const isUp = change24h >= 0;
-        changeEl.style.color = isUp ? 'var(--green)' : 'var(--accent)';
-        changeEl.style.background = isUp ? 'rgba(0,214,143,0.1)' : 'rgba(233,69,96,0.1)';
-        changeEl.innerHTML = (isUp ? '+' : '') + change24h.toFixed(2) + '% ' +
-          (isUp ? '<i class="fas fa-caret-up"></i>' : '<i class="fas fa-caret-down"></i>');
+        if (changeEl) {
+          const isUp = change24h >= 0;
+          changeEl.style.color = isUp ? 'var(--green)' : 'var(--accent)';
+          changeEl.style.background = isUp ? 'rgba(0,214,143,0.1)' : 'rgba(233,69,96,0.1)';
+          changeEl.innerHTML = (isUp ? '+' : '') + change24h.toFixed(2) + '% ' +
+            (isUp ? '<i class="fas fa-caret-up"></i>' : '<i class="fas fa-caret-down"></i>');
+        }
 
-        statusEl.textContent = 'Diperbarui ' + new Date().toLocaleTimeString('id-ID');
-        dotEl.classList.remove('off');
+        if (statusEl) statusEl.textContent = 'Diperbarui ' + new Date().toLocaleTimeString('id-ID');
+        if (dotEl) dotEl.classList.remove('off');
 
         const now = new Date();
         const label = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         chartLabels.push(label);
         chartData.push(price);
-        while (chartLabels.length > MAX_DATA_POINTS) {
-          chartLabels.shift();
-          chartData.shift();
-        }
+        while (chartLabels.length > MAX_DATA_POINTS) { chartLabels.shift(); chartData.shift(); }
         if (priceChart) priceChart.update('none');
 
         lastPrice = price;
+        saveChartHistory();
 
-        // Hanya timpa input harga jika mode AUTO aktif
         if (autoPriceMode) {
           const curPriceInput = $('curPrice');
           const newVal = String(Math.round(price));
-          if (curPriceInput.value !== newVal) {
+          if (curPriceInput && curPriceInput.value !== newVal) {
             isAutoUpdating = true;
             curPriceInput.value = newVal;
             isAutoUpdating = false;
             calc();
           }
         }
-
         return price;
       } catch (err) {
-        console.warn('Gagal ambil harga DOGE:', err);
-        statusEl.textContent = 'Gagal memperbarui — coba lagi';
-        dotEl.classList.add('off');
+        console.warn('Gagal ambil harga ' + selectedCoinId + ':', err);
+        if (statusEl) statusEl.textContent = 'Gagal memperbarui — coba lagi';
+        if (dotEl) dotEl.classList.add('off');
         return null;
       }
     }
 
     function startPriceChart() {
-      if (priceChart) return;
+      // Pastikan label coin di UI sesuai pilihan
+      if ($('chartCoinLabel')) $('chartCoinLabel').textContent = getCurrentSymbol();
+      const sel = $('chartCoinSelect');
+      if (sel && sel.value !== selectedCoinId) sel.value = selectedCoinId;
+
+      if (priceChart) {
+        priceChart.destroy();
+        priceChart = null;
+      }
+
+      chartLabels = [];
+      chartData   = [];
+      lastPrice   = null;
+
       initChart();
-      fetchDogecoinPrice();
-      chartFetchTimer = setInterval(fetchDogecoinPrice, REFRESH_INTERVAL);
+
+      if (chartLabels.length && chartData.length) {
+        if ($('chartPriceLabel')) $('chartPriceLabel').textContent = fRp(chartData[chartData.length - 1]);
+        if ($('chartStatusText')) $('chartStatusText').textContent = 'Memuat data terbaru...';
+        if (priceChart) priceChart.update('none');
+      }
+
+      if (autoPriceMode && lastPrice != null) {
+        isAutoUpdating = true;
+        if ($('curPrice')) $('curPrice').value = Math.round(lastPrice);
+        isAutoUpdating = false;
+        calc();
+      } else if (autoPriceMode) {
+        // Kalau belum ada history, ambil sekarang
+        fetchCoinPrice();
+      }
+
+      fetchCoinPrice();
+      chartFetchTimer = setInterval(fetchCoinPrice, REFRESH_INTERVAL);
     }
 
     function stopPriceChart() {
@@ -2047,15 +2025,70 @@
       }
     }
 
+    // === Event ganti coin di grafik ===
+    $('chartCoinSelect').addEventListener('change', (e) => {
+      const newCoinId = e.target.value;
+      if (!COIN_META[newCoinId]) return;
+
+      selectedCoinId = newCoinId;
+      localStorage.setItem('chart_coin_id', selectedCoinId);
+
+      // Reset data grafik & muat history coin baru
+      chartLabels = [];
+      chartData   = [];
+      lastPrice   = null;
+
+      if ($('chartCoinLabel')) $('chartCoinLabel').textContent = getCurrentSymbol();
+
+      // Re-init chart dengan warna coin baru
+      if (priceChart) {
+        priceChart.destroy();
+        priceChart = null;
+      }
+
+      // Muat history coin baru
+      loadChartHistory();
+      initChart();
+
+      if (chartLabels.length && chartData.length) {
+        if ($('chartPriceLabel')) $('chartPriceLabel').textContent = fRp(chartData[chartData.length - 1]);
+        if ($('chartStatusText')) $('chartStatusText').textContent = 'Memuat data terbaru...';
+        if (priceChart) priceChart.update('none');
+      }
+
+      // Update harga AUTO jika mode auto
+      if (autoPriceMode && lastPrice != null) {
+        isAutoUpdating = true;
+        if ($('curPrice')) $('curPrice').value = Math.round(lastPrice);
+        isAutoUpdating = false;
+        calc();
+      }
+
+      // Fetch harga terbaru coin baru
+      fetchCoinPrice();
+      toast('Beralih ke grafik ' + getCurrentSymbol(), 'info');
+    });
+
     themeToggle.addEventListener('click', () => {
       setTimeout(() => {
         if (priceChart) {
-          priceChart.destroy();
-          priceChart = null;
-          initChart();
-          if (chartLabels.length) priceChart.update('none');
+          const meta = COIN_META[selectedCoinId] || COIN_META.dogecoin;
+          const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+          const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
+          const textColor = isLight ? '#5a6478' : '#7a8ba8';
+          priceChart.options.scales.x.grid.color = gridColor;
+          priceChart.options.scales.y.grid.color = gridColor;
+          priceChart.options.scales.x.ticks.color = textColor;
+          priceChart.options.scales.y.ticks.color = textColor;
+          priceChart.data.datasets[0].borderColor = meta.color;
+          priceChart.data.datasets[0].backgroundColor = meta.fill;
+          priceChart.update('none');
         }
       }, 100);
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (chartLabels.length) saveChartHistory();
     });
 
     /* ============================================================
@@ -2063,9 +2096,11 @@
        ============================================================ */
     async function checkConn() {
       const dot = $('statusDot'), txt = $('statusText');
+      if (!dot || !txt) return false;
       dot.className = 'status-dot';
       txt.textContent = 'Memeriksa...';
       try {
+        if (!txRef) throw new Error('no ref');
         await Promise.race([
           txRef.limitToLast(1).once('value'),
           new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000))
@@ -2081,7 +2116,7 @@
     }
 
     function attachRealtimeListener() {
-      if (listenerAttached) return;
+      if (listenerAttached || !txRef) return;
       listenerAttached = true;
 
       txRef.on('value', (snap) => {
@@ -2090,23 +2125,27 @@
           .map(k => Object.assign({ id: k }, val[k]))
           .sort((a, b) => (Number(a.timestamp) || 0) - (Number(b.timestamp) || 0));
 
-        localStorage.setItem('doge_tx', JSON.stringify(transactions));
+        const uid = auth.currentUser ? auth.currentUser.uid : 'guest';
+        localStorage.setItem('doge_tx_' + uid, JSON.stringify(transactions));
         render(); calc();
       }, (err) => {
         console.warn('Firebase read error:', err);
         toast('Gagal membaca Firebase: ' + (err.message || ''), 'warning');
-        transactions = JSON.parse(localStorage.getItem('doge_tx') || '[]');
+        const uid = auth.currentUser ? auth.currentUser.uid : 'guest';
+        const cached = localStorage.getItem('doge_tx_' + uid);
+        transactions = cached ? JSON.parse(cached) : [];
         render(); calc();
       });
     }
 
     function syncLocks() {
-      if (lockListenerAttached) return;
+      if (lockListenerAttached || !lockRef) return;
       lockListenerAttached = true;
       lockRef.on('value', (snap) => {
         const val = snap.val() || {};
         lockedRows = Object.keys(val);
-        localStorage.setItem('doge_locks', JSON.stringify(lockedRows));
+        const uid = auth.currentUser ? auth.currentUser.uid : 'guest';
+        localStorage.setItem('doge_locks_' + uid, JSON.stringify(lockedRows));
         render();
       }, () => {});
     }
@@ -2116,24 +2155,27 @@
        ============================================================ */
     async function addTx(tx) {
       const user = auth.currentUser;
+      if (!user || !txRef) {
+        toast('Sesi habis, silakan login ulang', 'error');
+        return false;
+      }
+
       const payload = {
-        coin: tx.coin,
-        tanggal: tx.tanggal,
-        harga: Number(tx.harga),
-        total: Number(tx.total),
+        coin: tx.coin, tanggal: tx.tanggal,
+        harga: Number(tx.harga), total: Number(tx.total),
         jumlah: tx.harga > 0 ? Number(tx.total) / Number(tx.harga) : 0,
         timestamp: Date.now(),
         createdAt: new Date().toISOString(),
-        createdBy: user ? (user.email || user.uid) : 'unknown'
+        createdBy: user.email || user.uid
       };
 
       try {
         const newRef = await txRef.push(payload);
-        console.log('✅ Tersimpan di Firebase:', TX_PATH + '/' + newRef.key);
+        console.log('✅ Tersimpan:', newRef.key);
         toast('Transaksi tersimpan', 'success');
         return true;
       } catch (e) {
-        console.error('❌ Gagal simpan ke Firebase:', e);
+        console.error('❌ Gagal simpan:', e);
         toast('GAGAL simpan: ' + (e.message || 'periksa rules'), 'error');
         return false;
       }
@@ -2141,8 +2183,9 @@
 
     async function delTx(id) {
       if (lockedRows.includes(id)) { toast('Transaksi terkunci!', 'warning'); return; }
+      if (!txRef) return;
       try {
-        await db.ref(TX_PATH + '/' + id).remove();
+        await txRef.child(id).remove();
         toast('Transaksi dihapus', 'success');
       } catch (e) {
         console.error('Gagal hapus:', e);
@@ -2151,6 +2194,7 @@
     }
 
     function toggleLock(id) {
+      if (!lockRef) return;
       const isLocked = lockedRows.includes(id);
       if (isLocked) {
         lockRef.child(id).remove()
@@ -2164,15 +2208,16 @@
     }
 
     /* ============================================================
-       RENDER — dengan data-label untuk mobile card view
+       RENDER
        ============================================================ */
     function render() {
       const tbody = $('tBody');
+      if (!tbody) return;
       const cur = parseFloat($('curPrice').value) || 0;
 
       if (!transactions.length) {
         tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i><p>Belum ada transaksi.</p></div></td></tr>';
-        $('tCnt').textContent = '0 transaksi';
+        if ($('tCnt')) $('tCnt').textContent = '0 transaksi';
         return;
       }
 
@@ -2197,7 +2242,7 @@
         '</tr>';
       }).join('');
 
-      $('tCnt').textContent = transactions.length + ' transaksi';
+      if ($('tCnt')) $('tCnt').textContent = transactions.length + ' transaksi';
     }
 
     $('tBody').addEventListener('click', (e) => {
@@ -2255,34 +2300,44 @@
       const pnl = curVal - tModal;
       const pnlPct = tModal > 0 ? (pnl / tModal) * 100 : 0;
 
-      $('sKoin').textContent = fKoin(tKoin);
-      $('sModal').textContent = fRp(tModal);
-      $('sAvg').textContent = fRp(avg);
+      if ($('sKoin'))  $('sKoin').textContent = fKoin(tKoin);
+      if ($('sModal')) $('sModal').textContent = fRp(tModal);
+      if ($('sAvg'))   $('sAvg').textContent = fRp(avg);
 
       const pnlEl = $('sPnl');
       const pctEl = $('sPnlPct');
-      pnlEl.innerHTML = fRp(pnl) + ' ' + getTrendIcon(avg, cur);
-      pnlEl.className = 'card-value ' + (pnl >= 0 ? 't-g' : 't-r');
-      pctEl.innerHTML = (pnl >= 0 ? '+' : '') + pnlPct.toFixed(2) + '% ' + getTrendIcon(avg, cur);
-      pctEl.style.color = pnl >= 0 ? 'var(--green)' : 'var(--accent)';
+      if (pnlEl) {
+        pnlEl.innerHTML = fRp(pnl) + ' ' + getTrendIcon(avg, cur);
+        pnlEl.className = 'card-value ' + (pnl >= 0 ? 't-g' : 't-r');
+      }
+      if (pctEl) {
+        pctEl.innerHTML = (pnl >= 0 ? '+' : '') + pnlPct.toFixed(2) + '% ' + getTrendIcon(avg, cur);
+        pctEl.style.color = pnl >= 0 ? 'var(--green)' : 'var(--accent)';
+      }
 
       if (cur > 0 && tKoin > 0) {
-        $('pnlBar').style.display = 'block';
-        $('pnCur').innerHTML = fRp(curVal);
-        $('pnCost').innerHTML = fRp(tModal);
-        $('pnAmt').innerHTML = fRp(pnl) + ' ' + getTrendIcon(avg, cur);
-        $('pnAmt').className = 'pnl-val ' + (pnl >= 0 ? 't-g' : 't-r');
-        $('pnPct').innerHTML = (pnl >= 0 ? '+' : '') + pnlPct.toFixed(2) + '% ' + getTrendIcon(avg, cur);
-        $('pnPct').style.color = pnl >= 0 ? 'var(--green)' : 'var(--accent)';
+        if ($('pnlBar')) $('pnlBar').style.display = 'block';
+        if ($('pnCur'))  $('pnCur').innerHTML = fRp(curVal);
+        if ($('pnCost')) $('pnCost').innerHTML = fRp(tModal);
+        if ($('pnAmt')) {
+          $('pnAmt').innerHTML = fRp(pnl) + ' ' + getTrendIcon(avg, cur);
+          $('pnAmt').className = 'pnl-val ' + (pnl >= 0 ? 't-g' : 't-r');
+        }
+        if ($('pnPct')) {
+          $('pnPct').innerHTML = (pnl >= 0 ? '+' : '') + pnlPct.toFixed(2) + '% ' + getTrendIcon(avg, cur);
+          $('pnPct').style.color = pnl >= 0 ? 'var(--green)' : 'var(--accent)';
+        }
 
         const prog = Math.max(0, Math.min(100, 50 + pnlPct / 2));
         const fill = $('pnFill');
-        fill.style.width = prog + '%';
-        fill.style.background = pnl >= 0
-          ? 'linear-gradient(90deg,var(--green),var(--green2))'
-          : 'linear-gradient(90deg,var(--accent),#ff6b81)';
+        if (fill) {
+          fill.style.width = prog + '%';
+          fill.style.background = pnl >= 0
+            ? 'linear-gradient(90deg,var(--green),var(--green2))'
+            : 'linear-gradient(90deg,var(--accent),#ff6b81)';
+        }
       } else {
-        $('pnlBar').style.display = 'none';
+        if ($('pnlBar')) $('pnlBar').style.display = 'none';
       }
 
       render();
@@ -2328,7 +2383,8 @@
 
       const btn = $('btnAdd');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+      if (btnAddIcon) btnAddIcon.className = 'fas fa-spinner fa-spin';
+      if (btnAddText) btnAddText.textContent = 'Menyimpan...';
 
       const ok = await addTx({ coin, tanggal: tanggalFinal, harga, total });
 
@@ -2338,7 +2394,8 @@
       }
 
       btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-save"></i> Simpan Transaksi';
+      if (btnAddIcon) btnAddIcon.className = 'fas fa-save';
+      if (btnAddText) btnAddText.textContent = 'Simpan Transaksi';
     });
 
     /* ============================================================
@@ -2346,7 +2403,7 @@
        ============================================================ */
     function initParticles() {
       const c = $('particles');
-      if (c.dataset.init === '1') return;
+      if (!c || c.dataset.init === '1') return;
       c.dataset.init = '1';
       const colors = ['rgba(233,69,96,0.3)', 'rgba(240,185,11,0.25)', 'rgba(0,214,143,0.2)'];
       for (let i = 0; i < 18; i++) {
@@ -2373,7 +2430,8 @@
       const m = months[now.getMonth()];
       const y = now.getFullYear();
       const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      if ($('liveClock')) $('liveClock').textContent = dayName + ', ' + d + ' ' + m + ' ' + y + ' | ' + time;
+      const clockEl = $('liveClock');
+      if (clockEl) clockEl.textContent = dayName + ', ' + d + ' ' + m + ' ' + y + ' | ' + time;
     }
     setInterval(updateClock, 1000);
 
@@ -2393,6 +2451,8 @@
       attachRealtimeListener();
       syncLocks();
     }
+
+  }); // end DOMContentLoaded
   </script>
 </body>
 </html>
