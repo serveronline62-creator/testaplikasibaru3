@@ -1,86 +1,189 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lacak Paket Sindo Express</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1e3c72,#2a5298);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
-  .card{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);padding:40px;max-width:520px;width:100%}
-  .logo{display:inline-block;background:#1e3c72;color:#fff;font-weight:700;font-size:18px;padding:10px 28px;border-radius:50px;letter-spacing:1px;margin-bottom:20px}
-  h1{color:#333;font-size:22px;margin-bottom:8px}
-  p.sub{color:#777;font-size:14px;margin-bottom:24px;line-height:1.5}
-  label{display:block;font-weight:600;color:#333;font-size:14px;margin-bottom:8px}
-  input{width:100%;padding:14px 16px;border:2px solid #e0e0e0;border-radius:10px;font-size:16px;font-family:'Courier New',monospace;letter-spacing:1px;text-transform:uppercase;transition:border-color .3s}
-  input:focus{outline:none;border-color:#2a5298;box-shadow:0 0 0 3px rgba(42,82,152,.1)}
-  .btn{width:100%;padding:16px;margin-top:20px;background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;transition:all .3s}
-  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(30,60,114,.4)}
-  .info{margin-top:20px;padding:14px 16px;background:#f4f7ff;border-left:4px solid #2a5298;border-radius:8px;font-size:13px;color:#555;line-height:1.7}
-  .info code{background:#e8edf8;padding:2px 6px;border-radius:4px;font-family:'Courier New',monospace;font-size:12px}
-  .warning{margin-top:12px;padding:12px 16px;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;font-size:12px;color:#795548;line-height:1.6}
-  .footer{margin-top:20px;text-align:center;font-size:12px;color:#aaa}
-  .footer a{color:#2a5298;text-decoration:none}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lacak Paket Sindo Express</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 560px;
+            width: 100%;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header .logo {
+            display: inline-block;
+            background: #1e3c72;
+            color: #fff;
+            font-weight: 700;
+            font-size: 20px;
+            padding: 10px 28px;
+            border-radius: 50px;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        .header h1 { color: #333; font-size: 22px; margin-bottom: 8px; }
+        .header p { color: #777; font-size: 14px; line-height: 1.5; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; color: #333; font-size: 14px; margin-bottom: 8px; }
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            transition: border-color 0.3s;
+            text-transform: uppercase;
+        }
+        input:focus { outline: none; border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42,82,152,0.1); }
+        .btn-track {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+        }
+        .btn-track:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(30,60,114,0.4); }
+        .btn-track:active { transform: translateY(0); }
+        .info {
+            margin-top: 24px;
+            padding: 16px;
+            background: #f4f7ff;
+            border-radius: 10px;
+            border-left: 4px solid #2a5298;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.7;
+        }
+        .info strong { color: #1e3c72; }
+        .info code { background: #e8edf8; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 12px; }
+        .footer { margin-top: 20px; text-align: center; font-size: 12px; color: #aaa; }
+        .footer a { color: #2a5298; text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        .note {
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #795548;
+            line-height: 1.6;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 16px;
+            color: #2a5298;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-<div class="card">
-  <div class="logo">SINDO EXPRESS</div>
-  <h1>Lacak Paket Anda</h1>
-  <p class="sub">Masukkan nomor resi, lalu Anda akan diarahkan ke halaman resmi untuk melihat status pengiriman.</p>
+    <div class="card">
+        <div class="header">
+            <div class="logo">SINDO EXPRESS</div>
+            <h1>Lacak Paket Anda</h1>
+            <p>Masukkan nomor resi untuk melihat status pengiriman</p>
+        </div>
 
-  <label for="resi">Nomor Resi (Bill Number)</label>
-  <input type="text" id="resi" placeholder="Contoh: K2602115-688" autocomplete="off" spellcheck="false">
+        <div class="form-group">
+            <label for="resi">Nomor Resi (Bill Number)</label>
+            <input
+                type="text"
+                id="resi"
+                placeholder="Contoh: K2602115-688"
+                value="K2602115-688"
+                autocomplete="off"
+                spellcheck="false"
+            >
+        </div>
 
-  <button class="btn" onclick="lacak()">🔍 Buka Halaman Pelacakan Resmi</button>
+        <button class="btn-track" onclick="lacak()">
+            🔍 Lacak Paket Sekarang
+        </button>
 
-  <div class="info">
-    <strong>ℹ️ Cara kerja:</strong><br>
-    Halaman ini akan <strong>menyalin nomor resi</strong> ke clipboard Anda, lalu membuka situs resmi Sindo Express. Di sana, tempel nomor resi (<code>Ctrl+V</code>) dan klik tombol cek resi.
-  </div>
+        <div class="loading" id="loading">
+            Membuka sistem pelacakan Sindo Express...
+        </div>
 
-  <div class="warning">
-    ⚠️ <strong>Catatan penting:</strong> Saya tidak dapat menampilkan data pelacakan secara langsung karena Sindo Express tidak menyediakan API publik dan halaman login resmi tidak dapat diakses secara otomatis dari luar.
-  </div>
+        <div class="info">
+            <strong>ℹ️ Cara kerja:</strong><br>
+            Tombol di atas akan membuka portal pelacakan resmi Sindo Express di tab baru.
+            Nomor resi yang Anda masukkan akan otomatis disalin agar bisa langsung ditempel di sana.
+        </div>
 
-  <div class="footer">
-    Butuh bantuan? <a href="tel:+62315910758">(031) 5910758</a> · <a href="mailto:info@ptsindo.com">info@ptsindo.com</a>
-  </div>
-</div>
+        <div class="note">
+            ⚠️ <strong>Catatan:</strong> Halaman ini tidak dapat menampilkan data pelacakan secara langsung karena data resi hanya tersedia di sistem internal Sindo Express, bukan API publik.
+        </div>
 
-<script>
-function lacak() {
-  const input = document.getElementById('resi');
-  const resi = input.value.trim().toUpperCase();
+        <div class="footer">
+            Butuh bantuan? Hubungi <a href="tel:(031)5910758">(031) 5910758</a>
+            atau email <a href="mailto:info@ptsindo.com">info@ptsindo.com</a>
+        </div>
+    </div>
 
-  if (!resi) {
-    alert('Silakan masukkan nomor resi terlebih dahulu.');
-    input.focus();
-    return;
-  }
+    <script>
+        function lacak() {
+            const input = document.getElementById('resi');
+            const resi = input.value.trim().toUpperCase();
+            const loading = document.getElementById('loading');
 
-  // 复制运单号到剪贴板，方便用户粘贴
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(resi).then(function() {
-      console.log('Nomor resi disalin: ' + resi);
-    }).catch(function() {
-      // 剪贴板不可用时静默失败
-    });
-  }
+            if (!resi) {
+                alert('Silakan masukkan nomor resi terlebih dahulu.');
+                input.focus();
+                return;
+            }
 
-  // 打开 Sindo Express 官网，用户可点击“Cek Resi”菜单
-  window.open('https://www.sindoexpress.co.id/', '_blank');
-}
+            // Tampilkan loading
+            loading.style.display = 'block';
 
-// 输入时过滤非法字符
-document.getElementById('resi').addEventListener('input', function() {
-  this.value = this.value.replace(/[^A-Za-z0-9\-]/g, '');
-});
+            // Salin nomor resi ke clipboard agar user bisa langsung paste
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(resi).catch(function() {});
+            }
 
-// 按 Enter 触发
-document.getElementById('resi').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') lacak();
-});
-</script>
+            // Buka sistem pelacakan resmi Sindo Express
+            const trackingUrl = 'https://tracking.sindo.co.id/';
+
+            setTimeout(function() {
+                window.open(trackingUrl, '_blank');
+                loading.style.display = 'none';
+            }, 300);
+        }
+
+        // Lacak saat tekan Enter
+        document.getElementById('resi').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                lacak();
+            }
+        });
+
+        // Auto-format: hanya izinkan huruf, angka, dan tanda hubung
+        document.getElementById('resi').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^A-Za-z0-9\-]/g, '');
+        });
+    </script>
 </body>
 </html>
