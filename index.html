@@ -24,6 +24,11 @@
       --header-bg: rgba(10, 13, 20, 0.78);
       --radius: 16px; --radius-sm: 12px; --radius-lg: 22px;
       --safe-b: env(safe-area-inset-bottom, 0px);
+
+      /* ==== VARIABEL BRAND COIN DINAMIS ==== */
+      --brand: #f0b90b;
+      --brand-soft: rgba(240,185,11,0.14);
+      --brand-border: rgba(240,185,11,0.35);
     }
     [data-theme="light"] {
       --bg: #f4f6fa; --bg2: #ffffff;
@@ -177,11 +182,13 @@
       box-shadow: 0 0 30px rgba(240,185,11,0.35);
       position: relative; flex-shrink: 0;
       animation: coinGlow 3s ease-in-out infinite;
+      transition: background 0.4s ease, box-shadow 0.4s ease;
     }
     .coin-icon::after {
       content: ''; position: absolute; inset: -4px;
       border-radius: 50%; border: 2px solid rgba(240,185,11,0.35);
       animation: coinPulse 3s ease-in-out infinite;
+      transition: border-color 0.4s ease;
     }
     @keyframes coinGlow {
       0%,100% { box-shadow: 0 0 30px rgba(240,185,11,0.35); }
@@ -267,7 +274,7 @@
     }
     .chart-title i { color: var(--gold); font-size: 14px; }
 
-    /* === COIN SELECTOR BARU === */
+    /* === COIN SELECTOR === */
     .chart-coin-selector {
       display: flex; align-items: center; gap: 8px;
       background: var(--card2); border: 1px solid var(--border);
@@ -561,18 +568,26 @@
       white-space: nowrap;
       vertical-align: middle;
     }
+
+    /* ==== BADGE COIN — WARNA BRAND DINAMIS ==== */
     .td-coin {
-      background: rgba(240,185,11,0.14);
-      color: var(--gold);
+      background: var(--brand-soft);
+      color: var(--brand);
       padding: 4px 10px; border-radius: 6px;
       font-weight: 700; font-size: 11px;
       display: inline-block;
-      border: 1px solid rgba(240,185,11,0.25);
+      border: 1px solid var(--brand-border);
       letter-spacing: 0.5px;
+      transition: color 0.4s ease, background 0.4s ease, border-color 0.4s ease;
     }
     .td-date { color: var(--muted); font-size: 12px; }
     .td-total { color: var(--accent2); font-weight: 600; }
-    .td-jumlah { color: var(--green); font-weight: 600; }
+    /* ==== JUMLAH KOIN — WARNA BRAND DINAMIS ==== */
+    .td-jumlah {
+      color: var(--brand);
+      font-weight: 600;
+      transition: color 0.4s ease;
+    }
 
     .action-group { display: flex; gap: 6px; align-items: center; }
     .btn-action {
@@ -877,11 +892,13 @@
       table, thead, tbody, tr, td { display: block; width: 100%; }
       thead { display: none; }
 
+      /* ==== BORDER KIRI CARD — WARNA BRAND DINAMIS ==== */
       tbody tr {
         background: var(--card2); border: 1px solid var(--border);
+        border-left: 3px solid var(--brand);
         border-radius: var(--radius-sm); padding: 14px;
         margin-bottom: 10px; position: relative;
-        transition: border-color 0.2s, transform 0.15s;
+        transition: border-color 0.4s ease, transform 0.15s;
       }
       tbody tr:last-child { margin-bottom: 0; }
       tbody tr:hover { background: var(--card2); }
@@ -1057,13 +1074,14 @@
         <div class="chart-header">
           <div>
             <div class="chart-title"><i class="fas fa-chart-area"></i> Grafik <span id="chartCoinLabel">DOGE</span> / IDR</div>
-            <!-- === COIN SELECTOR BARU === -->
+            <!-- === COIN SELECTOR (SUDAH DITAMBAH BNB) === -->
             <div class="chart-coin-selector">
               <label><i class="fas fa-coins"></i> Pilih Coin:</label>
               <select id="chartCoinSelect">
                 <option value="dogecoin">DOGE</option>
                 <option value="bitcoin">BTC</option>
                 <option value="ethereum">ETH</option>
+                <option value="binancecoin">BNB</option>
                 <option value="solana">SOL</option>
                 <option value="ripple">XRP</option>
                 <option value="cardano">ADA</option>
@@ -1193,10 +1211,12 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="inCoin">Coin <span class="req">*</span></label>
+              <!-- === FORM COIN (SUDAH DITAMBAH BNB) === -->
               <select id="inCoin">
                 <option value="DOGE" selected>DOGE</option>
                 <option value="BTC">BTC</option>
                 <option value="ETH">ETH</option>
+                <option value="BNB">BNB</option>
                 <option value="SOL">SOL</option>
                 <option value="XRP">XRP</option>
                 <option value="ADA">ADA</option>
@@ -1796,16 +1816,16 @@
     $('curPrice').addEventListener('change', handleManualPriceInput);
 
     /* ============================================================
-       GRAFIK REAL-TIME — CoinGecko (MULTI COIN)
+       GRAFIK REAL-TIME — CoinGecko (MULTI COIN + BNB)
        ============================================================ */
-    // Mapping coin id CoinGecko -> label pendek
     const COIN_META = {
-      dogecoin: { symbol: 'DOGE', color: '#f0b90b', fill: 'rgba(240,185,11,0.12)' },
-      bitcoin:  { symbol: 'BTC',  color: '#f7931a', fill: 'rgba(247,147,26,0.12)' },
-      ethereum: { symbol: 'ETH',  color: '#627eea', fill: 'rgba(98,126,234,0.12)' },
-      solana:   { symbol: 'SOL',  color: '#14f195', fill: 'rgba(20,241,149,0.12)' },
-      ripple:   { symbol: 'XRP',  color: '#23292f', fill: 'rgba(35,41,47,0.12)' },
-      cardano:  { symbol: 'ADA',  color: '#0033ad', fill: 'rgba(0,51,173,0.12)' }
+      dogecoin:    { symbol: 'DOGE', color: '#f0b90b', fill: 'rgba(240,185,11,0.12)' },
+      bitcoin:     { symbol: 'BTC',  color: '#f7931a', fill: 'rgba(247,147,26,0.12)' },
+      ethereum:    { symbol: 'ETH',  color: '#627eea', fill: 'rgba(98,126,234,0.12)' },
+      binancecoin: { symbol: 'BNB',  color: '#f3ba2f', fill: 'rgba(243,186,47,0.12)' },
+      solana:      { symbol: 'SOL',  color: '#14f195', fill: 'rgba(20,241,149,0.12)' },
+      ripple:      { symbol: 'XRP',  color: '#00aae4', fill: 'rgba(0,170,228,0.12)' },
+      cardano:     { symbol: 'ADA',  color: '#0033ad', fill: 'rgba(0,51,173,0.12)' }
     };
 
     const MAX_DATA_POINTS = 60;
@@ -1817,15 +1837,27 @@
     let lastPrice   = null;
     let chartFetchTimer = null;
 
-    // Coin yang sedang dipilih untuk grafik
     let selectedCoinId = localStorage.getItem('chart_coin_id') || 'dogecoin';
 
     function getChartStorageKey() {
       return 'chart_history_' + selectedCoinId;
     }
-
     function getCurrentSymbol() {
       return (COIN_META[selectedCoinId] || COIN_META.dogecoin).symbol;
+    }
+
+    /* ==== UPDATE WARNA BRAND DINAMIS ==== */
+    function applyBrandColor(coinId) {
+      const meta = COIN_META[coinId] || COIN_META.dogecoin;
+      const root = document.documentElement;
+      const hex = meta.color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+
+      root.style.setProperty('--brand', meta.color);
+      root.style.setProperty('--brand-soft', 'rgba(' + r + ',' + g + ',' + b + ',0.14)');
+      root.style.setProperty('--brand-border', 'rgba(' + r + ',' + g + ',' + b + ',0.35)');
     }
 
     function saveChartHistory() {
@@ -1982,7 +2014,7 @@
     }
 
     function startPriceChart() {
-      // Pastikan label coin di UI sesuai pilihan
+      applyBrandColor(selectedCoinId);
       if ($('chartCoinLabel')) $('chartCoinLabel').textContent = getCurrentSymbol();
       const sel = $('chartCoinSelect');
       if (sel && sel.value !== selectedCoinId) sel.value = selectedCoinId;
@@ -2010,7 +2042,6 @@
         isAutoUpdating = false;
         calc();
       } else if (autoPriceMode) {
-        // Kalau belum ada history, ambil sekarang
         fetchCoinPrice();
       }
 
@@ -2025,7 +2056,7 @@
       }
     }
 
-    // === Event ganti coin di grafik ===
+    /* ==== EVENT GANTI COIN ==== */
     $('chartCoinSelect').addEventListener('change', (e) => {
       const newCoinId = e.target.value;
       if (!COIN_META[newCoinId]) return;
@@ -2033,20 +2064,19 @@
       selectedCoinId = newCoinId;
       localStorage.setItem('chart_coin_id', selectedCoinId);
 
-      // Reset data grafik & muat history coin baru
+      applyBrandColor(selectedCoinId);
+
       chartLabels = [];
       chartData   = [];
       lastPrice   = null;
 
       if ($('chartCoinLabel')) $('chartCoinLabel').textContent = getCurrentSymbol();
 
-      // Re-init chart dengan warna coin baru
       if (priceChart) {
         priceChart.destroy();
         priceChart = null;
       }
 
-      // Muat history coin baru
       loadChartHistory();
       initChart();
 
@@ -2056,7 +2086,6 @@
         if (priceChart) priceChart.update('none');
       }
 
-      // Update harga AUTO jika mode auto
       if (autoPriceMode && lastPrice != null) {
         isAutoUpdating = true;
         if ($('curPrice')) $('curPrice').value = Math.round(lastPrice);
@@ -2064,7 +2093,6 @@
         calc();
       }
 
-      // Fetch harga terbaru coin baru
       fetchCoinPrice();
       toast('Beralih ke grafik ' + getCurrentSymbol(), 'info');
     });
