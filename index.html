@@ -1,189 +1,972 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lacak Paket Sindo Express</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .card {
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-            max-width: 560px;
-            width: 100%;
-        }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header .logo {
-            display: inline-block;
-            background: #1e3c72;
-            color: #fff;
-            font-weight: 700;
-            font-size: 20px;
-            padding: 10px 28px;
-            border-radius: 50px;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-        }
-        .header h1 { color: #333; font-size: 22px; margin-bottom: 8px; }
-        .header p { color: #777; font-size: 14px; line-height: 1.5; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; color: #333; font-size: 14px; margin-bottom: 8px; }
-        input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 1px;
-            transition: border-color 0.3s;
-            text-transform: uppercase;
-        }
-        input:focus { outline: none; border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42,82,152,0.1); }
-        .btn-track {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 0.5px;
-        }
-        .btn-track:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(30,60,114,0.4); }
-        .btn-track:active { transform: translateY(0); }
-        .info {
-            margin-top: 24px;
-            padding: 16px;
-            background: #f4f7ff;
-            border-radius: 10px;
-            border-left: 4px solid #2a5298;
-            font-size: 13px;
-            color: #555;
-            line-height: 1.7;
-        }
-        .info strong { color: #1e3c72; }
-        .info code { background: #e8edf8; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 12px; }
-        .footer { margin-top: 20px; text-align: center; font-size: 12px; color: #aaa; }
-        .footer a { color: #2a5298; text-decoration: none; }
-        .footer a:hover { text-decoration: underline; }
-        .note {
-            margin-top: 12px;
-            padding: 10px 14px;
-            background: #fff8e1;
-            border: 1px solid #ffe082;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #795548;
-            line-height: 1.6;
-        }
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 16px;
-            color: #2a5298;
-            font-size: 14px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sindo Express - Tracking System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #1e3c72;
+    --primary-light: #2a5298;
+    --accent: #00a8e8;
+    --bg: #eef2f7;
+    --card: #ffffff;
+    --border: #e1e8f0;
+    --text: #2c3e50;
+    --muted: #7b8ba3;
+    --success: #27ae60;
+    --warn: #f39c12;
+    --danger: #c0392b;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: #fff;
+    padding: 26px 32px;
+    border-radius: 14px 14px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: 0 4px 20px rgba(30,60,114,.25);
+  }
+  .header .brand {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .header .brand .icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-size: 22px;
+  }
+  .header .brand .text .name {
+    font-size: 20px; font-weight: 700; letter-spacing: 2px;
+  }
+  .header .brand .text .tag {
+    font-size: 11px; opacity: 0.75; letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .header .clock {
+    text-align: right;
+    font-size: 12px;
+    opacity: 0.9;
+  }
+  .header .clock .time { font-size: 20px; font-weight: 700; font-family: 'Courier New', monospace; }
+
+  /* ===== SEARCH BAR ===== */
+  .search-bar {
+    background: #fff;
+    padding: 22px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-bar .input-wrap {
+    flex: 1;
+    min-width: 240px;
+    position: relative;
+  }
+  .search-bar .input-wrap::before {
+    content: '🔍';
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    opacity: 0.5;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 13px 16px 13px 42px;
+    border: 2px solid #d7dfe9;
+    border-radius: 9px;
+    font-size: 15px;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .search-bar input:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(42,82,152,.1);
+  }
+  .search-bar button {
+    padding: 13px 28px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    white-space: nowrap;
+  }
+  .search-bar button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(30,60,114,.35);
+  }
+  .search-bar button:active { transform: translateY(0); }
+  .search-bar .btn-clear {
+    background: #eef2f7;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .search-bar .btn-clear:hover { background: #e1e8f0; box-shadow: none; }
+
+  /* ===== QUICK SAMPLES ===== */
+  .samples {
+    background: #fff;
+    padding: 12px 32px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .samples .label { font-weight: 600; }
+  .samples button {
+    background: #f4f7fb;
+    border: 1px solid var(--border);
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .samples button:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  /* ===== STATE ===== */
+  .state {
+    background: #fff;
+    padding: 60px 30px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .state .spinner {
+    width: 44px; height: 44px;
+    border: 4px solid #e4ebf3;
+    border-top-color: var(--primary-light);
+    border-radius: 50%;
+    margin: 0 auto 18px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== SUMMARY ===== */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    background: #fff;
+    padding: 22px 32px 26px;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary .card {
+    background: #f8fafd;
+    border: 1px solid #e4ebf3;
+    border-radius: 10px;
+    padding: 15px 18px;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .summary .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(30,60,114,.08);
+  }
+  .summary .card .k {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .summary .card .v {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+    word-break: break-word;
+  }
+
+  /* ===== STATUS TRACKER ===== */
+  .status-track {
+    background: #fff;
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .status-track h2 {
+    font-size: 15px;
+    color: var(--primary);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .status-track h2::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--primary-light);
+    border-radius: 50%;
+  }
+  .timeline {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 0 10px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 10%;
+    right: 10%;
+    height: 3px;
+    background: #e4ebf3;
+    border-radius: 2px;
+  }
+  .timeline .progress-line {
+    position: absolute;
+    top: 18px;
+    left: 10%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--success), var(--accent));
+    border-radius: 2px;
+    transition: width .8s ease;
+  }
+  .timeline .step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 80px;
+  }
+  .timeline .step .dot {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: #e4ebf3;
+    color: var(--muted);
+    display: grid; place-items: center;
+    font-size: 16px;
+    border: 4px solid #fff;
+    box-shadow: 0 0 0 2px #e4ebf3;
+    transition: all .3s;
+  }
+  .timeline .step.done .dot {
+    background: var(--success);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--success);
+  }
+  .timeline .step.active .dot {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 0 2px var(--accent), 0 0 0 8px rgba(0,168,232,.15);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 2px var(--accent), 0 0 0 8px rgba(0,168,232,.15); }
+    50% { box-shadow: 0 0 0 2px var(--accent), 0 0 0 14px rgba(0,168,232,0); }
+  }
+  .timeline .step .lbl {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .timeline .step.done .lbl { color: var(--success); }
+  .timeline .step.active .lbl { color: var(--accent); }
+
+  /* ===== TABLE ===== */
+  .table-wrap {
+    background: #fff;
+    padding: 24px 32px 32px;
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 12px 40px rgba(30,60,114,.12);
+    overflow-x: auto;
+  }
+  .table-wrap .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .table-wrap h2 {
+    font-size: 16px;
+    color: var(--primary);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .table-wrap h2::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--primary-light);
+    border-radius: 50%;
+  }
+  .table-wrap .actions {
+    display: flex; gap: 8px;
+  }
+  .table-wrap .actions button {
+    background: #f4f7fb;
+    border: 1px solid var(--border);
+    color: var(--primary);
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .table-wrap .actions button:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 1100px;
+  }
+  thead th {
+    background: var(--primary);
+    color: #fff;
+    text-align: left;
+    padding: 12px 10px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+  }
+  thead th:first-child { border-radius: 8px 0 0 0; }
+  thead th:last-child  { border-radius: 0 8px 0 0; }
+  tbody td {
+    padding: 11px 10px;
+    border-bottom: 1px solid #eef2f7;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  tbody tr:nth-child(even) { background: #f8fafd; }
+  tbody tr:hover { background: #eaf1fb; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .5px;
+  }
+  .badge.box  { background: #e3f0ff; color: #1e5cb3; }
+  .badge.dos  { background: #fff4e0; color: #b8720b; }
+  .badge.unit { background: #e8f8ee; color: #1e7a3e; }
+
+  .resi-cell {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  /* ===== LEGEND ===== */
+  .legend {
+    margin-top: 22px;
+    background: #f8fafd;
+    border: 1px solid #e4ebf3;
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .legend h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+  .legend ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 6px 20px;
+    font-size: 13px;
+    color: #4a5a72;
+  }
+  .legend li strong { color: var(--primary); }
+
+  /* ===== EMPTY / ERROR ===== */
+  .empty {
+    background: #fff;
+    padding: 60px 30px;
+    text-align: center;
+    border-radius: 0 0 14px 14px;
+  }
+  .empty .icon { font-size: 60px; margin-bottom: 16px; opacity: 0.4; }
+  .empty .title { font-size: 18px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+  .empty .desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .footer a { color: var(--primary-light); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ===== MODAL HELP ===== */
+  .help {
+    margin-top: 16px;
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #795548;
+    line-height: 1.7;
+  }
+  .help strong { color: #5d4037; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 640px) {
+    .header, .search-bar, .summary, .table-wrap, .status-track, .samples {
+      padding-left: 18px; padding-right: 18px;
+    }
+    .header { padding-top: 20px; padding-bottom: 20px; }
+    .header .clock { text-align: left; }
+    .timeline .step .lbl { font-size: 9px; }
+    .timeline .step .dot { width: 32px; height: 32px; font-size: 13px; }
+  }
+</style>
 </head>
 <body>
-    <div class="card">
-        <div class="header">
-            <div class="logo">SINDO EXPRESS</div>
-            <h1>Lacak Paket Anda</h1>
-            <p>Masukkan nomor resi untuk melihat status pengiriman</p>
-        </div>
+<div class="container">
 
-        <div class="form-group">
-            <label for="resi">Nomor Resi (Bill Number)</label>
-            <input
-                type="text"
-                id="resi"
-                placeholder="Contoh: K2602115-688"
-                value="K2602115-688"
-                autocomplete="off"
-                spellcheck="false"
-            >
-        </div>
+  <!-- ================= HEADER ================= -->
+  <div class="header">
+    <div class="brand">
+      <div class="icon">📦</div>
+      <div class="text">
+        <div class="name">SINDO EXPRESS</div>
+        <div class="tag">Tracking System</div>
+      </div>
+    </div>
+    <div class="clock">
+      <div>Waktu Server</div>
+      <div class="time" id="clock">--:--:--</div>
+      <div id="date">--</div>
+    </div>
+  </div>
 
-        <button class="btn-track" onclick="lacak()">
-            🔍 Lacak Paket Sekarang
-        </button>
+  <!-- ================= SEARCH ================= -->
+  <div class="search-bar">
+    <div class="input-wrap">
+      <input type="text" id="resiInput" placeholder="Masukkan nomor resi (contoh: K2602115-688)" spellcheck="false" autocomplete="off">
+    </div>
+    <button onclick="lacak()">🔍 Lacak Paket</button>
+    <button class="btn-clear" onclick="resetForm()">Reset</button>
+  </div>
 
-        <div class="loading" id="loading">
-            Membuka sistem pelacakan Sindo Express...
-        </div>
+  <!-- ================= QUICK SAMPLES ================= -->
+  <div class="samples">
+    <span class="label">Contoh Resi:</span>
+    <button onclick="quickFill('K2602115-688')">K2602115-688</button>
+    <button onclick="quickFill('K2603001-101')">K2603001-101</button>
+    <button onclick="quickFill('K2603002-202')">K2603002-202</button>
+    <button onclick="quickFill('K2603003-303')">K2603003-303</button>
+    <button onclick="quickFill('K2603004-404')">K2603004-404</button>
+  </div>
 
-        <div class="info">
-            <strong>ℹ️ Cara kerja:</strong><br>
-            Tombol di atas akan membuka portal pelacakan resmi Sindo Express di tab baru.
-            Nomor resi yang Anda masukkan akan otomatis disalin agar bisa langsung ditempel di sana.
-        </div>
+  <!-- ================= LOADING ================= -->
+  <div class="state" id="loading" style="display:none;">
+    <div class="spinner"></div>
+    <div>Memuat data tracking untuk <b id="loadingResi">-</b>...</div>
+  </div>
 
-        <div class="note">
-            ⚠️ <strong>Catatan:</strong> Halaman ini tidak dapat menampilkan data pelacakan secara langsung karena data resi hanya tersedia di sistem internal Sindo Express, bukan API publik.
-        </div>
+  <!-- ================= RESULT ================= -->
+  <div id="result" style="display:none;">
 
-        <div class="footer">
-            Butuh bantuan? Hubungi <a href="tel:(031)5910758">(031) 5910758</a>
-            atau email <a href="mailto:info@ptsindo.com">info@ptsindo.com</a>
+    <!-- Summary -->
+    <div class="summary" id="summary"></div>
+
+    <!-- Status Timeline -->
+    <div class="status-track">
+      <h2>Status Pengiriman</h2>
+      <div class="timeline" id="timeline">
+        <div class="progress-line" id="progressLine" style="width:0%"></div>
+        <div class="step" data-step="1">
+          <div class="dot">📝</div>
+          <div class="lbl">Diterima</div>
         </div>
+        <div class="step" data-step="2">
+          <div class="dot">📦</div>
+          <div class="lbl">Diproses</div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="dot">🚢</div>
+          <div class="lbl">Berangkat</div>
+        </div>
+        <div class="step" data-step="4">
+          <div class="dot">⚓</div>
+          <div class="lbl">Tiba</div>
+        </div>
+        <div class="step" data-step="5">
+          <div class="dot">🚚</div>
+          <div class="lbl">Dikirim</div>
+        </div>
+        <div class="step" data-step="6">
+          <div class="dot">✅</div>
+          <div class="lbl">Terkirim</div>
+        </div>
+      </div>
     </div>
 
-    <script>
-        function lacak() {
-            const input = document.getElementById('resi');
-            const resi = input.value.trim().toUpperCase();
-            const loading = document.getElementById('loading');
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <h2>Detail Pengiriman</h2>
+        <div class="actions">
+          <button onclick="copyResi()">📋 Salin Resi</button>
+          <button onclick="window.print()">🖨️ Cetak</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Tgl. Masuk</th>
+            <th>Qty</th>
+            <th>Satuan</th>
+            <th>Nama Barang</th>
+            <th>No. Tracking</th>
+            <th>Pengirim</th>
+            <th>Kontainer</th>
+            <th>Kapal</th>
+            <th>ETD</th>
+            <th>ETA</th>
+            <th>ATD</th>
+            <th>ATA</th>
+            <th>Serah Terima</th>
+            <th>Penerima</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
 
-            if (!resi) {
-                alert('Silakan masukkan nomor resi terlebih dahulu.');
-                input.focus();
-                return;
-            }
+      <div class="legend">
+        <h3>Legend</h3>
+        <ul>
+          <li><strong>ETD</strong> : Estimasi Keberangkatan</li>
+          <li><strong>ETA</strong> : Estimasi Kedatangan</li>
+          <li><strong>ATD</strong> : Kapal Berangkat</li>
+          <li><strong>ATA</strong> : Kapal Tiba dan Proses Bongkar</li>
+          <li><strong>DT</strong> : Terkirim</li>
+        </ul>
+      </div>
+    </div>
 
-            // Tampilkan loading
-            loading.style.display = 'block';
+  </div>
 
-            // Salin nomor resi ke clipboard agar user bisa langsung paste
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(resi).catch(function() {});
-            }
+  <!-- ================= EMPTY ================= -->
+  <div class="empty" id="empty" style="display:none;">
+    <div class="icon">🔍</div>
+    <div class="title" id="emptyTitle">Resi Tidak Ditemukan</div>
+    <div class="desc" id="emptyDesc">
+      Silakan periksa kembali nomor resi yang Anda masukkan.
+    </div>
+  </div>
 
-            // Buka sistem pelacakan resmi Sindo Express
-            const trackingUrl = 'https://tracking.sindo.co.id/';
+  <!-- ================= INITIAL ================= -->
+  <div class="empty" id="initial" style="display:none;">
+    <div class="icon">📦</div>
+    <div class="title">Masukkan Nomor Resi</div>
+    <div class="desc">
+      Ketik nomor resi pada kotak di atas, lalu klik <b>Lacak Paket</b>.<br>
+      Gunakan contoh resi di atas untuk mencoba.
+    </div>
+  </div>
 
-            setTimeout(function() {
-                window.open(trackingUrl, '_blank');
-                loading.style.display = 'none';
-            }, 300);
-        }
+  <!-- ================= HELP ================= -->
+  <div class="help">
+    <strong>ℹ️ Informasi:</strong> Halaman ini mensimulasikan tampilan tracking Sindo Express.
+    Data ditampilkan dari database internal demo. Untuk data real-time, silakan kunjungi
+    <a href="https://tracking.sindo.co.id" target="_blank" style="color:#5d4037;text-decoration:underline;">tracking.sindo.co.id</a>.
+  </div>
 
-        // Lacak saat tekan Enter
-        document.getElementById('resi').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                lacak();
-            }
-        });
+  <!-- ================= FOOTER ================= -->
+  <div class="footer">
+    © 2026 Sindo Express — Tracking System Demo<br>
+    Butuh bantuan? Hubungi <a href="tel:(031)5910758">(031) 5910758</a> &middot;
+    <a href="mailto:info@ptsindo.com">info@ptsindo.com</a>
+  </div>
 
-        // Auto-format: hanya izinkan huruf, angka, dan tanda hubung
-        document.getElementById('resi').addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^A-Za-z0-9\-]/g, '');
-        });
-    </script>
+</div>
+
+<script>
+/* =========================================================
+   DATABASE RESI (demo)
+   ---------------------------------------------------------
+   Struktur tiap resi:
+   {
+     resi, pengirim, kontainer, kapal,
+     etd, eta, atd, ata, serahTerima, penerima,
+     status: 1..6 (posisi timeline),
+     items: [ { tgl, qty, sat, nama } ]
+   }
+   ========================================================= */
+const DATABASE = {
+
+  /* -------- Resi contoh 1 : K2602115-688 (data asli) -------- */
+  "K2602115-688": {
+    resi: "K2602115-688",
+    pengirim: "POLYTRON",
+    kontainer: "SIP-019L 9095 UD",
+    kapal: "DHARMA KENCANA VII",
+    etd: "22/09/2026",
+    eta: "25/09/2026",
+    atd: "22/09/2026",
+    ata: "23/09/2026",
+    serahTerima: "-",
+    penerima: "-",
+    status: 4, // sudah tiba (ATD)
+    items: [
+      { tgl:"21/09/2026", qty:1, sat:"BOX", nama:"GLASS PANEL" },
+      { tgl:"21/09/2026", qty:2, sat:"BOX", nama:"GLASS PANEL" },
+      { tgl:"21/09/2026", qty:1, sat:"BOX", nama:"GLASS PANEL" },
+      { tgl:"21/09/2026", qty:1, sat:"BOX", nama:"GLASS PANEL" },
+      { tgl:"21/09/2026", qty:1, sat:"BOX", nama:"GLASS PANEL" },
+      { tgl:"21/09/2026", qty:1, sat:"BOX", nama:"GLASS PANEL" },
+      { tgl:"21/09/2026", qty:1, sat:"BOX", nama:"GKLASS PANEL" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:2, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:4, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" },
+      { tgl:"21/09/2026", qty:1, sat:"DOS", nama:"ELEKTRONIK" }
+    ]
+  },
+
+  /* -------- Resi contoh 2 -------- */
+  "K2603001-101": {
+    resi: "K2603001-101",
+    pengirim: "PT MAJU JAYA",
+    kontainer: "SIP-020M 1200 AB",
+    kapal: "KM SAMUDRA NUSANTARA",
+    etd: "20/09/2026",
+    eta: "24/09/2026",
+    atd: "20/09/2026",
+    ata: "24/09/2026",
+    serahTerima: "25/09/2026",
+    penerima: "BUDI SANTOSO",
+    status: 6, // terkirim
+    items: [
+      { tgl:"19/09/2026", qty:5, sat:"BOX", nama:"KOMPONEN MESIN" },
+      { tgl:"19/09/2026", qty:3, sat:"DOS", nama:"SPARE PART" },
+      { tgl:"19/09/2026", qty:2, sat:"UNIT", nama:"MOTOR INDUKSI" }
+    ]
+  },
+
+  /* -------- Resi contoh 3 -------- */
+  "K2603002-202": {
+    resi: "K2603002-202",
+    pengirim: "SINAR ABADI",
+    kontainer: "SIP-021N 3456 CD",
+    kapal: "MV OCEAN STAR",
+    etd: "18/09/2026",
+    eta: "23/09/2026",
+    atd: "18/09/2026",
+    ata: "-",
+    serahTerima: "-",
+    penerima: "-",
+    status: 3, // berangkat
+    items: [
+      { tgl:"17/09/2026", qty:10, sat:"DOS", nama:"TEXTILE" },
+      { tgl:"17/09/2026", qty:8, sat:"BOX", nama:"GARMENT" }
+    ]
+  },
+
+  /* -------- Resi contoh 4 -------- */
+  "K2603003-303": {
+    resi: "K2603003-303",
+    pengirim: "CV BERKAH LAUT",
+    kontainer: "SIP-022O 7890 EF",
+    kapal: "KM BAHARI JAYA",
+    etd: "15/09/2026",
+    eta: "22/09/2026",
+    atd: "15/09/2026",
+    ata: "22/09/2026",
+    serahTerima: "-",
+    penerima: "-",
+    status: 4,
+    items: [
+      { tgl:"14/09/2026", qty:20, sat:"DOS", nama:"MAKANAN KALENG" },
+      { tgl:"14/09/2026", qty:15, sat:"BOX", nama:"MINUMAN" }
+    ]
+  },
+
+  /* -------- Resi contoh 5 -------- */
+  "K2603004-404": {
+    resi: "K2603004-404",
+    pengirim: "PT SUKSES MANDIRI",
+    kontainer: "SIP-023P 1122 GH",
+    kapal: "MV NUSANTARA EXPRESS",
+    etd: "12/09/2026",
+    eta: "20/09/2026",
+    atd: "12/09/2026",
+    ata: "20/09/2026",
+    serahTerima: "21/09/2026",
+    penerima: "SITI AMINAH",
+    status: 6,
+    items: [
+      { tgl:"11/09/2026", qty:6, sat:"BOX", nama:"ELEKTRONIK" },
+      { tgl:"11/09/2026", qty:4, sat:"DOS", nama:"AKSESORIS" },
+      { tgl:"11/09/2026", qty:2, sat:"UNIT", nama:"MESIN CUCI" }
+    ]
+  }
+};
+
+/* =========================================================
+   HELPER
+   ========================================================= */
+const $ = id => document.getElementById(id);
+
+function fmtDate(d) {
+  if (!d || d === "-") return "-";
+  return d;
+}
+
+/* =========================================================
+   RENDER SUMMARY
+   ========================================================= */
+function renderSummary(data, totalQty) {
+  const cards = [
+    { k:'No. Tracking', v: data.resi },
+    { k:'Pengirim',     v: data.pengirim },
+    { k:'Kontainer',    v: data.kontainer },
+    { k:'Kapal',        v: data.kapal },
+    { k:'Total Baris',  v: data.items.length + ' baris' },
+    { k:'Total Qty',    v: totalQty + ' unit' },
+    { k:'ETD',          v: data.etd },
+    { k:'ETA',          v: data.eta },
+    { k:'ATD',          v: fmtDate(data.atd) },
+    { k:'ATA',          v: fmtDate(data.ata) },
+    { k:'Serah Terima', v: fmtDate(data.serahTerima) },
+    { k:'Penerima',     v: fmtDate(data.penerima) }
+  ];
+  $('summary').innerHTML = cards.map(c =>
+    `<div class="card"><div class="k">${c.k}</div><div class="v">${c.v}</div></div>`
+  ).join('');
+}
+
+/* =========================================================
+   RENDER TABLE
+   ========================================================= */
+function renderTable(data) {
+  const tbody = $('tableBody');
+  if (!data.items.length) {
+    tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;padding:30px;color:#7b8ba3;">Tidak ada item.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.items.map((it, i) => {
+    const cls = it.sat === 'BOX' ? 'box' : it.sat === 'DOS' ? 'dos' : 'unit';
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${it.tgl}</td>
+      <td><strong>${it.qty}</strong></td>
+      <td><span class="badge ${cls}">${it.sat}</span></td>
+      <td>${it.nama}</td>
+      <td class="resi-cell">${data.resi}</td>
+      <td>${data.pengirim}</td>
+      <td>${data.kontainer}</td>
+      <td>${data.kapal}</td>
+      <td>${data.etd}</td>
+      <td>${data.eta}</td>
+      <td>${fmtDate(data.atd)}</td>
+      <td>${fmtDate(data.ata)}</td>
+      <td>${fmtDate(data.serahTerima)}</td>
+      <td>${fmtDate(data.penerima)}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* =========================================================
+   RENDER TIMELINE
+   ========================================================= */
+function renderTimeline(status) {
+  const steps = document.querySelectorAll('.timeline .step');
+  const total = steps.length;
+  steps.forEach((el, i) => {
+    el.classList.remove('done', 'active');
+    const stepNum = i + 1;
+    if (stepNum < status) {
+      el.classList.add('done');
+      el.querySelector('.dot').textContent = '✓';
+    } else if (stepNum === status) {
+      el.classList.add('active');
+    } else {
+      // reset icon
+      const icons = ['📝','📦','🚢','⚓','🚚','✅'];
+      el.querySelector('.dot').textContent = icons[i];
+    }
+  });
+  // progress line width
+  const pct = ((status - 1) / (total - 1)) * 80;
+  $('progressLine').style.width = pct + '%';
+}
+
+/* =========================================================
+   MAIN FUNCTION
+   ========================================================= */
+function lacak() {
+  const resi = $('resiInput').value.trim().toUpperCase();
+  if (!resi) {
+    alert('Silakan masukkan nomor resi terlebih dahulu.');
+    $('resiInput').focus();
+    return;
+  }
+
+  // Sembunyikan semua state
+  $('result').style.display = 'none';
+  $('empty').style.display = 'none';
+  $('initial').style.display = 'none';
+  $('loadingResi').textContent = resi;
+  $('loading').style.display = 'block';
+
+  // Simulasi delay fetch
+  setTimeout(() => {
+    const data = DATABASE[resi];
+
+    if (!data) {
+      $('loading').style.display = 'none';
+      $('empty').style.display = 'block';
+      $('emptyTitle').textContent = 'Resi Tidak Ditemukan';
+      $('emptyDesc').innerHTML = `Nomor resi <b>${resi}</b> tidak ada dalam database.<br>Silakan coba contoh resi di atas.`;
+      return;
+    }
+
+    // Hitung total qty
+    const totalQty = data.items.reduce((s, it) => s + it.qty, 0);
+
+    // Render
+    renderSummary(data, totalQty);
+    renderTable(data);
+    renderTimeline(data.status);
+
+    // Tampilkan
+    $('loading').style.display = 'none';
+    $('result').style.display = 'block';
+    $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 600);
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+function resetForm() {
+  $('resiInput').value = '';
+  $('result').style.display = 'none';
+  $('empty').style.display = 'none';
+  $('loading').style.display = 'none';
+  $('initial').style.display = 'block';
+  $('resiInput').focus();
+}
+
+function quickFill(resi) {
+  $('resiInput').value = resi;
+  lacak();
+}
+
+function copyResi() {
+  const resi = $('resiInput').value.trim().toUpperCase();
+  if (!resi) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(resi).then(() => {
+      const btn = event.target;
+      const old = btn.textContent;
+      btn.textContent = '✓ Tersalin';
+      setTimeout(() => btn.textContent = old, 1500);
+    });
+  }
+}
+
+/* =========================================================
+   CLOCK
+   ========================================================= */
+function updateClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString('id-ID', { hour12: false });
+  const date = now.toLocaleDateString('id-ID', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+  $('clock').textContent = time;
+  $('date').textContent = date;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* =========================================================
+   INIT
+   ========================================================= */
+document.addEventListener('DOMContentLoaded', () => {
+  $('initial').style.display = 'block';
+
+  // Enter untuk lacak
+  $('resiInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') lacak();
+  });
+
+  // Hanya izinkan huruf, angka, tanda hubung
+  $('resiInput').addEventListener('input', function() {
+    this.value = this.value.replace(/[^A-Za-z0-9\-]/g, '').toUpperCase();
+  });
+
+  // Auto-load resi contoh pertama saat halaman dibuka (opsional)
+  // Hapus komentar di bawah jika ingin auto-load:
+  // $('resiInput').value = 'K2602115-688';
+  // lacak();
+});
+</script>
 </body>
 </html>
