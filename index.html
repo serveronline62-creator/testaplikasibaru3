@@ -160,7 +160,7 @@ button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .btn-group-info { margin-left: auto; font-size: 12px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 0; box-shadow: none; cursor: default; background: none; }
 .badge { background: var(--primary-light); color: var(--primary); font-weight: 700; padding: 2px 9px; border-radius: 20px; font-size: 11px; }
 
-input[type="text"], input[type="date"], select {
+input[type="text"], select {
     display: block;
     font-size: 13px;
     font-family: inherit;
@@ -180,11 +180,6 @@ input[type="text"] {
     background-position: 13px center;
 }
 
-input[type="date"] {
-    padding: 10px 12px;
-    width: 100%;
-}
-
 select {
     padding: 10px 14px;
     margin-bottom: 16px;
@@ -197,8 +192,35 @@ select {
     font-weight: 500;
 }
 
-input[type="text"]:focus, input[type="date"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+input[type="text"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 input[type="text"]::placeholder { color: var(--border-light); }
+
+/* Input tanggal format DD/MM/YYYY */
+input.date-input {
+    padding: 10px 12px !important;
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--card-bg);
+    color: var(--text-main);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: 12px center !important;
+    padding-left: 34px !important;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+input.date-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+input.date-input::placeholder { color: var(--border-light); font-weight: 400; letter-spacing: 0; }
+input.date-input.invalid { border-color: var(--danger); background: #fef2f2; }
+input.date-input.valid { border-color: var(--success); }
 
 .filter-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 
@@ -207,19 +229,27 @@ input[type="text"]::placeholder { color: var(--border-light); }
 @media (max-width: 500px) { .filter-grid { grid-template-columns: 1fr; } }
 .filter-grid > * { margin-bottom: 0 !important; min-width: 0; }
 
-#dateRangeContainer {
-    grid-column: span 2;
-}
+#dateRangeContainer { margin-bottom: 16px; }
 #dateRangeContainer .date-range-inner {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
+    max-width: 520px;
 }
 #dateRangeContainer .date-sep {
     color: var(--text-muted);
     font-size: 12px;
     font-weight: 600;
     flex-shrink: 0;
+    padding: 0 4px;
+}
+#dateRangeContainer .date-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .file-upload-wrapper { position: relative; margin-bottom: 16px; }
@@ -258,8 +288,8 @@ td[contenteditable]:hover { border-color: var(--border-light); }
 td[contenteditable]:focus { background: var(--primary-subtle); border-color: var(--primary); }
 
 td.read-only-cell {
-    background: transparent; 
-    cursor: default; 
+    background: transparent;
+    cursor: default;
 }
 
 td.no-urut {
@@ -326,7 +356,8 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     .btn-group-info { display: none; }
     .toast-container { left: 12px; right: 12px; bottom: 12px; }
     .toast { max-width: 100%; }
-    #dateRangeContainer { grid-column: span 1; }
+    #dateRangeContainer .date-range-inner { flex-direction: column; align-items: stretch; max-width: 100%; }
+    #dateRangeContainer .date-sep { text-align: center; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 </style>
@@ -409,12 +440,15 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 </div>
             </div>
 
-            <div id="dateRangeContainer" style="display:none; margin-bottom:16px;">
-                <label class="sr-only">Rentang Tanggal</label>
+            <div id="dateRangeContainer" style="display:none;">
+                <label class="sr-only">Rentang Tanggal (Hari/Bulan/Tahun)</label>
                 <div class="date-range-inner">
-                    <input type="date" id="dateFrom" aria-label="Tanggal dari">
+                    <input type="text" id="dateFrom" class="date-input" placeholder="DD/MM/YYYY" maxlength="10" aria-label="Tanggal dari (DD/MM/YYYY)" autocomplete="off">
                     <span class="date-sep">s/d</span>
-                    <input type="date" id="dateTo" aria-label="Tanggal sampai">
+                    <input type="text" id="dateTo" class="date-input" placeholder="DD/MM/YYYY" maxlength="10" aria-label="Tanggal sampai (DD/MM/YYYY)" autocomplete="off">
+                </div>
+                <div class="date-hint">
+                    <i class="fas fa-info-circle"></i> Format: <strong>Hari/Bulan/Tahun</strong> (contoh: 25/12/2025)
                 </div>
             </div>
 
@@ -561,51 +595,118 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         toastContainer.appendChild(t); setTimeout(()=>{ if(t.parentNode) t.remove(); }, 3200);
     }
 
-    function calculateDays(dateStr) {
-        if (!dateStr) return "";
-        dateStr = String(dateStr).trim();
-        var parts, date;
-        if (dateStr.indexOf('/') !== -1) {
-            parts = dateStr.split('/');
-            if (parts.length === 3) date = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-        } else if (dateStr.indexOf('-') !== -1) {
-            parts = dateStr.split('-');
-             if (parts.length === 3) date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        }
-        if (!date || isNaN(date.getTime())) return ""; 
-        var today = new Date();
-        today.setHours(0, 0, 0, 0); 
-        var diffTime = today - date;
-        var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
-        return diffDays >= 0 ? diffDays : 0;
+    // ========== FUNGSI TANGGAL (DD/MM/YYYY) ==========
+    function formatDateToDDMMYYYY(date) {
+        if (!date || isNaN(date.getTime())) return "";
+        var d = String(date.getDate()).padStart(2, "0");
+        var m = String(date.getMonth() + 1).padStart(2, "0");
+        var y = date.getFullYear();
+        return d + "/" + m + "/" + y;
     }
 
-    // ========== FUNGSI BARU: PARSING TANGGAL ==========
+    function parseDateDDMMYYYY(str) {
+        if (!str) return null;
+        str = String(str).trim();
+        var m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (!m) return null;
+        var d = parseInt(m[1], 10);
+        var mo = parseInt(m[2], 10);
+        var y = parseInt(m[3], 10);
+        if (mo < 1 || mo > 12) return null;
+        if (d < 1 || d > 31) return null;
+        var date = new Date(y, mo - 1, d);
+        if (date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d) return null;
+        date.setHours(0, 0, 0, 0);
+        return date;
+    }
+
+    // Parser umum untuk berbagai format (termasuk DD/MM/YYYY)
     function parseDateValue(val) {
         if (!val) return null;
-        val = String(val).trim();
-        var d = null;
-        // Format DD/MM/YYYY
-        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)) {
-            var p = val.split('/');
-            d = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+        if (val instanceof Date) {
+            if (isNaN(val.getTime())) return null;
+            var dd = new Date(val);
+            dd.setHours(0, 0, 0, 0);
+            return dd;
         }
-        // Format YYYY-MM-DD
-        else if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(val)) {
-            var p = val.split('-');
-            d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+        var s = String(val).trim();
+        if (!s) return null;
+        // DD/MM/YYYY
+        var m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (m1) {
+            return parseDateDDMMYYYY(s);
         }
-        // Format DD-MM-YYYY
-        else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(val)) {
-            var p = val.split('-');
-            d = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+        // YYYY-MM-DD
+        var m2 = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (m2) {
+            var y2 = parseInt(m2[1],10), mo2 = parseInt(m2[2],10), d2 = parseInt(m2[3],10);
+            var date2 = new Date(y2, mo2-1, d2);
+            if (date2.getFullYear()===y2 && date2.getMonth()===mo2-1 && date2.getDate()===d2) {
+                date2.setHours(0,0,0,0);
+                return date2;
+            }
+            return null;
         }
-        else {
-            d = new Date(val);
+        // DD-MM-YYYY
+        var m3 = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+        if (m3) {
+            var y3 = parseInt(m3[3],10), mo3 = parseInt(m3[2],10), d3 = parseInt(m3[1],10);
+            var date3 = new Date(y3, mo3-1, d3);
+            if (date3.getFullYear()===y3 && date3.getMonth()===mo3-1 && date3.getDate()===d3) {
+                date3.setHours(0,0,0,0);
+                return date3;
+            }
+            return null;
         }
+        // Fallback ke Date() bawaan
+        var d = new Date(s);
         if (!d || isNaN(d.getTime())) return null;
         d.setHours(0, 0, 0, 0);
         return d;
+    }
+
+    // Auto-format input tanggal: tambah "/" otomatis
+    function attachDateMask(input) {
+        input.addEventListener("input", function() {
+            var v = this.value.replace(/[^\d]/g, "");
+            if (v.length >= 5) {
+                v = v.substring(0, 2) + "/" + v.substring(2, 4) + "/" + v.substring(4, 8);
+            } else if (v.length >= 3) {
+                v = v.substring(0, 2) + "/" + v.substring(2);
+            }
+            this.value = v;
+            
+            if (v.length === 10) {
+                if (parseDateDDMMYYYY(v)) {
+                    this.classList.remove("invalid");
+                    this.classList.add("valid");
+                } else {
+                    this.classList.add("invalid");
+                    this.classList.remove("valid");
+                }
+            } else {
+                this.classList.remove("invalid", "valid");
+            }
+        });
+        
+        input.addEventListener("blur", function() {
+            var v = this.value.trim();
+            if (v && !parseDateDDMMYYYY(v)) {
+                this.classList.add("invalid");
+                this.classList.remove("valid");
+            } else if (v && parseDateDDMMYYYY(v)) {
+                this.classList.remove("invalid");
+                this.classList.add("valid");
+            } else {
+                this.classList.remove("invalid", "valid");
+            }
+        });
+        
+        // Hanya izinkan angka dan "/" saat keypress
+        input.addEventListener("keypress", function(e) {
+            var c = String.fromCharCode(e.which);
+            if (!/[\d\/]/.test(c)) e.preventDefault();
+        });
     }
 
     function getRowDate(row) {
@@ -619,11 +720,22 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         for (var k in row) {
             if (k.charAt(0) === "_") continue;
             if (/tanggal|date|tgl/i.test(k) && row[k]) {
-                var d = parseDateValue(row[k]);
-                if (d) return d;
+                var d2 = parseDateValue(row[k]);
+                if (d2) return d2;
             }
         }
         return null;
+    }
+
+    function calculateDays(dateStr) {
+        if (!dateStr) return "";
+        var date = parseDateValue(dateStr);
+        if (!date) return "";
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var diffTime = today - date;
+        var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays >= 0 ? diffDays : 0;
     }
 
     document.addEventListener("keydown", function(e) {
@@ -650,8 +762,14 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         tbody1.innerHTML=""; tbody2.innerHTML=""; tbody3.innerHTML=""; tbody4.innerHTML=""; tbody5.innerHTML="";
         totalQty1El.textContent="0"; totalQty2El.textContent="0"; totalQty3aEl.textContent="0"; totalQty4El.textContent="0"; totalQty5El.textContent="0";
         fileInput.value=""; search1.value=""; search2.value=""; search3.value=""; search4.value=""; search5.value="";
-        filterTeknisi.innerHTML = '<option value="">Semua Teknisi</option>'; filterReturn.value=""; filterClaim.value=""; filterPengiriman.innerHTML = '<option value="">Semua Status Pengiriman</option>';
-        filterPeriode.value=""; dateFromInput.value=""; dateToInput.value=""; dateRangeContainer.style.display="none";
+        filterTeknisi.innerHTML = '<option value="">Semua Teknisi</option>';
+        filterReturn.value=""; filterClaim.value="";
+        filterPengiriman.innerHTML = '<option value="">Semua Status Pengiriman</option>';
+        filterPeriode.value="";
+        dateFromInput.value=""; dateToInput.value="";
+        dateFromInput.classList.remove("invalid","valid");
+        dateToInput.classList.remove("invalid","valid");
+        dateRangeContainer.style.display="none";
         checkAllCb.checked=false; checkAllCb.indeterminate=false;
         countBadge.textContent="0"; selectedBadge.textContent="0"; demandBadge.textContent="0"; stockBadge.textContent="0"; stockBadge5.textContent="0";
         $$(".note-input").forEach(el => el.innerText="");
@@ -668,10 +786,15 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 var parsed = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
                 if (!parsed.length) { showToast("File kosong atau format tidak dikenali.", "danger"); return; }
                 data1 = parsed; selectedIndexes.clear();
-                checkAllCb.checked=false; checkAllCb.indeterminate=false; currentFilter1=""; search1.value=""; 
+                checkAllCb.checked=false; checkAllCb.indeterminate=false;
+                currentFilter1=""; search1.value=""; 
                 filterTeknisiVal=""; filterReturnVal=""; filterClaimVal=""; filterPengirimanVal="";
                 filterTeknisi.value=""; filterReturn.value=""; filterClaim.value=""; filterPengiriman.value="";
-                filterPeriodeVal=""; filterPeriode.value=""; dateFromInput.value=""; dateToInput.value=""; dateRangeContainer.style.display="none";
+                filterPeriodeVal=""; filterPeriode.value="";
+                dateFromInput.value=""; dateToInput.value="";
+                dateFromInput.classList.remove("invalid","valid");
+                dateToInput.classList.remove("invalid","valid");
+                dateRangeContainer.style.display="none";
                 populateTeknisiDropdown(data1);
                 populatePengirimanDropdown(data1);
                 renderTable1(); syncToTab2(); syncToTab3(); syncToTab4(); syncToTab5();
@@ -729,7 +852,10 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     filterReturn.addEventListener("change", function() { filterReturnVal = filterReturn.value; renderTable1(); });
     filterClaim.addEventListener("change", function() { filterClaimVal = filterClaim.value; renderTable1(); });
     
-    // Filter Periode
+    // ========== FILTER PERIODE ==========
+    attachDateMask(dateFromInput);
+    attachDateMask(dateToInput);
+
     filterPeriode.addEventListener("change", function() {
         filterPeriodeVal = filterPeriode.value;
         if (filterPeriodeVal === "custom") {
@@ -738,17 +864,25 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             dateRangeContainer.style.display = "none";
             filterDateFrom = ""; filterDateTo = "";
             dateFromInput.value = ""; dateToInput.value = "";
+            dateFromInput.classList.remove("invalid","valid");
+            dateToInput.classList.remove("invalid","valid");
         }
         renderTable1();
     });
-    dateFromInput.addEventListener("change", function() {
-        filterDateFrom = dateFromInput.value;
-        if (filterPeriodeVal === "custom") renderTable1();
-    });
-    dateToInput.addEventListener("change", function() {
-        filterDateTo = dateToInput.value;
-        if (filterPeriodeVal === "custom") renderTable1();
-    });
+
+    dateFromInput.addEventListener("input", debounce(function() {
+        var v = dateFromInput.value.trim();
+        var parsed = parseDateDDMMYYYY(v);
+        filterDateFrom = parsed ? v : "";
+        if (filterPeriodeVal === "custom" && (v === "" || parsed)) renderTable1();
+    }, 400));
+
+    dateToInput.addEventListener("input", debounce(function() {
+        var v = dateToInput.value.trim();
+        var parsed = parseDateDDMMYYYY(v);
+        filterDateTo = parsed ? v : "";
+        if (filterPeriodeVal === "custom" && (v === "" || parsed)) renderTable1();
+    }, 400));
     
     search2.addEventListener("input", debounce(function() { currentFilter2 = search2.value.toLowerCase(); renderTable2(); }, 300));
     search3.addEventListener("input", debounce(function() { currentFilter3 = search3.value.toLowerCase(); renderTable3(); }, 300));
@@ -816,8 +950,8 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 } else if (filterPeriodeVal === "tahunan") {
                     matchPeriode = (rowDate.getFullYear() === today.getFullYear());
                 } else if (filterPeriodeVal === "custom") {
-                    var from = filterDateFrom ? parseDateValue(filterDateFrom) : null;
-                    var to = filterDateTo ? parseDateValue(filterDateTo) : null;
+                    var from = filterDateFrom ? parseDateDDMMYYYY(filterDateFrom) : null;
+                    var to = filterDateTo ? parseDateDDMMYYYY(filterDateTo) : null;
                     if (from && to) {
                         matchPeriode = (rowDate >= from && rowDate <= to);
                     } else if (from) {
