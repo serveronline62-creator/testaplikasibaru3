@@ -25,6 +25,7 @@
       --radius: 16px; --radius-sm: 12px; --radius-lg: 22px;
       --safe-b: env(safe-area-inset-bottom, 0px);
 
+      /* ==== VARIABEL BRAND COIN DINAMIS ==== */
       --brand: #f0b90b;
       --brand-soft: rgba(240,185,11,0.14);
       --brand-border: rgba(240,185,11,0.35);
@@ -325,39 +326,6 @@
       background: var(--green); animation: blink 1.5s infinite;
     }
     .chart-status .dot.off { background: var(--accent); animation: none; }
-
-    /* ==== COUNTDOWN ==== */
-    .chart-countdown {
-      margin-left: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--muted);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      white-space: nowrap;
-      transition: all 0.3s;
-    }
-    .chart-countdown i { font-size: 9px; }
-    .chart-countdown.warn { color: var(--gold); border-color: rgba(240,185,11,0.4); }
-    .chart-countdown.crit { color: var(--accent); border-color: rgba(233,69,96,0.4); }
-
-    /* ==== TOMBOL REFRESH MANUAL ==== */
-    .btn-refresh-chart {
-      background: var(--card2); border: 1px solid var(--border);
-      border-radius: 50%; width: 28px; height: 28px;
-      display: inline-flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--muted); font-size: 11px;
-      transition: all 0.2s; flex-shrink: 0; margin-left: 4px;
-      padding: 0;
-    }
-    .btn-refresh-chart:hover { color: var(--gold); border-color: var(--gold); }
-    .btn-refresh-chart.spinning i { animation: spinSlow 1s linear infinite; }
-    .btn-refresh-chart:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .add-tx-section { margin-bottom: 18px; }
     .btn-add-inline {
@@ -1181,14 +1149,7 @@
               <span class="chart-change" id="chartChangeLabel">0%</span>
             </div>
             <div class="chart-status" id="chartStatus">
-              <span class="dot"></span>
-              <span id="chartStatusText">Menunggu data...</span>
-              <button class="btn-refresh-chart" id="btnRefreshChart" type="button" title="Refresh manual">
-                <i class="fas fa-rotate-right"></i>
-              </button>
-              <span class="chart-countdown" id="chartCountdown" title="Hitung mundur refresh otomatis">
-                <i class="fas fa-hourglass-half"></i> <span id="chartCountdownText">--</span>
-              </span>
+              <span class="dot"></span> <span id="chartStatusText">Menunggu data...</span>
             </div>
           </div>
         </div>
@@ -1213,7 +1174,7 @@
         </div>
         <div class="cp-hint auto" id="cpHint">
           <i class="fas fa-info-circle"></i>
-          <span id="cpHintText">Harga diambil otomatis dari grafik & diperbarui setiap ±60 detik.</span>
+          <span id="cpHintText">Harga diambil otomatis dari grafik & diperbarui setiap 5 menit.</span>
         </div>
       </section>
 
@@ -1362,6 +1323,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <script>
+  // ============================================================
+  // BUNGKUS SEMUA DALAM DOMContentLoaded
+  // ============================================================
   document.addEventListener('DOMContentLoaded', function () {
 
     /* ============================================================
@@ -1734,7 +1698,6 @@
 
         detachListeners();
         stopPriceChart();
-        stopCountdown();
         transactions = [];
         lockedRows   = [];
         appInitialized = false;
@@ -1928,7 +1891,7 @@
         badge.classList.add('auto'); badge.classList.remove('manual');
         text.textContent = 'AUTO';
         hint.classList.add('auto'); hint.classList.remove('manual');
-        hintText.textContent = 'Harga diambil otomatis dari grafik & diperbarui setiap ±60 detik.';
+        hintText.textContent = 'Harga diambil otomatis dari grafik & diperbarui setiap 5 menit.';
       } else {
         wrap.classList.add('manual'); wrap.classList.remove('auto');
         badge.classList.add('manual'); badge.classList.remove('auto');
@@ -1951,7 +1914,7 @@
           isAutoUpdating = false;
           calc();
         } else {
-          fetchCoinPrice(true).then(() => calc());
+          fetchCoinPrice().then(() => calc());
         }
       } else {
         toast('Mode MANUAL aktif — kamu bisa isi harga sendiri', 'info');
@@ -1973,7 +1936,7 @@
     $('curPrice').addEventListener('change', handleManualPriceInput);
 
     /* ============================================================
-       GRAFIK REAL-TIME — Multi Endpoint + Smart Caching + Jitter
+       GRAFIK REAL-TIME — CoinGecko + Fallback CoinCap + Proxy
        ============================================================ */
     const COIN_META = {
       dogecoin:    { symbol: 'DOGE', color: '#f0b90b', fill: 'rgba(240,185,11,0.12)' },
@@ -1985,21 +1948,18 @@
       cardano:     { symbol: 'ADA',  color: '#0033ad', fill: 'rgba(0,51,173,0.12)' }
     };
 
-    /* ==== KONFIGURASI REFRESH ==== */
-    const MAX_DATA_POINTS  = 60;
-    const REFRESH_INTERVAL = 60000;   // 60 detik (aman dari rate limit CoinGecko)
-    const REFRESH_JITTER   = 10000;   // tambah 0-10 detik acak
-    const FETCH_TIMEOUT    = 12000;   // timeout fetch 12 detik
-    const SMART_SKIP_MS    = 55000;   // skip fetch kalau data < 55 detik
-    const USD_TO_IDR       = 15800;   // fallback kurs CoinCap
+    const MAX_DATA_POINTS = 60;
+    const REFRESH_INTERVAL = 300000; // ==== 5 MENIT (300.000 ms) ====
+    const FETCH_TIMEOUT = 12000;
+    const USD_TO_IDR = 15800; // fallback kurs CoinCap
 
-    /* ==== MULTI ENDPOINT FALLBACK ==== */
+    // ==== MULTI ENDPOINT FALLBACK ====
     const API_ENDPOINTS = [
       // 1) CoinGecko simple price (utama)
       (id) => `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=idr&include_24hr_change=true`,
-      // 2) CoinGecko via allorigins proxy
+      // 2) CoinGecko via allorigins proxy (kalau utama diblokir/CORS)
       (id) => `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=idr&include_24hr_change=true`)}`,
-      // 3) CoinCap (fallback terakhir)
+      // 3) CoinCap (fallback terakhir, konversi USD→IDR)
       (id) => {
         const map = {
           dogecoin: 'dogecoin', bitcoin: 'bitcoin', ethereum: 'ethereum',
@@ -2015,7 +1975,6 @@
     let chartData   = [];
     let lastPrice   = null;
     let chartFetchTimer = null;
-    let countdownTimer  = null;
     let isFetching = false;
     let failCount = 0;
     let lastSuccessAt = 0;
@@ -2057,7 +2016,7 @@
         if (!raw) return false;
         const parsed = JSON.parse(raw);
         if (!parsed || !Array.isArray(parsed.labels) || !Array.isArray(parsed.data)) return false;
-        // Cache 24 jam
+        // Simpan cache 24 jam
         if (parsed.savedAt && (Date.now() - parsed.savedAt) > (24 * 60 * 60 * 1000)) {
           localStorage.removeItem(getChartStorageKey());
           return false;
@@ -2178,55 +2137,8 @@
       }
     }
 
-    /* ==== countdown UI ==== */
-    function updateCountdownUI() {
-      const el = $('chartCountdown');
-      const txt = $('chartCountdownText');
-      if (!el || !txt) return;
-
-      if (!lastSuccessAt) {
-        txt.textContent = '--';
-        el.classList.remove('warn', 'crit');
-        return;
-      }
-
-      const elapsed = Math.floor((Date.now() - lastSuccessAt) / 1000);
-      const remain = Math.max(0, Math.floor(REFRESH_INTERVAL / 1000) - elapsed);
-      txt.textContent = remain + 's';
-
-      el.classList.remove('warn', 'crit');
-      if (remain <= 5) el.classList.add('crit');
-      else if (remain <= 15) el.classList.add('warn');
-    }
-
-    function startCountdown() {
-      if (countdownTimer) clearInterval(countdownTimer);
-      updateCountdownUI();
-      countdownTimer = setInterval(updateCountdownUI, 1000);
-    }
-
-    function stopCountdown() {
-      if (countdownTimer) {
-        clearInterval(countdownTimer);
-        countdownTimer = null;
-      }
-      const el = $('chartCountdown');
-      const txt = $('chartCountdownText');
-      if (txt) txt.textContent = '--';
-      if (el) el.classList.remove('warn', 'crit');
-    }
-
-    /* ==== fungsi utama fetch harga ==== */
-    async function fetchCoinPrice(force = false) {
+    async function fetchCoinPrice() {
       if (isFetching) return null;
-
-      // ==== SMART SKIP: kalau data masih fresh (< 55s) dan tidak dipaksa, skip ====
-      if (!force && lastSuccessAt && (Date.now() - lastSuccessAt) < SMART_SKIP_MS) {
-        const elapsed = Math.round((Date.now() - lastSuccessAt) / 1000);
-        console.log('⏭️ Skip fetch — data masih fresh (' + elapsed + 's)');
-        return lastPrice;
-      }
-
       isFetching = true;
 
       const statusEl = $('chartStatusText');
@@ -2325,20 +2237,6 @@
       return success ? lastPrice : null;
     }
 
-    /* ==== scheduling dengan jitter ==== */
-    function scheduleNextFetch() {
-      if (chartFetchTimer) {
-        clearTimeout(chartFetchTimer);
-        chartFetchTimer = null;
-      }
-      const delay = REFRESH_INTERVAL + Math.floor(Math.random() * REFRESH_JITTER);
-      console.log('⏱️ Jadwal fetch berikutnya dalam ' + Math.round(delay / 1000) + 's');
-      chartFetchTimer = setTimeout(async () => {
-        await fetchCoinPrice();
-        if (chartFetchTimer !== null) scheduleNextFetch();
-      }, delay);
-    }
-
     function startPriceChart() {
       applyBrandColor(selectedCoinId);
       if ($('chartCoinLabel')) $('chartCoinLabel').textContent = getCurrentSymbol();
@@ -2368,37 +2266,17 @@
         calc();
       }
 
-      // Fetch pertama (paksa)
-      fetchCoinPrice(true);
-      startCountdown();
-      scheduleNextFetch();
+      fetchCoinPrice();
+      if (chartFetchTimer) clearInterval(chartFetchTimer);
+      chartFetchTimer = setInterval(fetchCoinPrice, REFRESH_INTERVAL);
     }
 
     function stopPriceChart() {
       if (chartFetchTimer) {
-        clearTimeout(chartFetchTimer);
+        clearInterval(chartFetchTimer);
         chartFetchTimer = null;
       }
     }
-
-    /* ==== tombol refresh manual ==== */
-    $('btnRefreshChart').addEventListener('click', async () => {
-      const btn = $('btnRefreshChart');
-      if (btn.disabled) return;
-      btn.disabled = true;
-      btn.classList.add('spinning');
-      try {
-        await fetchCoinPrice(true);
-        if (lastSuccessAt) toast('Harga diperbarui', 'success');
-        // Reset jadwal berikutnya
-        scheduleNextFetch();
-      } finally {
-        setTimeout(() => {
-          btn.classList.remove('spinning');
-          btn.disabled = false;
-        }, 600);
-      }
-    });
 
     /* ==== EVENT GANTI COIN → AUTO FILTER RIWAYAT ==== */
     $('chartCoinSelect').addEventListener('change', (e) => {
@@ -2413,7 +2291,6 @@
       chartLabels = [];
       chartData   = [];
       lastPrice   = null;
-      lastSuccessAt = 0;  // reset biar tidak kena smart skip
 
       if ($('chartCoinLabel')) $('chartCoinLabel').textContent = getCurrentSymbol();
 
@@ -2438,9 +2315,7 @@
         calc();
       }
 
-      // Paksa fetch karena coin berubah
-      fetchCoinPrice(true);
-      scheduleNextFetch();
+      fetchCoinPrice();
 
       const symbol = getCurrentSymbol();
       setFilterCoin(symbol, true);
@@ -2797,10 +2672,9 @@
             chartLabels = [];
             chartData   = [];
             lastPrice   = null;
-            lastSuccessAt = 0;
             loadChartHistory();
             initChart();
-            fetchCoinPrice(true);
+            fetchCoinPrice();
           }
           setFilterCoin(newFilter, false);
         }
