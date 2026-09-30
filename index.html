@@ -195,61 +195,82 @@ select {
 input[type="text"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 input[type="text"]::placeholder { color: var(--border-light); }
 
-/* Input tanggal format DD/MM/YYYY */
-input.date-input {
-    padding: 10px 12px;
-    width: 100%;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: inherit;
-    background: var(--card-bg);
-    color: var(--text-main);
-    transition: border-color 0.2s, box-shadow 0.2s;
-    letter-spacing: 0.5px;
-}
-input.date-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-}
-input.date-input::placeholder { color: var(--border-light); }
-input.date-input.invalid {
-    border-color: var(--danger);
-    background: #fef2f2;
-}
+.filter-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 
-.filter-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-
-@media (max-width: 1200px) { .filter-grid { grid-template-columns: 1fr 1fr 1fr; } }
-@media (max-width: 700px) { .filter-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 500px) { .filter-grid { grid-template-columns: 1fr; } }
-.filter-grid > * { margin-bottom: 0 !important; min-width: 0; }
-
-#dateRangeContainer {
+/* ===== FILTER PERIODE BARU ===== */
+.periode-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1.2fr 1fr auto;
+    gap: 12px;
     margin-bottom: 16px;
+    padding: 14px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #bae6fd;
+    border-radius: 10px;
+    align-items: end;
 }
-#dateRangeContainer .date-range-inner {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    max-width: 520px;
-}
-#dateRangeContainer .date-sep {
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-    flex-shrink: 0;
-}
-#dateRangeContainer .date-hint {
+
+.periode-grid > div { position: relative; }
+.periode-grid label {
+    display: block;
     font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 6px;
+    font-weight: 700;
+    color: #0369a1;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+}
+
+.periode-grid input[type="text"] {
+    margin-bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%230ea5e9' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1zm2 3h2v2H3V7zm0 3h2v2H3v-2zm3-3h2v2H6V7zm0 3h2v2H6v-2zm3-3h2v2H9V7zm0 3h2v2H9v-2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 13px center;
+    background-color: #fff;
+    border-color: #bae6fd;
+}
+
+.periode-grid select {
+    margin-bottom: 0;
+    background-color: #fff;
+    border-color: #bae6fd;
+}
+
+.periode-grid button {
+    margin-bottom: 0;
+    height: 40px;
+    white-space: nowrap;
+}
+
+.periode-hint {
+    font-size: 11px;
+    color: #0369a1;
+    margin: -8px 0 14px 0;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+    padding-left: 4px;
 }
-#dateRangeContainer .date-hint i { color: var(--primary); }
+
+.periode-hint code {
+    background: rgba(255,255,255,0.7);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 10.5px;
+    color: #0c4a6e;
+    font-weight: 600;
+}
+
+@media (max-width: 1100px) { .filter-grid { grid-template-columns: 1fr 1fr 1fr; } }
+@media (max-width: 900px) { .periode-grid { grid-template-columns: 1fr 1fr; } .periode-grid button { grid-column: span 2; } }
+@media (max-width: 700px) { .filter-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 500px) { 
+    .filter-grid { grid-template-columns: 1fr; } 
+    .periode-grid { grid-template-columns: 1fr; }
+    .periode-grid button { grid-column: span 1; }
+}
+.filter-grid > * { margin-bottom: 0 !important; min-width: 0; }
 
 .file-upload-wrapper { position: relative; margin-bottom: 16px; }
 .file-upload-wrapper input[type="file"] {
@@ -355,8 +376,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     .btn-group-info { display: none; }
     .toast-container { left: 12px; right: 12px; bottom: 12px; }
     .toast { max-width: 100%; }
-    #dateRangeContainer .date-range-inner { flex-direction: column; align-items: stretch; max-width: 100%; }
-    #dateRangeContainer .date-sep { text-align: center; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 </style>
@@ -426,29 +445,36 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                         <option value="no">Claim: NO</option>
                     </select>
                 </div>
-                <div>
-                    <label for="filterPeriode" class="sr-only">Filter Periode</label>
-                    <select id="filterPeriode" style="margin-bottom:0; width:100%;">
-                        <option value="">Semua Periode</option>
-                        <option value="harian">Harian (Hari Ini)</option>
-                        <option value="mingguan">Mingguan (7 Hari Terakhir)</option>
-                        <option value="bulanan">Bulanan (Bulan Ini)</option>
-                        <option value="tahunan">Tahunan (Tahun Ini)</option>
-                        <option value="custom">Custom (Rentang Tanggal)</option>
-                    </select>
-                </div>
             </div>
 
-            <div id="dateRangeContainer" style="display:none;">
-                <label class="sr-only">Rentang Tanggal (Hari/Bulan/Tahun)</label>
-                <div class="date-range-inner">
-                    <input type="text" id="dateFrom" class="date-input" placeholder="DD/MM/YYYY" maxlength="10" inputmode="numeric" aria-label="Tanggal dari (DD/MM/YYYY)">
-                    <span class="date-sep">s/d</span>
-                    <input type="text" id="dateTo" class="date-input" placeholder="DD/MM/YYYY" maxlength="10" inputmode="numeric" aria-label="Tanggal sampai (DD/MM/YYYY)">
+            <!-- FILTER PERIODE BERDASARKAN NOMOR SCL/SJOB -->
+            <div class="periode-grid">
+                <div>
+                    <label for="filterPeriodeDari"><i class="fas fa-calendar-alt"></i> Periode Dari</label>
+                    <input type="text" id="filterPeriodeDari" placeholder="cth: 26/01/05" maxlength="8">
                 </div>
-                <div class="date-hint">
-                    <i class="fas fa-info-circle"></i> Format: Hari/Bulan/Tahun (contoh: 25/12/2025)
+                <div>
+                    <label for="filterPeriodeSampai"><i class="fas fa-calendar-check"></i> Periode Sampai</label>
+                    <input type="text" id="filterPeriodeSampai" placeholder="cth: 26/01/10" maxlength="8">
                 </div>
+                <div>
+                    <label for="filterSumberNomor"><i class="fas fa-filter"></i> Sumber Nomor</label>
+                    <select id="filterSumberNomor" style="margin-bottom:0; width:100%;">
+                        <option value="">Semua Nomor (SCL & SJOB)</option>
+                        <option value="scl">Hanya SCL</option>
+                        <option value="sjob">Hanya SJOB</option>
+                    </select>
+                </div>
+                <div>
+                    <label>&nbsp;</label>
+                    <button class="btn-info" id="resetPeriodeBtn" style="width:100%; justify-content:center;">
+                        <i class="fas fa-undo"></i> Reset Periode
+                    </button>
+                </div>
+            </div>
+            <div class="periode-hint">
+                <i class="fas fa-info-circle"></i>
+                <span>Ambil tanggal dari nomor SCL/SJOB. Format: <code>YY/MM/DD</code> contoh: <code>26/01/05</code> (Tahun 2026, Bulan 01, Tanggal 05)</span>
             </div>
 
             <div class="table-container">
@@ -556,14 +582,16 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     let data1 = [], selectedIndexes = new Set(), data2 = [], data3 = [], data4 = [], data5 = [];
     let currentFilter1 = "", currentFilter2 = "", currentFilter3 = "", currentFilter4 = "", currentFilter5 = "";
     let filterTeknisiVal = "", filterReturnVal = "", filterClaimVal = "", filterPengirimanVal = "";
-    let filterPeriodeVal = "", filterDateFrom = "", filterDateTo = "";
+    
+    // STATE FILTER PERIODE
+    let filterPeriodeDari = "", filterPeriodeSampai = "", filterSumberNomor = "";
     
     // ========== DOM ==========
     const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
     const fileInput = $("#fileInput"), 
           search1 = $("#search1"), search2 = $("#search2"), search3 = $("#search3"), search4 = $("#search4"), search5 = $("#search5");
     const filterTeknisi = $("#filterTeknisi"), filterReturn = $("#filterReturn"), filterClaim = $("#filterClaim"), filterPengiriman = $("#filterPengiriman");
-    const filterPeriode = $("#filterPeriode"), dateRangeContainer = $("#dateRangeContainer"), dateFromInput = $("#dateFrom"), dateToInput = $("#dateTo");
+    const filterPeriodeDariEl = $("#filterPeriodeDari"), filterPeriodeSampaiEl = $("#filterPeriodeSampai"), filterSumberNomorEl = $("#filterSumberNomor"), resetPeriodeBtn = $("#resetPeriodeBtn");
     const addRowBtn = $("#addRowBtn"), addRowBtn3 = $("#addRowBtn3"), addRowBtn4 = $("#addRowBtn4");
     const resetBtn = $("#resetBtn"), checkAllCb = $("#checkAll"), deleteSelectedBtn = $("#deleteSelectedBtn");
     const tbody1 = $("#tbody1"), tbody2 = $("#tbody2"), tbody3 = $("#tbody3"), tbody4 = $("#tbody4"), tbody5 = $("#tbody5");
@@ -596,110 +624,102 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
 
     function calculateDays(dateStr) {
         if (!dateStr) return "";
-        var date = parseDateValue(dateStr);
-        if (!date) return "";
+        dateStr = String(dateStr).trim();
+        var parts, date;
+        if (dateStr.indexOf('/') !== -1) {
+            parts = dateStr.split('/');
+            if (parts.length === 3) date = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+        } else if (dateStr.indexOf('-') !== -1) {
+            parts = dateStr.split('-');
+             if (parts.length === 3) date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        }
+        if (!date || isNaN(date.getTime())) return ""; 
         var today = new Date();
-        today.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0); 
         var diffTime = today - date;
-        var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
         return diffDays >= 0 ? diffDays : 0;
     }
 
-    // ========== PARSING TANGGAL (MULTI FORMAT) ==========
-    function parseDateValue(val) {
-        if (!val) return null;
-        val = String(val).trim();
-        var d = null;
-        // Format DD/MM/YYYY (hari/bulan/tahun)
-        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)) {
-            var p = val.split('/');
-            var dd = parseInt(p[0], 10), mm = parseInt(p[1], 10), yy = parseInt(p[2], 10);
-            if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
-            d = new Date(yy, mm - 1, dd);
-            if (d.getFullYear() !== yy || d.getMonth() !== mm - 1 || d.getDate() !== dd) return null;
-        }
-        // Format YYYY-MM-DD
-        else if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(val)) {
-            var p = val.split('-');
-            d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
-        }
-        // Format DD-MM-YYYY
-        else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(val)) {
-            var p = val.split('-');
-            d = new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
-        }
-        else {
-            d = new Date(val);
-        }
-        if (!d || isNaN(d.getTime())) return null;
-        d.setHours(0, 0, 0, 0);
-        return d;
+    // ========== FUNGSI EKSTRAK TANGGAL DARI NOMOR SCL/SJOB ==========
+    // Format SCL: SCL/KPG/26/01/05/013  -> 26/01/05
+    // Format SJOB: SJOB/SKM-KPG/26/01/05/015 -> 26/01/05
+    function extractTanggalFromNomor(teks) {
+        if (!teks || typeof teks !== "string") return "";
+        
+        // Pola SCL: SCL/XXX/YY/MM/DD/NNN
+        var sclMatch = teks.match(/SCL\/[A-Za-z\-]+\/(\d{2})\/(\d{2})\/(\d{2})\//i);
+        if (sclMatch) return sclMatch[1] + "/" + sclMatch[2] + "/" + sclMatch[3];
+        
+        // Pola SJOB: SJOB/XXX/YY/MM/DD/NNN
+        var sjobMatch = teks.match(/SJOB\/[A-Za-z\-]+\/(\d{2})\/(\d{2})\/(\d{2})\//i);
+        if (sjobMatch) return sjobMatch[1] + "/" + sjobMatch[2] + "/" + sjobMatch[3];
+        
+        // Pola umum fallback: /YY/MM/DD/
+        var umumMatch = teks.match(/\/(\d{2})\/(\d{2})\/(\d{2})\//);
+        if (umumMatch) return umumMatch[1] + "/" + umumMatch[2] + "/" + umumMatch[3];
+        
+        return "";
     }
 
-    // ========== FORMAT TANGGAL DD/MM/YYYY ==========
-    function formatDateToDDMMYYYY(date) {
-        if (!date || isNaN(date.getTime())) return "";
-        var d = String(date.getDate()).padStart(2, "0");
-        var m = String(date.getMonth() + 1).padStart(2, "0");
-        var y = date.getFullYear();
-        return d + "/" + m + "/" + y;
+    // Konversi periode YY/MM/DD ke integer YYMMDD untuk perbandingan
+    function periodeToComparable(periodeStr) {
+        if (!periodeStr) return null;
+        var parts = periodeStr.split("/");
+        if (parts.length !== 3) return null;
+        var yy = parseInt(parts[0]), mm = parseInt(parts[1]), dd = parseInt(parts[2]);
+        if (isNaN(yy) || isNaN(mm) || isNaN(dd)) return null;
+        return yy * 10000 + mm * 100 + dd;
     }
 
-    function parseDateDDMMYYYY(str) {
-        if (!str) return null;
-        str = String(str).trim();
-        var m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        if (!m) return null;
-        var d = parseInt(m[1], 10);
-        var mo = parseInt(m[2], 10);
-        var y = parseInt(m[3], 10);
-        if (mo < 1 || mo > 12) return null;
-        if (d < 1 || d > 31) return null;
-        var date = new Date(y, mo - 1, d);
-        if (date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d) return null;
-        date.setHours(0, 0, 0, 0);
-        return date;
-    }
-
-    function attachDateMask(input) {
-        input.addEventListener("input", function() {
-            var v = this.value.replace(/[^\d]/g, "");
-            if (v.length >= 5) {
-                v = v.substring(0, 2) + "/" + v.substring(2, 4) + "/" + v.substring(4, 8);
-            } else if (v.length >= 3) {
-                v = v.substring(0, 2) + "/" + v.substring(2);
-            }
-            this.value = v;
-            if (v.length === 10) {
-                if (parseDateDDMMYYYY(v)) this.classList.remove("invalid");
-                else this.classList.add("invalid");
-            } else {
-                this.classList.remove("invalid");
-            }
-        });
-        input.addEventListener("blur", function() {
-            var v = this.value.trim();
-            if (v && !parseDateDDMMYYYY(v)) this.classList.add("invalid");
-            else this.classList.remove("invalid");
-        });
-    }
-
-    function getRowDate(row) {
-        var candidates = ["Disetujui Pada", "Tanggal", "Date", "Tgl", "Tanggal Disetujui", "Tanggal Transaksi"];
-        for (var i = 0; i < candidates.length; i++) {
-            if (row[candidates[i]]) {
-                var d = parseDateValue(row[candidates[i]]);
-                if (d) return d;
-            }
-        }
+    // Cek apakah row cocok dengan filter periode
+    function matchPeriode(row) {
+        if (!filterPeriodeDari && !filterPeriodeSampai && !filterSumberNomor) return true;
+        
+        // Gabungkan semua teks dari semua field
+        var semuaTeks = "";
         for (var k in row) {
             if (k.charAt(0) === "_") continue;
-            if (/tanggal|date|tgl/i.test(k) && row[k]) {
-                var d = parseDateValue(row[k]);
-                if (d) return d;
-            }
+            semuaTeks += " " + String(row[k] || "");
         }
-        return null;
+        
+        // Filter berdasarkan sumber nomor
+        if (filterSumberNomor) {
+            var adaSCL = /SCL\//i.test(semuaTeks);
+            var adaSJOB = /SJOB\//i.test(semuaTeks);
+            if (filterSumberNomor === "scl" && !adaSCL) return false;
+            if (filterSumberNomor === "sjob" && !adaSJOB) return false;
+        }
+        
+        // Ekstrak tanggal dari nomor
+        var tanggalRow = extractTanggalFromNomor(semuaTeks);
+        if (!tanggalRow) {
+            return (!filterPeriodeDari && !filterPeriodeSampai);
+        }
+        
+        var comparableRow = periodeToComparable(tanggalRow);
+        if (comparableRow === null) return false;
+        
+        if (filterPeriodeDari) {
+            var comparableDari = periodeToComparable(filterPeriodeDari);
+            if (comparableDari !== null && comparableRow < comparableDari) return false;
+        }
+        if (filterPeriodeSampai) {
+            var comparableSampai = periodeToComparable(filterPeriodeSampai);
+            if (comparableSampai !== null && comparableRow > comparableSampai) return false;
+        }
+        return true;
+    }
+
+    // Auto-format input periode (selalu YY/MM/DD)
+    function autoFormatPeriode(input) {
+        input.addEventListener("input", function() {
+            var v = this.value.replace(/[^0-9]/g, "");
+            if (v.length >= 2) v = v.substring(0,2) + "/" + v.substring(2);
+            if (v.length >= 5) v = v.substring(0,5) + "/" + v.substring(5);
+            if (v.length > 8) v = v.substring(0, 8);
+            this.value = v;
+        });
     }
 
     document.addEventListener("keydown", function(e) {
@@ -722,13 +742,16 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         data1=[]; data2=[]; data3=[]; data4=[]; data5=[]; selectedIndexes.clear();
         currentFilter1=""; currentFilter2=""; currentFilter3=""; currentFilter4=""; currentFilter5="";
         filterTeknisiVal=""; filterReturnVal=""; filterClaimVal=""; filterPengirimanVal="";
-        filterPeriodeVal=""; filterDateFrom=""; filterDateTo="";
+        filterPeriodeDari=""; filterPeriodeSampai=""; filterSumberNomor="";
+        
+        if (filterPeriodeDariEl) filterPeriodeDariEl.value="";
+        if (filterPeriodeSampaiEl) filterPeriodeSampaiEl.value="";
+        if (filterSumberNomorEl) filterSumberNomorEl.value="";
+        
         tbody1.innerHTML=""; tbody2.innerHTML=""; tbody3.innerHTML=""; tbody4.innerHTML=""; tbody5.innerHTML="";
         totalQty1El.textContent="0"; totalQty2El.textContent="0"; totalQty3aEl.textContent="0"; totalQty4El.textContent="0"; totalQty5El.textContent="0";
         fileInput.value=""; search1.value=""; search2.value=""; search3.value=""; search4.value=""; search5.value="";
         filterTeknisi.innerHTML = '<option value="">Semua Teknisi</option>'; filterReturn.value=""; filterClaim.value=""; filterPengiriman.innerHTML = '<option value="">Semua Status Pengiriman</option>';
-        filterPeriode.value=""; dateFromInput.value=""; dateToInput.value=""; dateRangeContainer.style.display="none";
-        dateFromInput.classList.remove("invalid"); dateToInput.classList.remove("invalid");
         checkAllCb.checked=false; checkAllCb.indeterminate=false;
         countBadge.textContent="0"; selectedBadge.textContent="0"; demandBadge.textContent="0"; stockBadge.textContent="0"; stockBadge5.textContent="0";
         $$(".note-input").forEach(el => el.innerText="");
@@ -747,9 +770,11 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 data1 = parsed; selectedIndexes.clear();
                 checkAllCb.checked=false; checkAllCb.indeterminate=false; currentFilter1=""; search1.value=""; 
                 filterTeknisiVal=""; filterReturnVal=""; filterClaimVal=""; filterPengirimanVal="";
+                filterPeriodeDari=""; filterPeriodeSampai=""; filterSumberNomor="";
                 filterTeknisi.value=""; filterReturn.value=""; filterClaim.value=""; filterPengiriman.value="";
-                filterPeriodeVal=""; filterPeriode.value=""; dateFromInput.value=""; dateToInput.value=""; dateRangeContainer.style.display="none";
-                dateFromInput.classList.remove("invalid"); dateToInput.classList.remove("invalid");
+                if (filterPeriodeDariEl) filterPeriodeDariEl.value="";
+                if (filterPeriodeSampaiEl) filterPeriodeSampaiEl.value="";
+                if (filterSumberNomorEl) filterSumberNomorEl.value="";
                 populateTeknisiDropdown(data1);
                 populatePengirimanDropdown(data1);
                 renderTable1(); syncToTab2(); syncToTab3(); syncToTab4(); syncToTab5();
@@ -807,44 +832,44 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     filterReturn.addEventListener("change", function() { filterReturnVal = filterReturn.value; renderTable1(); });
     filterClaim.addEventListener("change", function() { filterClaimVal = filterClaim.value; renderTable1(); });
     
-    // Filter Periode
-    attachDateMask(dateFromInput);
-    attachDateMask(dateToInput);
-
-    filterPeriode.addEventListener("change", function() {
-        filterPeriodeVal = filterPeriode.value;
-        if (filterPeriodeVal === "custom") {
-            dateRangeContainer.style.display = "block";
-        } else {
-            dateRangeContainer.style.display = "none";
-            filterDateFrom = ""; filterDateTo = "";
-            dateFromInput.value = ""; dateToInput.value = "";
-            dateFromInput.classList.remove("invalid");
-            dateToInput.classList.remove("invalid");
-        }
-        renderTable1();
-    });
-
-    dateFromInput.addEventListener("input", debounce(function() {
-        var v = dateFromInput.value.trim();
-        var parsed = parseDateDDMMYYYY(v);
-        filterDateFrom = parsed ? v : "";
-        if (filterPeriodeVal === "custom" && (v === "" || parsed)) renderTable1();
-    }, 400));
-
-    dateToInput.addEventListener("input", debounce(function() {
-        var v = dateToInput.value.trim();
-        var parsed = parseDateDDMMYYYY(v);
-        filterDateTo = parsed ? v : "";
-        if (filterPeriodeVal === "custom" && (v === "" || parsed)) renderTable1();
-    }, 400));
+    // Event listener filter periode
+    if (filterPeriodeDariEl) {
+        autoFormatPeriode(filterPeriodeDariEl);
+        filterPeriodeDariEl.addEventListener("input", debounce(function() {
+            filterPeriodeDari = filterPeriodeDariEl.value.trim();
+            renderTable1();
+        }, 300));
+    }
+    if (filterPeriodeSampaiEl) {
+        autoFormatPeriode(filterPeriodeSampaiEl);
+        filterPeriodeSampaiEl.addEventListener("input", debounce(function() {
+            filterPeriodeSampai = filterPeriodeSampaiEl.value.trim();
+            renderTable1();
+        }, 300));
+    }
+    if (filterSumberNomorEl) {
+        filterSumberNomorEl.addEventListener("change", function() {
+            filterSumberNomor = filterSumberNomorEl.value;
+            renderTable1();
+        });
+    }
+    if (resetPeriodeBtn) {
+        resetPeriodeBtn.addEventListener("click", function() {
+            if (filterPeriodeDariEl) filterPeriodeDariEl.value = "";
+            if (filterPeriodeSampaiEl) filterPeriodeSampaiEl.value = "";
+            if (filterSumberNomorEl) filterSumberNomorEl.value = "";
+            filterPeriodeDari = ""; filterPeriodeSampai = ""; filterSumberNomor = "";
+            renderTable1();
+            showToast("Filter periode direset.", "info");
+        });
+    }
     
     search2.addEventListener("input", debounce(function() { currentFilter2 = search2.value.toLowerCase(); renderTable2(); }, 300));
     search3.addEventListener("input", debounce(function() { currentFilter3 = search3.value.toLowerCase(); renderTable3(); }, 300));
     search4.addEventListener("input", debounce(function() { currentFilter4 = search4.value.toLowerCase(); renderTable4(); }, 300));
     search5.addEventListener("input", debounce(function() { currentFilter5 = search5.value.toLowerCase(); renderTable5(); }, 300));
 
-    // ========== TAMBAH BARIS ==========
+    // ========== TAMBAH BARIS (Hanya Tab 2, 3, 4) ==========
     addRowBtn.addEventListener("click", function() { 
         data2.push({ "No_Urut":"", "Catatan":"", "Part":"", "Qty Transaksi":"", "Part Demand":"", "Serial Number":"", "Teknisi Perbaikan":"", _isNew:true }); 
         renderTable2(); showToast("Baris baru ditambahkan.", "success"); 
@@ -886,39 +911,8 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             var matchRet = true; if (fRet) matchRet = checkYesNo(row["Return To Factory"], fRet); if(!matchRet) continue;
             var matchClm = true; if (fClm) matchClm = checkYesNo(row["Claim To Factory"], fClm); if(!matchClm) continue;
             
-            // Filter Periode
-            if (filterPeriodeVal) {
-                var rowDate = getRowDate(row);
-                if (!rowDate) continue;
-                var today = new Date();
-                today.setHours(0, 0, 0, 0);
-                var matchPeriode = false;
-
-                if (filterPeriodeVal === "harian") {
-                    matchPeriode = (rowDate.getTime() === today.getTime());
-                } else if (filterPeriodeVal === "mingguan") {
-                    var weekAgo = new Date(today);
-                    weekAgo.setDate(weekAgo.getDate() - 6);
-                    matchPeriode = (rowDate >= weekAgo && rowDate <= today);
-                } else if (filterPeriodeVal === "bulanan") {
-                    matchPeriode = (rowDate.getMonth() === today.getMonth() && rowDate.getFullYear() === today.getFullYear());
-                } else if (filterPeriodeVal === "tahunan") {
-                    matchPeriode = (rowDate.getFullYear() === today.getFullYear());
-                } else if (filterPeriodeVal === "custom") {
-                    var from = filterDateFrom ? parseDateDDMMYYYY(filterDateFrom) : null;
-                    var to = filterDateTo ? parseDateDDMMYYYY(filterDateTo) : null;
-                    if (from && to) {
-                        matchPeriode = (rowDate >= from && rowDate <= to);
-                    } else if (from) {
-                        matchPeriode = (rowDate >= from);
-                    } else if (to) {
-                        matchPeriode = (rowDate <= to);
-                    } else {
-                        matchPeriode = true;
-                    }
-                }
-                if (!matchPeriode) continue;
-            }
+            // FILTER PERIODE
+            if (!matchPeriode(row)) continue;
             
             res.push(Object.assign({}, row, {_origIdx:i}));
         }
@@ -932,9 +926,9 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     function renderTable1() {
         var frag = document.createDocumentFragment(), filtered = getFilteredData1(), total = 0;
         if (!filtered.length && !data1.length) { var tr=document.createElement("tr"); tr.innerHTML = '<td colspan="12"><div class="empty-state"><i class="fas fa-file-upload"></i><p>Belum ada data.  ( By : Gregorius Berlin )</p></div></td>'; frag.appendChild(tr); }
-        else if (!filtered.length) { var tr=document.createElement("tr"); tr.innerHTML = '<td colspan="12"><div class="empty-state"><i class="fas fa-search"></i><p>Tidak ditemukan.</p></div></td>'; frag.appendChild(tr); }
+        else if (!filtered.length) { var tr=document.createElement("tr"); tr.innerHTML = '<td colspan="12"><div class="empty-state"><i class="fas fa-search"></i><p>Tidak ditemukan data yang cocok dengan filter.</p></div></td>'; frag.appendChild(tr); }
         else { for (var fi=0; fi<filtered.length; fi++) { var row=filtered[fi], origIdx=row._origIdx; total += parseFloat(row["Qty Transaksi"]) || 0; var isC = selectedIndexes.has(origIdx); var tr=document.createElement("tr"); if(isC) tr.className = "selected-row"; var tdCb=document.createElement("td"); tdCb.className="col-check"; var cb=document.createElement("input"); cb.type="checkbox"; cb.className="cb-cell"; cb.dataset.idx=origIdx; if(isC) cb.checked=true; tdCb.appendChild(cb); tr.appendChild(tdCb); for (var ki=0; ki<KEYS_TAB1.length; ki++) { var td=document.createElement("td"); td.contentEditable="true"; td.dataset.key=KEYS_TAB1[ki]; td.dataset.idx=origIdx; td.textContent=row[KEYS_TAB1[ki]]||""; tr.appendChild(td); } frag.appendChild(tr); } }
-        tbody1.innerHTML=""; tbody1.appendChild(frag); totalQty1El.textContent=total.toLocaleString("id-ID"); countBadge.textContent=data1.length; updateCheckAllState();
+        tbody1.innerHTML=""; tbody1.appendChild(frag); totalQty1El.textContent=total.toLocaleString("id-ID"); countBadge.textContent=filtered.length + (filtered.length !== data1.length ? " / " + data1.length : ""); updateCheckAllState();
     }
 
     // Event Delegasi Tab 1
@@ -971,7 +965,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     function renderTable3() { var frag=document.createDocumentFragment(), filtered=getFiltered(data3,currentFilter3), totalA=0; if(!filtered.length && !data3.length){ var tr=document.createElement("tr"); tr.innerHTML='<td colspan="11"><div class="empty-state"><i class="fas fa-exchange-alt"></i><p>Belum ada data SJOB.</p></div></td>'; frag.appendChild(tr); } else if(!filtered.length){ var tr=document.createElement("tr"); tr.innerHTML='<td colspan="11"><div class="empty-state"><i class="fas fa-search"></i><p>Tidak ditemukan.</p></div></td>'; frag.appendChild(tr); } else { for(var fi=0; fi<filtered.length; fi++){ var row=filtered[fi]; var ri = data3.indexOf(row); totalA+=parseFloat(row["QTY / Qty Transaksi"])||0; var tr=document.createElement("tr"); if(row._isNew) tr.className="new-row"; var tdN=document.createElement("td"); tdN.className="no-urut"; tdN.textContent=fi+1; tr.appendChild(tdN); for(var ki=1; ki<KEYS_TAB3.length; ki++){ var td=document.createElement("td"); td.contentEditable="true"; td.dataset.key=KEYS_TAB3[ki]; td.dataset.ridx3=ri; td.textContent=row[KEYS_TAB3[ki]]||""; tr.appendChild(td); } var tdA=document.createElement("td"); tdA.className="col-action"; var btn=document.createElement("button"); btn.className="btn-danger"; btn.dataset.ridx3=ri; btn.innerHTML='<i class="fas fa-trash-alt"></i>'; tdA.appendChild(btn); tr.appendChild(tdA); frag.appendChild(tr); } } tbody3.innerHTML=""; tbody3.appendChild(frag); totalQty3aEl.textContent=totalA.toLocaleString("id-ID"); demandBadge.textContent=data3.length; }
     function renderTable4() { var frag=document.createDocumentFragment(), filtered=getFiltered(data4,currentFilter4), total=0; if(!filtered.length && !data4.length){ var tr=document.createElement("tr"); tr.innerHTML='<td colspan="8"><div class="empty-state"><i class="fas fa-boxes"></i><p>Belum ada data surat jalan.</p></div></td>'; frag.appendChild(tr); } else if(!filtered.length){ var tr=document.createElement("tr"); tr.innerHTML='<td colspan="8"><div class="empty-state"><i class="fas fa-search"></i><p>Tidak ditemukan.</p></div></td>'; frag.appendChild(tr); } else { for(var fi=0; fi<filtered.length; fi++){ var row=filtered[fi]; var ri = data4.indexOf(row); total+=parseFloat(row["Qty Reservasi"])||0; var tr=document.createElement("tr"); if(row._isNew) tr.className="new-row"; var tdN=document.createElement("td"); tdN.className="no-urut"; tdN.textContent=fi+1; tr.appendChild(tdN); for(var ki=1; ki<KEYS_TAB4.length; ki++){ var td=document.createElement("td"); td.contentEditable="true"; td.dataset.key=KEYS_TAB4[ki]; td.dataset.ridx4=ri; td.textContent=row[KEYS_TAB4[ki]]||""; tr.appendChild(td); } var tdA=document.createElement("td"); tdA.className="col-action"; var btn=document.createElement("button"); btn.className="btn-danger"; btn.dataset.ridx4=ri; btn.innerHTML='<i class="fas fa-trash-alt"></i>'; tdA.appendChild(btn); tr.appendChild(tdA); frag.appendChild(tr); } } tbody4.innerHTML=""; tbody4.appendChild(frag); totalQty4El.textContent=total.toLocaleString("id-ID"); }
     
-    // ========== RENDER TABEL 5 ==========
+    // ========== RENDER TABEL 5 (DENGAN AKSI HAPUS) ==========
     function renderTable5() { 
         var frag=document.createDocumentFragment(), filtered=getFiltered(data5,currentFilter5), total=0; 
         
@@ -1080,7 +1074,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         wsData.push(["KEL. FATULULI"]);
         wsData.push(["KEC. OEBOBO - KOTA KUPANG"]);
         wsData.push(["TELP. +62 813 2816 2259"]);
-        wsData.push([]); wsData.push(["Tanggal: " + formatDateToDDMMYYYY(new Date())]); wsData.push([]);
+        wsData.push([]); wsData.push(["Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"})]); wsData.push([]);
         wsData.push(["No", "Catatan", "Part", "Qty Reservasi", "Part Demand", "Serial Number", "Teknisi Perbaikan"]);
         var gt=calcTotal(data4,"Qty Reservasi"); 
         for(var i=0;i<data4.length;i++){var r=data4[i]; wsData.push([i+1, r["Catatan"]||"", r["Part"]||"", r["Qty Reservasi"]||"", r["Part Demand"]||"", r["Serial Number"]||"", r["Teknisi Perbaikan"]||""]);}
@@ -1107,7 +1101,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         doc.text("JL. FRANS SEDA NO. 08 KOMPLEK RUKO ( RUKOKU )", mg.left, 51);
         doc.text("KEL. FATULULI", mg.left, 56); doc.text("KEC. OEBOBO - KOTA KUPANG", mg.left, 61);
         doc.text("TELP. +62 813 2816 2259", mg.left, 66);
-        doc.setFontSize(10); doc.text("Tanggal: " + formatDateToDDMMYYYY(new Date()), pw - mg.right, 66, {align: "right"});
+        doc.setFontSize(10); doc.text("Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"}), pw - mg.right, 66, {align: "right"});
         doc.setDrawColor(200,200,200); doc.line(mg.left, 71, pw-mg.right, 71);
         
         for(var i=0;i<data4.length;i++){var r=data4[i]; rows.push([String(i+1),String(r["Catatan"]||""),String(r["Part"]||""),String(r["Qty Reservasi"]||""),String(r["Part Demand"]||""),String(r["Serial Number"]||""),String(r["Teknisi Perbaikan"]||"")]);} 
@@ -1150,7 +1144,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         showToast("File PDF berhasil diunduh.","success"); 
     });
 
-    // Tab 5 (TAGIHAN RETURN) - Export Excel
+    // Tab 5 (TAGIHAN RETURN) - Export Excel (DIHAPUS KOLOM DISETUJUI PADA)
     $("#excelBtn5").addEventListener("click", function() { 
         if(!data5.length){showToast("Tidak ada data.","danger");return;} 
         var wb = XLSX.utils.book_new();
@@ -1158,7 +1152,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         
         wsData.push(["Tagihan SOB OPEN Sparepart Bekas"]); 
         wsData.push([]);
-        wsData.push(["Tanggal: " + formatDateToDDMMYYYY(new Date())]); 
+        wsData.push(["Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"})]); 
         wsData.push([]);
         
         wsData.push(["No", "Catatan", "Part", "Qty Reservasi", "Part Demand", "Serial Number", "Teknisi Perbaikan", "Lamanya Hari"]);
@@ -1197,7 +1191,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         doc.setFontSize(18); doc.setTextColor(30,41,59); doc.setFont(undefined,"bold"); doc.text("Tagihan SOB OPEN Sparepart Bekas", pw/2, 20, {align: "center"});
         
         doc.setFontSize(10); doc.setTextColor(100,116,139); doc.setFont(undefined,"normal");
-        doc.text("Tanggal: " + formatDateToDDMMYYYY(new Date()), pw - mg.right, 20, {align: "right"});
+        doc.text("Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"}), pw - mg.right, 20, {align: "right"});
         
         doc.setDrawColor(200,200,200); doc.line(mg.left, 26, pw-mg.right, 26);
         
@@ -1254,7 +1248,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         header.style.marginBottom = '30px';
         header.innerHTML = `
             <h2 style="margin:0; font-size:32px; color:#1e293b; text-align:center; font-weight:800;">Tagihan SOB OPEN Sparepart Bekas</h2>
-            <p style="margin:10px 0 0 0; font-size:16px; color:#64748b; text-align:right;">Tanggal: ${formatDateToDDMMYYYY(new Date())}</p>
+            <p style="margin:10px 0 0 0; font-size:16px; color:#64748b; text-align:right;">Tanggal: ${new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"})}</p>
             <hr style="border:0; border-top:2px solid #e2e8f0; margin-top:15px;">
         `;
         container.appendChild(header);
