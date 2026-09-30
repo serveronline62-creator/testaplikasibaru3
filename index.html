@@ -25,7 +25,6 @@
       --radius: 16px; --radius-sm: 12px; --radius-lg: 22px;
       --safe-b: env(safe-area-inset-bottom, 0px);
 
-      /* ==== VARIABEL BRAND COIN DINAMIS ==== */
       --brand: #f0b90b;
       --brand-soft: rgba(240,185,11,0.14);
       --brand-border: rgba(240,185,11,0.35);
@@ -320,12 +319,35 @@
       font-size: 11px; color: var(--muted);
       margin-top: 10px;
       display: flex; align-items: center; gap: 6px;
+      flex-wrap: wrap;
     }
     .chart-status .dot {
       width: 6px; height: 6px; border-radius: 50%;
       background: var(--green); animation: blink 1.5s infinite;
     }
     .chart-status .dot.off { background: var(--accent); animation: none; }
+    .chart-retry-btn {
+      padding: 3px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      background: rgba(233,69,96,0.12);
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .chart-retry-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .chart-retry-btn:disabled {
+      opacity: 0.5; cursor: not-allowed;
+    }
 
     .add-tx-section { margin-bottom: 18px; }
     .btn-add-inline {
@@ -563,15 +585,8 @@
       transition: all 0.3s ease;
       font-family: 'JetBrains Mono', monospace;
       letter-spacing: 0.5px;
-      animation: filterPulse 2s ease-in-out infinite;
     }
-    .filter-indicator i.fa-filter {
-      font-size: 10px;
-    }
-    @keyframes filterPulse {
-      0%, 100% { box-shadow: 0 0 0 0 var(--brand-soft); }
-      50% { box-shadow: 0 0 0 6px transparent; }
-    }
+    .filter-indicator i.fa-filter { font-size: 10px; }
 
     .filter-banner {
       display: flex;
@@ -1264,7 +1279,7 @@
 
       <footer class="footer">
         Data tersimpan di <a href="https://console.firebase.google.com/project/savedatabase-c936c/database/savedatabase-c936c-default-rtdb/data" target="_blank" rel="noopener">FIREBASE Realtime Database</a><br />
-        Auth: <a href="https://console.firebase.google.com/project/savedatabase-c936c/authentication/users" target="_blank" rel="noopener">Firebase Authentication</a> &middot; Grafik: CoinGecko / CoinCap
+        Auth: <a href="https://console.firebase.google.com/project/savedatabase-c936c/authentication/users" target="_blank" rel="noopener">Firebase Authentication</a> &middot; Grafik: Binance / CoinGecko / CoinCap
       </footer>
     </div>
 
@@ -1323,9 +1338,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <script>
-  // ============================================================
-  // BUNGKUS SEMUA DALAM DOMContentLoaded
-  // ============================================================
   document.addEventListener('DOMContentLoaded', function () {
 
     /* ============================================================
@@ -1936,37 +1948,101 @@
     $('curPrice').addEventListener('change', handleManualPriceInput);
 
     /* ============================================================
-       GRAFIK REAL-TIME — CoinGecko + Fallback CoinCap + Proxy
+       GRAFIK REAL-TIME — MULTI-SOURCE (Binance + CoinGecko + Proxy + CoinCap)
+       Versi: ANTI-GAGAL — 4 sumber + auto-retry + cache 7 hari
        ============================================================ */
     const COIN_META = {
-      dogecoin:    { symbol: 'DOGE', color: '#f0b90b', fill: 'rgba(240,185,11,0.12)' },
-      bitcoin:     { symbol: 'BTC',  color: '#f7931a', fill: 'rgba(247,147,26,0.12)' },
-      ethereum:    { symbol: 'ETH',  color: '#627eea', fill: 'rgba(98,126,234,0.12)' },
-      binancecoin: { symbol: 'BNB',  color: '#f3ba2f', fill: 'rgba(243,186,47,0.12)' },
-      solana:      { symbol: 'SOL',  color: '#14f195', fill: 'rgba(20,241,149,0.12)' },
-      ripple:      { symbol: 'XRP',  color: '#00aae4', fill: 'rgba(0,170,228,0.12)' },
-      cardano:     { symbol: 'ADA',  color: '#0033ad', fill: 'rgba(0,51,173,0.12)' }
+      dogecoin:    { symbol: 'DOGE', color: '#f0b90b', fill: 'rgba(240,185,11,0.12)', binance: 'DOGEUSDT', cap: 'dogecoin' },
+      bitcoin:     { symbol: 'BTC',  color: '#f7931a', fill: 'rgba(247,147,26,0.12)', binance: 'BTCUSDT',  cap: 'bitcoin' },
+      ethereum:    { symbol: 'ETH',  color: '#627eea', fill: 'rgba(98,126,234,0.12)', binance: 'ETHUSDT',  cap: 'ethereum' },
+      binancecoin: { symbol: 'BNB',  color: '#f3ba2f', fill: 'rgba(243,186,47,0.12)', binance: 'BNBUSDT',  cap: 'binance-coin' },
+      solana:      { symbol: 'SOL',  color: '#14f195', fill: 'rgba(20,241,149,0.12)', binance: 'SOLUSDT',  cap: 'solana' },
+      ripple:      { symbol: 'XRP',  color: '#00aae4', fill: 'rgba(0,170,228,0.12)', binance: 'XRPUSDT',  cap: 'xrp' },
+      cardano:     { symbol: 'ADA',  color: '#0033ad', fill: 'rgba(0,51,173,0.12)', binance: 'ADAUSDT',  cap: 'cardano' }
     };
 
     const MAX_DATA_POINTS = 60;
-    const REFRESH_INTERVAL = 300000; // ==== 5 MENIT (300.000 ms) ====
-    const FETCH_TIMEOUT = 12000;
-    const USD_TO_IDR = 15800; // fallback kurs CoinCap
+    const REFRESH_INTERVAL = 300000; // 5 MENIT
+    const FETCH_TIMEOUT = 10000;
+    const USD_TO_IDR_FALLBACK = 15800;
 
-    // ==== MULTI ENDPOINT FALLBACK ====
+    let usdToIdr = USD_TO_IDR_FALLBACK;
+    let usdToIdrFetchedAt = 0;
+
+    async function refreshUsdToIdrRate() {
+      if (Date.now() - usdToIdrFetchedAt < 60 * 60 * 1000 && usdToIdr !== USD_TO_IDR_FALLBACK) {
+        return usdToIdr;
+      }
+      try {
+        const res = await fetchWithTimeout('https://api.exchangerate-api.com/v4/latest/USD', 6000);
+        if (res.ok) {
+          const j = await res.json();
+          const rate = j && j.rates && j.rates.IDR;
+          if (rate && rate > 1000) {
+            usdToIdr = rate;
+            usdToIdrFetchedAt = Date.now();
+            console.log('💱 Kurs USD→IDR diperbarui:', rate);
+          }
+        }
+      } catch (e) {
+        console.warn('⚠️ Gagal ambil kurs, pakai fallback', USD_TO_IDR_FALLBACK);
+      }
+      return usdToIdr;
+    }
+
     const API_ENDPOINTS = [
-      // 1) CoinGecko simple price (utama)
-      (id) => `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=idr&include_24hr_change=true`,
-      // 2) CoinGecko via allorigins proxy (kalau utama diblokir/CORS)
-      (id) => `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=idr&include_24hr_change=true`)}`,
-      // 3) CoinCap (fallback terakhir, konversi USD→IDR)
-      (id) => {
-        const map = {
-          dogecoin: 'dogecoin', bitcoin: 'bitcoin', ethereum: 'ethereum',
-          binancecoin: 'binance-coin', solana: 'solana', ripple: 'xrp', cardano: 'cardano'
-        };
-        const capId = map[id] || id;
-        return `https://api.coincap.io/v2/assets/${capId}`;
+      {
+        name: 'Binance',
+        url: (id) => `https://api.binance.com/api/v3/ticker/24hr?symbol=${COIN_META[id].binance}`,
+        parse: async (json) => {
+          if (!json || !json.lastPrice) throw new Error('Binance: data kosong');
+          const usdPrice = parseFloat(json.lastPrice);
+          if (!isFinite(usdPrice) || usdPrice <= 0) throw new Error('Binance: harga invalid');
+          const rate = await refreshUsdToIdrRate();
+          return {
+            price: usdPrice * rate,
+            change24h: parseFloat(json.priceChangePercent) || 0
+          };
+        }
+      },
+      {
+        name: 'CoinGecko',
+        url: (id) => `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=idr&include_24hr_change=true`,
+        parse: (json, id) => {
+          const coin = json && json[id];
+          if (!coin || typeof coin.idr !== 'number') throw new Error('CoinGecko: data invalid');
+          return {
+            price: coin.idr,
+            change24h: typeof coin.idr_24h_change === 'number' ? coin.idr_24h_change : 0
+          };
+        }
+      },
+      {
+        name: 'CoinGecko-Proxy',
+        url: (id) => `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=idr&include_24hr_change=true`)}`,
+        parse: (json, id) => {
+          const coin = json && json[id];
+          if (!coin || typeof coin.idr !== 'number') throw new Error('Proxy: data invalid');
+          return {
+            price: coin.idr,
+            change24h: typeof coin.idr_24h_change === 'number' ? coin.idr_24h_change : 0
+          };
+        }
+      },
+      {
+        name: 'CoinCap',
+        url: (id) => `https://api.coincap.io/v2/assets/${COIN_META[id].cap}`,
+        parse: async (json) => {
+          const d = json && json.data;
+          if (!d || !d.priceUsd) throw new Error('CoinCap: data invalid');
+          const usd = parseFloat(d.priceUsd);
+          if (!isFinite(usd) || usd <= 0) throw new Error('CoinCap: harga invalid');
+          const rate = await refreshUsdToIdrRate();
+          return {
+            price: usd * rate,
+            change24h: parseFloat(d.changePercent24Hr) || 0
+          };
+        }
       }
     ];
 
@@ -1978,11 +2054,13 @@
     let isFetching = false;
     let failCount = 0;
     let lastSuccessAt = 0;
+    let lastSource = '';
+    let retryTimer = null;
 
     let selectedCoinId = localStorage.getItem('chart_coin_id') || 'dogecoin';
 
     function getChartStorageKey() {
-      return 'chart_history_' + selectedCoinId;
+      return 'chart_history_v2_' + selectedCoinId;
     }
     function getCurrentSymbol() {
       return (COIN_META[selectedCoinId] || COIN_META.dogecoin).symbol;
@@ -1995,7 +2073,6 @@
       const r = parseInt(hex.substring(0, 2), 16);
       const g = parseInt(hex.substring(2, 4), 16);
       const b = parseInt(hex.substring(4, 6), 16);
-
       root.style.setProperty('--brand', meta.color);
       root.style.setProperty('--brand-soft', 'rgba(' + r + ',' + g + ',' + b + ',0.14)');
       root.style.setProperty('--brand-border', 'rgba(' + r + ',' + g + ',' + b + ',0.35)');
@@ -2005,7 +2082,8 @@
       try {
         localStorage.setItem(getChartStorageKey(), JSON.stringify({
           labels: chartLabels, data: chartData,
-          lastPrice: lastPrice, savedAt: Date.now()
+          lastPrice: lastPrice, lastSuccessAt: lastSuccessAt,
+          savedAt: Date.now()
         }));
       } catch (e) {}
     }
@@ -2016,15 +2094,18 @@
         if (!raw) return false;
         const parsed = JSON.parse(raw);
         if (!parsed || !Array.isArray(parsed.labels) || !Array.isArray(parsed.data)) return false;
-        // Simpan cache 24 jam
-        if (parsed.savedAt && (Date.now() - parsed.savedAt) > (24 * 60 * 60 * 1000)) {
+        if (parsed.savedAt && (Date.now() - parsed.savedAt) > (7 * 24 * 60 * 60 * 1000)) {
           localStorage.removeItem(getChartStorageKey());
           return false;
         }
         chartLabels = parsed.labels.slice();
         chartData   = parsed.data.slice();
         lastPrice   = (typeof parsed.lastPrice === 'number') ? parsed.lastPrice : null;
+        lastSuccessAt = parsed.lastSuccessAt || 0;
         while (chartLabels.length > MAX_DATA_POINTS) { chartLabels.shift(); chartData.shift(); }
+        if (chartLabels.length > 0) {
+          console.log('📦 Cache dimuat:', chartLabels.length, 'titik');
+        }
         return chartLabels.length > 0;
       } catch (e) { return false; }
     }
@@ -2099,7 +2180,6 @@
       });
     }
 
-    /* ==== fetch dengan timeout ==== */
     async function fetchWithTimeout(url, timeout = FETCH_TIMEOUT) {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), timeout);
@@ -2115,25 +2195,35 @@
       }
     }
 
-    /* ==== parse respons dari endpoint berbeda ==== */
-    function parsePriceResponse(endpointIndex, json, coinId) {
-      if (endpointIndex <= 1) {
-        // CoinGecko
-        const coin = json && json[coinId];
-        if (!coin || typeof coin.idr !== 'number') throw new Error('Data CoinGecko tidak valid');
-        return {
-          price: coin.idr,
-          change24h: typeof coin.idr_24h_change === 'number' ? coin.idr_24h_change : 0
-        };
-      } else {
-        // CoinCap
-        const d = json && json.data;
-        if (!d || !d.priceUsd) throw new Error('Data CoinCap tidak valid');
-        const usd = parseFloat(d.priceUsd);
-        if (!isFinite(usd) || usd <= 0) throw new Error('Harga USD tidak valid');
-        const price = usd * USD_TO_IDR;
-        const change24h = parseFloat(d.changePercent24Hr) || 0;
-        return { price, change24h };
+    function setChartStatus(text, isOffline, showRetry) {
+      const statusEl = $('chartStatusText');
+      const statusContainer = $('chartStatus');
+      const dotEl = statusContainer ? statusContainer.querySelector('.dot') : null;
+
+      if (statusEl) {
+        if (showRetry) {
+          statusEl.innerHTML = text + ' <button id="chartRetryBtn" class="chart-retry-btn" type="button">↻ Coba Lagi</button>';
+          setTimeout(() => {
+            const btn = document.getElementById('chartRetryBtn');
+            if (btn) {
+              btn.onclick = (e) => {
+                e.preventDefault();
+                console.log('🔄 Retry manual dipicu');
+                btn.disabled = true;
+                btn.textContent = 'Memuat...';
+                fetchCoinPrice().then(ok => {
+                  if (ok) toast('Harga berhasil diperbarui', 'success');
+                });
+              };
+            }
+          }, 50);
+        } else {
+          statusEl.textContent = text;
+        }
+      }
+      if (dotEl) {
+        if (isOffline) dotEl.classList.add('off');
+        else dotEl.classList.remove('off');
       }
     }
 
@@ -2141,26 +2231,27 @@
       if (isFetching) return null;
       isFetching = true;
 
-      const statusEl = $('chartStatusText');
-      const statusContainer = $('chartStatus');
-      const dotEl = statusContainer ? statusContainer.querySelector('.dot') : null;
+      setChartStatus('Memuat...', false, false);
 
       let success = false;
       let lastErr = null;
 
       for (let i = 0; i < API_ENDPOINTS.length && !success; i++) {
+        const ep = API_ENDPOINTS[i];
         try {
-          const url = API_ENDPOINTS[i](selectedCoinId);
-          const res = await fetchWithTimeout(url, FETCH_TIMEOUT);
+          const url = ep.url(selectedCoinId);
+          console.log(`🌐 [${i+1}/${API_ENDPOINTS.length}] ${ep.name}...`);
 
+          const res = await fetchWithTimeout(url, FETCH_TIMEOUT);
           if (!res.ok) throw new Error('HTTP ' + res.status);
 
           const json = await res.json();
-          const { price, change24h } = parsePriceResponse(i, json, selectedCoinId);
+          const { price, change24h } = await ep.parse(json, selectedCoinId);
 
           if (!isFinite(price) || price <= 0) throw new Error('Harga tidak valid');
 
-          // ==== SUKSES ====
+          console.log(`✅ ${ep.name}: Rp ${Math.round(price).toLocaleString('id-ID')} (${change24h.toFixed(2)}%)`);
+
           if ($('chartPriceLabel')) $('chartPriceLabel').textContent = fRp(price);
           const changeEl = $('chartChangeLabel');
           if (changeEl) {
@@ -2171,11 +2262,11 @@
               (isUp ? '<i class="fas fa-caret-up"></i>' : '<i class="fas fa-caret-down"></i>');
           }
 
-          if (statusEl) statusEl.textContent = 'Diperbarui ' + new Date().toLocaleTimeString('id-ID');
-          if (dotEl) dotEl.classList.remove('off');
+          const timeStr = new Date().toLocaleTimeString('id-ID');
+          setChartStatus(`Diperbarui ${timeStr} · ${ep.name}`, false, false);
 
           const now = new Date();
-          const label = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          const label = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
           if (chartLabels.length && chartLabels[chartLabels.length - 1] === label) {
             chartData[chartData.length - 1] = price;
@@ -2188,6 +2279,7 @@
 
           lastPrice = price;
           lastSuccessAt = Date.now();
+          lastSource = ep.name;
           failCount = 0;
           saveChartHistory();
 
@@ -2205,18 +2297,17 @@
           success = true;
         } catch (err) {
           lastErr = err;
-          console.warn('Endpoint ' + i + ' gagal:', err && err.message ? err.message : err);
+          console.warn(`❌ ${ep.name} gagal:`, err && err.message ? err.message : err);
         }
       }
 
       if (!success) {
         failCount++;
-        console.warn('Semua endpoint gagal untuk ' + selectedCoinId + ':', lastErr);
+        console.error(`🚨 Semua endpoint gagal (ke-${failCount}):`, lastErr);
 
         if (lastPrice != null) {
-          if (statusEl) statusEl.textContent = 'Offline — pakai data terakhir (' +
-            new Date(lastSuccessAt || Date.now()).toLocaleTimeString('id-ID') + ')';
-          if (dotEl) dotEl.classList.add('off');
+          const lastTime = lastSuccessAt ? new Date(lastSuccessAt).toLocaleTimeString('id-ID') : 'sebelumnya';
+          setChartStatus(`Offline · data terakhir ${lastTime}`, true, true);
 
           if (autoPriceMode && $('curPrice')) {
             const newVal = String(Math.round(lastPrice));
@@ -2228,9 +2319,18 @@
             }
           }
         } else {
-          if (statusEl) statusEl.textContent = 'Gagal memperbarui — coba lagi';
-          if (dotEl) dotEl.classList.add('off');
+          setChartStatus('Gagal memperbarui', true, true);
         }
+
+        if (retryTimer) clearTimeout(retryTimer);
+        const backoff = Math.min(30000 * Math.pow(2, failCount - 1), 120000);
+        console.log(`⏱️ Auto-retry dalam ${backoff/1000}s...`);
+        retryTimer = setTimeout(() => {
+          console.log('🔁 Auto-retry...');
+          fetchCoinPrice();
+        }, backoff);
+      } else {
+        if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
       }
 
       isFetching = false;
@@ -2254,9 +2354,12 @@
       initChart();
 
       if (chartLabels.length && chartData.length) {
-        if ($('chartPriceLabel')) $('chartPriceLabel').textContent = fRp(chartData[chartData.length - 1]);
-        if ($('chartStatusText')) $('chartStatusText').textContent = 'Memuat data terbaru...';
+        const cachedPrice = chartData[chartData.length - 1];
+        if ($('chartPriceLabel')) $('chartPriceLabel').textContent = fRp(cachedPrice);
+        setChartStatus('Memuat data terbaru...', false, false);
         if (priceChart) priceChart.update('none');
+      } else {
+        setChartStatus('Memuat data...', false, false);
       }
 
       if (autoPriceMode && lastPrice != null) {
@@ -2276,9 +2379,13 @@
         clearInterval(chartFetchTimer);
         chartFetchTimer = null;
       }
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+      }
     }
 
-    /* ==== EVENT GANTI COIN → AUTO FILTER RIWAYAT ==== */
+    /* ==== EVENT GANTI COIN ==== */
     $('chartCoinSelect').addEventListener('change', (e) => {
       const newCoinId = e.target.value;
       if (!COIN_META[newCoinId]) return;
@@ -2304,7 +2411,7 @@
 
       if (chartLabels.length && chartData.length) {
         if ($('chartPriceLabel')) $('chartPriceLabel').textContent = fRp(chartData[chartData.length - 1]);
-        if ($('chartStatusText')) $('chartStatusText').textContent = 'Memuat data terbaru...';
+        setChartStatus('Memuat data terbaru...', false, false);
         if (priceChart) priceChart.update('none');
       }
 
