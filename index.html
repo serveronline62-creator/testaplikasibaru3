@@ -180,11 +180,6 @@ input[type="text"] {
     background-position: 13px center;
 }
 
-input[type="date"] {
-    padding: 10px 12px;
-    width: 100%;
-}
-
 select {
     padding: 10px 14px;
     margin-bottom: 16px;
@@ -197,30 +192,42 @@ select {
     font-weight: 500;
 }
 
+input[type="date"] {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
 input[type="text"]:focus, input[type="date"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 input[type="text"]::placeholder { color: var(--border-light); }
 
-.filter-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.filter-grid { 
+    display: grid; 
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr; 
+    gap: 12px; 
+    margin-bottom: 16px; 
+    align-items: center;
+}
 
-@media (max-width: 1200px) { .filter-grid { grid-template-columns: 1fr 1fr 1fr; } }
+.period-filter-label {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: -4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.period-filter-label i { color: var(--primary); }
+
+@media (max-width: 1400px) { .filter-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+@media (max-width: 1100px) { .filter-grid { grid-template-columns: 1fr 1fr 1fr; } }
 @media (max-width: 700px) { .filter-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 500px) { .filter-grid { grid-template-columns: 1fr; } }
 .filter-grid > * { margin-bottom: 0 !important; min-width: 0; }
-
-#dateRangeContainer {
-    grid-column: span 2;
-}
-#dateRangeContainer .date-range-inner {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-#dateRangeContainer .date-sep {
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-    flex-shrink: 0;
-}
 
 .file-upload-wrapper { position: relative; margin-bottom: 16px; }
 .file-upload-wrapper input[type="file"] {
@@ -314,17 +321,32 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
 .empty-state i { font-size: 40px; margin-bottom: 12px; opacity: 0.3; display: block; }
 .empty-state p { font-size: 13px; margin: 0; }
 
-.periode-info {
+.filter-info-banner {
     display: none;
-    margin-bottom: 14px;
-    padding: 10px 14px;
     background: var(--primary-subtle);
+    border: 1px solid var(--primary-light);
     border-left: 4px solid var(--primary);
-    border-radius: 6px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
     font-size: 12px;
-    color: var(--text-body);
+    color: var(--primary-dark);
+    align-items: center;
+    gap: 10px;
 }
-.periode-info i { color: var(--primary); margin-right: 6px; }
+.filter-info-banner.active { display: flex; }
+.filter-info-banner i { color: var(--primary); }
+.filter-info-banner strong { font-weight: 700; }
+.filter-info-banner .close-info {
+    margin-left: auto;
+    background: none;
+    border: none;
+    box-shadow: none;
+    color: var(--primary);
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 13px;
+}
 
 @media (max-width: 768px) {
     body { padding: 12px; }
@@ -338,7 +360,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     .btn-group-info { display: none; }
     .toast-container { left: 12px; right: 12px; bottom: 12px; }
     .toast { max-width: 100%; }
-    #dateRangeContainer { grid-column: span 1; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 </style>
@@ -368,11 +389,18 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             <div class="btn-group">
                 <button class="btn-warning" id="resetBtn" aria-label="Reset semua data"><i class="fas fa-sync-alt"></i> Reset Data</button>
                 <button class="btn-danger" id="deleteSelectedBtn" aria-label="Hapus baris terpilih"><i class="fas fa-trash-alt"></i> Hapus Terpilih</button>
+                <button class="btn-info" id="resetAllFiltersBtn" aria-label="Reset semua filter"><i class="fas fa-filter-circle-xmark"></i> Reset Semua Filter</button>
                 <span class="btn-group-info"><span class="badge" id="dataCountBadge">0</span> baris data</span>
             </div>
             <div class="file-upload-wrapper">
                 <label for="fileInput" class="sr-only">Pilih file Excel atau CSV</label>
                 <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" aria-label="Upload file Excel atau CSV">
+            </div>
+
+            <div class="filter-info-banner" id="filterInfoBanner">
+                <i class="fas fa-info-circle"></i>
+                <span id="filterInfoText">Filter aktif</span>
+                <button class="close-info" id="clearFilterInfo" title="Hapus semua filter"><i class="fas fa-times-circle"></i> Bersihkan</button>
             </div>
             
             <div class="filter-grid">
@@ -408,31 +436,18 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                         <option value="no">Claim: NO</option>
                     </select>
                 </div>
+                
+                <div class="period-filter-label">
+                    <i class="fas fa-calendar-alt"></i> Filter Periode (Berdasarkan Kolom "Disetujui Pada")
+                </div>
                 <div>
-                    <label for="filterPeriode" class="sr-only">Filter Periode</label>
-                    <select id="filterPeriode" style="margin-bottom:0; width:100%;">
-                        <option value="">Semua Periode</option>
-                        <option value="harian">Harian (Hari Ini)</option>
-                        <option value="mingguan">Mingguan (7 Hari Terakhir)</option>
-                        <option value="bulanan">Bulanan (Bulan Ini)</option>
-                        <option value="tahunan">Tahunan (Tahun Ini)</option>
-                        <option value="custom">Custom (Rentang Tanggal)</option>
-                    </select>
+                    <label for="filterStartDate" class="sr-only">Dari Tanggal</label>
+                    <input type="date" id="filterStartDate" style="margin-bottom:0; width:100%;" title="Dari Tanggal (Disetujui Pada)">
                 </div>
-            </div>
-
-            <div id="dateRangeContainer" style="display:none; margin-bottom:16px;">
-                <label class="sr-only">Rentang Tanggal</label>
-                <div class="date-range-inner">
-                    <input type="date" id="dateFrom" aria-label="Tanggal dari">
-                    <span class="date-sep">s/d</span>
-                    <input type="date" id="dateTo" aria-label="Tanggal sampai">
+                <div>
+                    <label for="filterEndDate" class="sr-only">Sampai Tanggal</label>
+                    <input type="date" id="filterEndDate" style="margin-bottom:0; width:100%;" title="Sampai Tanggal (Disetujui Pada)">
                 </div>
-            </div>
-
-            <div id="periodeInfo" class="periode-info">
-                <i class="fas fa-filter"></i>
-                <span id="periodeInfoText">Filter periode aktif</span>
             </div>
 
             <div class="table-container">
@@ -540,17 +555,18 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     let data1 = [], selectedIndexes = new Set(), data2 = [], data3 = [], data4 = [], data5 = [];
     let currentFilter1 = "", currentFilter2 = "", currentFilter3 = "", currentFilter4 = "", currentFilter5 = "";
     let filterTeknisiVal = "", filterReturnVal = "", filterClaimVal = "", filterPengirimanVal = "";
-    let filterPeriodeVal = "", filterDateFrom = "", filterDateTo = "";
+    let filterStartDateVal = "", filterEndDateVal = "";
     
     // ========== DOM ==========
     const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
     const fileInput = $("#fileInput"), 
           search1 = $("#search1"), search2 = $("#search2"), search3 = $("#search3"), search4 = $("#search4"), search5 = $("#search5");
     const filterTeknisi = $("#filterTeknisi"), filterReturn = $("#filterReturn"), filterClaim = $("#filterClaim"), filterPengiriman = $("#filterPengiriman");
-    const filterPeriode = $("#filterPeriode"), dateRangeContainer = $("#dateRangeContainer"), dateFromInput = $("#dateFrom"), dateToInput = $("#dateTo");
-    const periodeInfo = $("#periodeInfo"), periodeInfoText = $("#periodeInfoText");
+    const filterStartDate = $("#filterStartDate"), filterEndDate = $("#filterEndDate");
+    const filterInfoBanner = $("#filterInfoBanner"), filterInfoText = $("#filterInfoText"), clearFilterInfo = $("#clearFilterInfo");
     const addRowBtn = $("#addRowBtn"), addRowBtn3 = $("#addRowBtn3"), addRowBtn4 = $("#addRowBtn4");
     const resetBtn = $("#resetBtn"), checkAllCb = $("#checkAll"), deleteSelectedBtn = $("#deleteSelectedBtn");
+    const resetAllFiltersBtn = $("#resetAllFiltersBtn");
     const tbody1 = $("#tbody1"), tbody2 = $("#tbody2"), tbody3 = $("#tbody3"), tbody4 = $("#tbody4"), tbody5 = $("#tbody5");
     const totalQty1El = $("#totalQty1"), totalQty2El = $("#totalQty2"), totalQty3aEl = $("#totalQty3a"), totalQty4El = $("#totalQty4"), totalQty5El = $("#totalQty5");
     const countBadge = $("#dataCountBadge"), selectedBadge = $("#selectedCountBadge"), demandBadge = $("#demandCountBadge"), stockBadge = $("#stockCountBadge"), stockBadge5 = $("#stockCountBadge5");
@@ -581,8 +597,28 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
 
     function calculateDays(dateStr) {
         if (!dateStr) return "";
-        var date = parseDateValue(dateStr);
-        if (!date) return ""; 
+        dateStr = String(dateStr).trim();
+        var parts, date;
+        if (dateStr.indexOf('/') !== -1) {
+            parts = dateStr.split('/');
+            if (parts.length === 3) {
+                var d = parseInt(parts[0]), m = parseInt(parts[1]), y = parseInt(parts[2]);
+                if (y < 100) y += 2000;
+                date = new Date(y, m - 1, d);
+            }
+        } else if (dateStr.indexOf('-') !== -1) {
+            parts = dateStr.split('-');
+            if (parts.length === 3) {
+                if (parts[0].length === 4) {
+                    date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                } else {
+                    var d2 = parseInt(parts[0]), m2 = parseInt(parts[1]), y2 = parseInt(parts[2]);
+                    if (y2 < 100) y2 += 2000;
+                    date = new Date(y2, m2 - 1, d2);
+                }
+            }
+        }
+        if (!date || isNaN(date.getTime())) return ""; 
         var today = new Date();
         today.setHours(0, 0, 0, 0); 
         var diffTime = today - date;
@@ -590,87 +626,49 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         return diffDays >= 0 ? diffDays : 0;
     }
 
-    // ========== PARSING TANGGAL (ROBUST) ==========
-    function parseDateValue(val) {
-        if (val === null || val === undefined || val === "") return null;
-        
-        // Jika sudah Date object (dari Excel parsing)
-        if (val instanceof Date) {
-            if (isNaN(val.getTime())) return null;
-            var dc = new Date(val.getFullYear(), val.getMonth(), val.getDate());
-            dc.setHours(0, 0, 0, 0);
-            return dc;
-        }
-        
-        // Jika number (Excel serial date)
-        if (typeof val === "number" && val > 0) {
-            var excelDate = new Date(Math.round((val - 25569) * 86400 * 1000));
-            if (!isNaN(excelDate.getTime())) {
-                var de = new Date(excelDate.getUTCFullYear(), excelDate.getUTCMonth(), excelDate.getUTCDate());
-                de.setHours(0, 0, 0, 0);
-                return de;
+    function parseDateToYMD(dateStr) {
+        if (!dateStr) return null;
+        dateStr = String(dateStr).trim();
+        if (dateStr === "") return null;
+        var parts, date;
+        if (dateStr.indexOf('/') !== -1) {
+            parts = dateStr.split('/');
+            if (parts.length === 3) {
+                var d = parseInt(parts[0]), m = parseInt(parts[1]), y = parseInt(parts[2]);
+                if (y < 100) y += 2000;
+                date = new Date(y, m - 1, d);
+            }
+        } else if (dateStr.indexOf('-') !== -1) {
+            parts = dateStr.split('-');
+            if (parts.length === 3) {
+                if (parts[0].length === 4) {
+                    date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                } else {
+                    var d2 = parseInt(parts[0]), m2 = parseInt(parts[1]), y2 = parseInt(parts[2]);
+                    if (y2 < 100) y2 += 2000;
+                    date = new Date(y2, m2 - 1, d2);
+                }
             }
         }
-        
-        val = String(val).trim();
-        if (!val) return null;
-        
-        var d = null;
-        // Format DD/MM/YYYY atau DD-MM-YYYY
-        if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(val)) {
-            var p = val.split(/[\/\-]/);
-            d = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
-        }
-        // Format YYYY-MM-DD
-        else if (/^\d{4}-\d{1,2}-\d{1,2}/.test(val)) {
-            var p2 = val.substring(0, 10).split('-');
-            d = new Date(parseInt(p2[0]), parseInt(p2[1]) - 1, parseInt(p2[2]));
-        }
-        // Format YYYY/MM/DD
-        else if (/^\d{4}\/\d{1,2}\/\d{1,2}/.test(val)) {
-            var p3 = val.substring(0, 10).split('/');
-            d = new Date(parseInt(p3[0]), parseInt(p3[1]) - 1, parseInt(p3[2]));
-        }
-        else {
-            d = new Date(val);
-        }
-        
-        if (!d || isNaN(d.getTime())) return null;
-        d.setHours(0, 0, 0, 0);
-        return d;
+        if (!date || isNaN(date.getTime())) return null;
+        return date;
     }
 
-    // ========== AMBIL TANGGAL DARI KOLOM "Disetujui Pada" ==========
-    function getRowDate(row) {
-        // PRIORITAS UTAMA: kolom "Disetujui Pada"
-        var primaryVal = row["Disetujui Pada"];
-        if (primaryVal !== undefined && primaryVal !== null && String(primaryVal).trim() !== "") {
-            var d = parseDateValue(primaryVal);
-            if (d) return d;
-        }
-        // Fallback ke kolom tanggal lain
-        var candidates = ["Tanggal Disetujui", "Tanggal", "Date", "Tgl", "Tanggal Transaksi"];
-        for (var i = 0; i < candidates.length; i++) {
-            if (row[candidates[i]]) {
-                var d2 = parseDateValue(row[candidates[i]]);
-                if (d2) return d2;
-            }
-        }
-        // Fallback terakhir: cari kolom apapun yang mengandung "tanggal/date/tgl"
-        for (var k in row) {
-            if (k.charAt(0) === "_") continue;
-            if (/tanggal|date|tgl/i.test(k) && row[k]) {
-                var d3 = parseDateValue(row[k]);
-                if (d3) return d3;
-            }
-        }
-        return null;
+    function formatYMD(date) {
+        if (!date) return "";
+        var y = date.getFullYear();
+        var m = String(date.getMonth() + 1).padStart(2, '0');
+        var d = String(date.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + d;
     }
 
-    // ========== FORMAT TANGGAL UNTUK INFO ==========
-    function formatDateID(d) {
-        if (!d) return "";
-        return d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    function formatDateDisplay(dateStr) {
+        var d = parseDateToYMD(dateStr);
+        if (!d) return dateStr || "";
+        var dd = String(d.getDate()).padStart(2, '0');
+        var mm = String(d.getMonth() + 1).padStart(2, '0');
+        var yyyy = d.getFullYear();
+        return dd + '/' + mm + '/' + yyyy;
     }
 
     document.addEventListener("keydown", function(e) {
@@ -687,22 +685,57 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         });
     });
 
-    // ========== RESET ==========
+    // ========== UPDATE BANNER INFO FILTER ==========
+    function updateFilterInfoBanner() {
+        var parts = [];
+        if (currentFilter1) parts.push('Pencarian: "' + search1.value + '"');
+        if (filterTeknisiVal) parts.push('Teknisi: ' + filterTeknisiVal);
+        if (filterPengirimanVal) parts.push('Pengiriman: ' + filterPengirimanVal);
+        if (filterReturnVal) parts.push('Return: ' + filterReturnVal.toUpperCase());
+        if (filterClaimVal) parts.push('Claim: ' + filterClaimVal.toUpperCase());
+        if (filterStartDateVal || filterEndDateVal) {
+            var start = filterStartDateVal ? formatDateDisplay(filterStartDateVal) : "…";
+            var end = filterEndDateVal ? formatDateDisplay(filterEndDateVal) : "…";
+            parts.push('Periode: ' + start + ' s/d ' + end);
+        }
+        if (parts.length > 0) {
+            filterInfoText.innerHTML = '<strong>Filter Aktif:</strong> ' + parts.join(' • ');
+            filterInfoBanner.classList.add('active');
+        } else {
+            filterInfoBanner.classList.remove('active');
+        }
+    }
+
+    // ========== RESET SEMUA FILTER ==========
+    function resetAllFilters(silent) {
+        currentFilter1 = ""; filterTeknisiVal = ""; filterReturnVal = ""; filterClaimVal = ""; filterPengirimanVal = "";
+        filterStartDateVal = ""; filterEndDateVal = "";
+        search1.value = ""; filterTeknisi.value = ""; filterReturn.value = ""; filterClaim.value = ""; filterPengiriman.value = "";
+        filterStartDate.value = ""; filterEndDate.value = "";
+        renderTable1();
+        updateFilterInfoBanner();
+        if (!silent) showToast("Semua filter direset.", "info");
+    }
+
+    resetAllFiltersBtn.addEventListener("click", function() { resetAllFilters(false); });
+    clearFilterInfo.addEventListener("click", function() { resetAllFilters(false); });
+
+    // ========== RESET SEMUA DATA ==========
     resetBtn.addEventListener("click", function() {
         if (!confirm("Apakah Anda yakin ingin mereset semua data?")) return;
         data1=[]; data2=[]; data3=[]; data4=[]; data5=[]; selectedIndexes.clear();
         currentFilter1=""; currentFilter2=""; currentFilter3=""; currentFilter4=""; currentFilter5="";
         filterTeknisiVal=""; filterReturnVal=""; filterClaimVal=""; filterPengirimanVal="";
-        filterPeriodeVal=""; filterDateFrom=""; filterDateTo="";
+        filterStartDateVal=""; filterEndDateVal="";
         tbody1.innerHTML=""; tbody2.innerHTML=""; tbody3.innerHTML=""; tbody4.innerHTML=""; tbody5.innerHTML="";
         totalQty1El.textContent="0"; totalQty2El.textContent="0"; totalQty3aEl.textContent="0"; totalQty4El.textContent="0"; totalQty5El.textContent="0";
         fileInput.value=""; search1.value=""; search2.value=""; search3.value=""; search4.value=""; search5.value="";
+        filterStartDate.value=""; filterEndDate.value="";
         filterTeknisi.innerHTML = '<option value="">Semua Teknisi</option>'; filterReturn.value=""; filterClaim.value=""; filterPengiriman.innerHTML = '<option value="">Semua Status Pengiriman</option>';
-        filterPeriode.value=""; dateFromInput.value=""; dateToInput.value=""; dateRangeContainer.style.display="none";
-        periodeInfo.style.display="none"; periodeInfoText.textContent="";
         checkAllCb.checked=false; checkAllCb.indeterminate=false;
         countBadge.textContent="0"; selectedBadge.textContent="0"; demandBadge.textContent="0"; stockBadge.textContent="0"; stockBadge5.textContent="0";
         $$(".note-input").forEach(el => el.innerText="");
+        updateFilterInfoBanner();
         showToast("Semua data berhasil direset.", "info");
     });
 
@@ -716,14 +749,16 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 var parsed = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
                 if (!parsed.length) { showToast("File kosong atau format tidak dikenali.", "danger"); return; }
                 data1 = parsed; selectedIndexes.clear();
-                checkAllCb.checked=false; checkAllCb.indeterminate=false; currentFilter1=""; search1.value=""; 
+                checkAllCb.checked=false; checkAllCb.indeterminate=false; 
+                currentFilter1=""; search1.value=""; 
                 filterTeknisiVal=""; filterReturnVal=""; filterClaimVal=""; filterPengirimanVal="";
+                filterStartDateVal=""; filterEndDateVal="";
                 filterTeknisi.value=""; filterReturn.value=""; filterClaim.value=""; filterPengiriman.value="";
-                filterPeriodeVal=""; filterPeriode.value=""; dateFromInput.value=""; dateToInput.value=""; dateRangeContainer.style.display="none";
-                periodeInfo.style.display="none"; periodeInfoText.textContent="";
+                filterStartDate.value=""; filterEndDate.value="";
                 populateTeknisiDropdown(data1);
                 populatePengirimanDropdown(data1);
                 renderTable1(); syncToTab2(); syncToTab3(); syncToTab4(); syncToTab5();
+                updateFilterInfoBanner();
                 showToast(parsed.length + " baris data berhasil diimpor.", "success");
             } catch (err) { showToast("Gagal membaca file: " + err.message, "danger"); }
         };
@@ -772,67 +807,14 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     });
 
     // ========== PENCARIAN & FILTER ==========
-    search1.addEventListener("input", debounce(function() { currentFilter1 = search1.value.toLowerCase(); renderTable1(); }, 300));
-    filterTeknisi.addEventListener("change", function() { filterTeknisiVal = filterTeknisi.value; renderTable1(); });
-    filterPengiriman.addEventListener("change", function() { filterPengirimanVal = filterPengiriman.value; renderTable1(); });
-    filterReturn.addEventListener("change", function() { filterReturnVal = filterReturn.value; renderTable1(); });
-    filterClaim.addEventListener("change", function() { filterClaimVal = filterClaim.value; renderTable1(); });
-    
-    // Filter Periode — Utama
-    filterPeriode.addEventListener("change", function() {
-        filterPeriodeVal = filterPeriode.value;
-        
-        if (filterPeriodeVal === "custom") {
-            dateRangeContainer.style.display = "block";
-            periodeInfo.style.display = "block";
-            var txt = "Filter: Custom — pilih rentang tanggal di bawah.";
-            if (filterDateFrom || filterDateTo) {
-                txt = "Filter: Custom — " + (filterDateFrom ? "dari " + formatDateID(parseDateValue(filterDateFrom)) : "") + 
-                      (filterDateTo ? " sampai " + formatDateID(parseDateValue(filterDateTo)) : "");
-            }
-            periodeInfoText.textContent = txt + ' (kolom "Disetujui Pada")';
-        } else if (filterPeriodeVal) {
-            dateRangeContainer.style.display = "none";
-            filterDateFrom = ""; filterDateTo = "";
-            dateFromInput.value = ""; dateToInput.value = "";
-            periodeInfo.style.display = "block";
-            var label = {harian:"Harian (Hari Ini)", mingguan:"Mingguan (7 Hari Terakhir)", bulanan:"Bulanan (Bulan Ini)", tahunan:"Tahunan (Tahun Ini)"}[filterPeriodeVal] || filterPeriodeVal;
-            periodeInfoText.textContent = "Filter: " + label + ' — berdasarkan kolom "Disetujui Pada".';
-        } else {
-            dateRangeContainer.style.display = "none";
-            filterDateFrom = ""; filterDateTo = "";
-            dateFromInput.value = ""; dateToInput.value = "";
-            periodeInfo.style.display = "none";
-            periodeInfoText.textContent = "";
-        }
-        renderTable1();
-    });
-    
-    dateFromInput.addEventListener("change", function() {
-        filterDateFrom = dateFromInput.value;
-        if (filterPeriodeVal === "custom") {
-            var t = "Filter: Custom — ";
-            if (filterDateFrom && filterDateTo) t += "dari " + formatDateID(parseDateValue(filterDateFrom)) + " sampai " + formatDateID(parseDateValue(filterDateTo));
-            else if (filterDateFrom) t += "dari " + formatDateID(parseDateValue(filterDateFrom));
-            else if (filterDateTo) t += "sampai " + formatDateID(parseDateValue(filterDateTo));
-            else t += "pilih rentang tanggal.";
-            periodeInfoText.textContent = t + ' (kolom "Disetujui Pada")';
-            renderTable1();
-        }
-    });
-    dateToInput.addEventListener("change", function() {
-        filterDateTo = dateToInput.value;
-        if (filterPeriodeVal === "custom") {
-            var t = "Filter: Custom — ";
-            if (filterDateFrom && filterDateTo) t += "dari " + formatDateID(parseDateValue(filterDateFrom)) + " sampai " + formatDateID(parseDateValue(filterDateTo));
-            else if (filterDateFrom) t += "dari " + formatDateID(parseDateValue(filterDateFrom));
-            else if (filterDateTo) t += "sampai " + formatDateID(parseDateValue(filterDateTo));
-            else t += "pilih rentang tanggal.";
-            periodeInfoText.textContent = t + ' (kolom "Disetujui Pada")';
-            renderTable1();
-        }
-    });
-    
+    search1.addEventListener("input", debounce(function() { currentFilter1 = search1.value.toLowerCase(); renderTable1(); updateFilterInfoBanner(); }, 300));
+    filterTeknisi.addEventListener("change", function() { filterTeknisiVal = filterTeknisi.value; renderTable1(); updateFilterInfoBanner(); });
+    filterPengiriman.addEventListener("change", function() { filterPengirimanVal = filterPengiriman.value; renderTable1(); updateFilterInfoBanner(); });
+    filterReturn.addEventListener("change", function() { filterReturnVal = filterReturn.value; renderTable1(); updateFilterInfoBanner(); });
+    filterClaim.addEventListener("change", function() { filterClaimVal = filterClaim.value; renderTable1(); updateFilterInfoBanner(); });
+    filterStartDate.addEventListener("change", function() { filterStartDateVal = filterStartDate.value; renderTable1(); updateFilterInfoBanner(); });
+    filterEndDate.addEventListener("change", function() { filterEndDateVal = filterEndDate.value; renderTable1(); updateFilterInfoBanner(); });
+
     search2.addEventListener("input", debounce(function() { currentFilter2 = search2.value.toLowerCase(); renderTable2(); }, 300));
     search3.addEventListener("input", debounce(function() { currentFilter3 = search3.value.toLowerCase(); renderTable3(); }, 300));
     search4.addEventListener("input", debounce(function() { currentFilter4 = search4.value.toLowerCase(); renderTable4(); }, 300));
@@ -863,12 +845,14 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         populatePengirimanDropdown(data1);
         renderTable1();
         syncToTab2(); syncToTab3(); syncToTab4(); syncToTab5();
+        updateFilterInfoBanner();
         showToast(toDelete.length + " baris berhasil dihapus.", "success");
     });
 
     // ========== FILTER LOGIKA ==========
     function getFilteredData1() {
         var fText = currentFilter1, fTek = filterTeknisiVal, fRet = filterReturnVal, fClm = filterClaimVal, fKirim = filterPengirimanVal;
+        var fStart = filterStartDateVal, fEnd = filterEndDateVal;
         var res = [];
         for(var i=0; i<data1.length; i++) {
             var row = data1[i];
@@ -880,38 +864,12 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             var matchRet = true; if (fRet) matchRet = checkYesNo(row["Return To Factory"], fRet); if(!matchRet) continue;
             var matchClm = true; if (fClm) matchClm = checkYesNo(row["Claim To Factory"], fClm); if(!matchClm) continue;
             
-            // Filter Periode — Berdasarkan kolom "Disetujui Pada"
-            if (filterPeriodeVal) {
-                var rowDate = getRowDate(row);
-                if (!rowDate) continue;
-                var today = new Date();
-                today.setHours(0, 0, 0, 0);
-                var matchPeriode = false;
-
-                if (filterPeriodeVal === "harian") {
-                    matchPeriode = (rowDate.getTime() === today.getTime());
-                } else if (filterPeriodeVal === "mingguan") {
-                    var weekAgo = new Date(today);
-                    weekAgo.setDate(weekAgo.getDate() - 6);
-                    matchPeriode = (rowDate >= weekAgo && rowDate <= today);
-                } else if (filterPeriodeVal === "bulanan") {
-                    matchPeriode = (rowDate.getMonth() === today.getMonth() && rowDate.getFullYear() === today.getFullYear());
-                } else if (filterPeriodeVal === "tahunan") {
-                    matchPeriode = (rowDate.getFullYear() === today.getFullYear());
-                } else if (filterPeriodeVal === "custom") {
-                    var from = filterDateFrom ? parseDateValue(filterDateFrom) : null;
-                    var to = filterDateTo ? parseDateValue(filterDateTo) : null;
-                    if (from && to) {
-                        matchPeriode = (rowDate >= from && rowDate <= to);
-                    } else if (from) {
-                        matchPeriode = (rowDate >= from);
-                    } else if (to) {
-                        matchPeriode = (rowDate <= to);
-                    } else {
-                        matchPeriode = true;
-                    }
-                }
-                if (!matchPeriode) continue;
+            if (fStart || fEnd) {
+                var tgl = parseDateToYMD(row["Disetujui Pada"]);
+                if (!tgl) continue;
+                var ymd = formatYMD(tgl);
+                if (fStart && ymd < fStart) continue;
+                if (fEnd && ymd > fEnd) continue;
             }
             
             res.push(Object.assign({}, row, {_origIdx:i}));
@@ -932,7 +890,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         }
         else if (!filtered.length) { 
             var tr=document.createElement("tr"); 
-            tr.innerHTML = '<td colspan="13"><div class="empty-state"><i class="fas fa-search"></i><p>Tidak ditemukan data yang sesuai filter.</p></div></td>'; 
+            tr.innerHTML = '<td colspan="13"><div class="empty-state"><i class="fas fa-search"></i><p>Tidak ditemukan data yang sesuai dengan filter.</p></div></td>'; 
             frag.appendChild(tr); 
         }
         else { 
@@ -947,13 +905,19 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 var cb=document.createElement("input"); 
                 cb.type="checkbox"; cb.className="cb-cell"; cb.dataset.idx=origIdx; 
                 if(isC) cb.checked=true; 
-                tdCb.appendChild(cb); tr.appendChild(tdCb); 
+                tdCb.appendChild(cb); 
+                tr.appendChild(tdCb); 
                 for (var ki=0; ki<KEYS_TAB1.length; ki++) { 
                     var td=document.createElement("td"); 
+                    var key = KEYS_TAB1[ki];
                     td.contentEditable="true"; 
-                    td.dataset.key=KEYS_TAB1[ki]; 
+                    td.dataset.key=key; 
                     td.dataset.idx=origIdx; 
-                    td.textContent=row[KEYS_TAB1[ki]]||""; 
+                    td.textContent=row[key]||""; 
+                    if (key === "Disetujui Pada") {
+                        td.style.fontWeight = "600";
+                        td.style.color = "var(--primary-dark)";
+                    }
                     tr.appendChild(td); 
                 } 
                 frag.appendChild(tr); 
@@ -963,6 +927,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         totalQty1El.textContent=total.toLocaleString("id-ID"); 
         countBadge.textContent=data1.length; 
         updateCheckAllState();
+        updateFilterInfoBanner();
     }
 
     // Event Delegasi Tab 1
@@ -974,7 +939,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             updateCheckAllState();syncToTab2();syncToTab3();syncToTab4();syncToTab5(); 
         } 
     });
-    
     tbody1.addEventListener("focusout", function(e) { 
         if(e.target.hasAttribute("contenteditable")){ 
             var idx=parseInt(e.target.dataset.idx),key=e.target.dataset.key; 
@@ -991,9 +955,9 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                     if(selectedIndexes.has(idx)){syncToTab2();syncToTab4();syncToTab5();}
                 } 
                 if(key==="Return To Factory"||key==="Claim To Factory"){ renderTable1(); } 
-                // Jika kolom "Disetujui Pada" diedit dan filter periode aktif, re-render
-                if(key==="Disetujui Pada" && filterPeriodeVal) { renderTable1(); }
-                if(key==="Disetujui Pada" && selectedIndexes.has(idx)) { syncToTab5(); }
+                if(key==="Disetujui Pada"){ 
+                    if(selectedIndexes.has(idx)){ syncToTab5(); }
+                }
             } 
         } 
     });
@@ -1012,7 +976,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         selectedBadge.textContent=data2.length; 
         renderTable2(); 
     }
-    
     function syncToTab3() { 
         var fromTab1=[]; 
         selectedIndexes.forEach(idx => { 
@@ -1044,7 +1007,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         demandBadge.textContent=data3.length; 
         renderTable3(); 
     }
-    
     function syncToTab4() { 
         var fromTab1=[]; 
         selectedIndexes.forEach(idx => { 
@@ -1065,6 +1027,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             if(data1[idx]){ 
                 var src = data1[idx];
                 var days = calculateDays(src["Disetujui Pada"]);
+                
                 var r=Object.assign({}, src, {
                     _sourceIdx:idx,
                     _isNew:false,
@@ -1078,7 +1041,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         renderTable5(); 
     }
 
-    // ========== RENDER TABEL 2, 3, 4 ==========
+    // ========== RENDER TABEL 2 ==========
     function renderTable2() { 
         var frag=document.createDocumentFragment(), filtered=getFiltered(data2,currentFilter2), total=0; 
         if(!filtered.length && !data2.length){ 
@@ -1273,7 +1236,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         totalQty5El.textContent=total.toLocaleString("id-ID"); 
     }
 
-    // Event Delegasi Tab 2, 3, 4
+    // Event Delegasi Tab 2
     tbody2.addEventListener("focusout", function(e) { 
         if(e.target.hasAttribute("contenteditable")){ 
             var ri=parseInt(e.target.dataset.ridx), k=e.target.dataset.key; 
@@ -1284,7 +1247,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             } 
         } 
     });
-    
     tbody2.addEventListener("click", function(e) { 
         if(e.target.closest(".btn-danger")){ 
             var ri=parseInt(e.target.closest(".btn-danger").dataset.ridx); 
@@ -1313,7 +1275,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             } 
         } 
     });
-    
     tbody3.addEventListener("click", function(e) { 
         if(e.target.closest(".btn-danger")){ 
             var ri=parseInt(e.target.closest(".btn-danger").dataset.ridx3); 
@@ -1342,7 +1303,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             } 
         } 
     });
-    
     tbody4.addEventListener("click", function(e) { 
         if(e.target.closest(".btn-danger")){ 
             var ri=parseInt(e.target.closest(".btn-danger").dataset.ridx4); 
@@ -1408,32 +1368,15 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         XLSX.writeFile(wb,"Laporan Data Sparepart Bekas.xlsx"); 
         showToast("File Excel berhasil diunduh.","success"); 
     });
-    
     $("#pdfBtn").addEventListener("click", function() { 
         if(!data2.length){showToast("Tidak ada data.","danger");return;} 
         var doc=new jsPDF({orientation:"p",unit:"mm",format:"a4"}),pw=doc.internal.pageSize.getWidth(),mg={left:8,right:8},uw=pw-mg.left-mg.right,col=["No","Catatan","Part","Qty","Demand","Serial","Teknisi"],rows=[]; 
-        for(var i=0;i<data2.length;i++){
-            var r=data2[i]; 
-            rows.push([String(i+1),String(r["Catatan"]||""),String(r["Part"]||""),String(r["Qty Transaksi"]||""),String(r["Part Demand"]||""),String(r["Serial Number"]||""),String(r["Teknisi Perbaikan"]||"")]);
-        } 
+        for(var i=0;i<data2.length;i++){var r=data2[i]; rows.push([String(i+1),String(r["Catatan"]||""),String(r["Part"]||""),String(r["Qty Transaksi"]||""),String(r["Part Demand"]||""),String(r["Serial Number"]||""),String(r["Teknisi Perbaikan"]||"")]);} 
         doc.setFontSize(16); doc.setTextColor(30,41,59); doc.text("Laporan Data Sparepart Bekas",mg.left,18); 
-        doc.setFontSize(8); doc.setTextColor(100,116,139); 
-        doc.text("Dicetak: "+new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"}),mg.left,24); 
-        doc.autoTable({
-            head:[col],
-            body:rows,
-            startY:28,
-            margin:mg,
-            styles:{font:"helvetica",fontStyle:"normal",fontSize:7,lineColor:[226,232,240],lineWidth:0.3,textColor:[51,65,85],cellPadding:2.5,overflow:"linebreak"},
-            headStyles:{fillColor:[248,250,252],textColor:[30,41,59],fontStyle:"bold",fontSize:7.5,lineColor:[203,213,225],lineWidth:0.4,halign:"center",valign:"middle"},
-            tableWidth:"auto",
-            columnStyles:{0:{halign:"center",cellWidth:8},3:{halign:"center",cellWidth:10},4:{halign:"left",cellWidth:"auto"}},
-            alternateRowStyles:{fillColor:[248,250,252]},
-            theme:"grid"
-        }); 
+        doc.setFontSize(8); doc.setTextColor(100,116,139); doc.text("Dicetak: "+new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"}),mg.left,24); 
+        doc.autoTable({head:[col],body:rows,startY:28,margin:mg,styles:{font:"helvetica",fontStyle:"normal",fontSize:7,lineColor:[226,232,240],lineWidth:0.3,textColor:[51,65,85],cellPadding:2.5,overflow:"linebreak"},headStyles:{fillColor:[248,250,252],textColor:[30,41,59],fontStyle:"bold",fontSize:7.5,lineColor:[203,213,225],lineWidth:0.4,halign:"center",valign:"middle"},tableWidth:"auto",columnStyles:{0:{halign:"center",cellWidth:8},3:{halign:"center",cellWidth:10},4:{halign:"left",cellWidth:"auto"}},alternateRowStyles:{fillColor:[248,250,252]},theme:"grid"}); 
         var fy=doc.lastAutoTable.finalY,gt=calcTotal(data2,"Qty Transaksi"); 
-        doc.setFontSize(9); doc.setTextColor(30,41,59); doc.setFont(undefined,"bold"); 
-        doc.text("TOTAL QTY:",uw-35,fy+7,{align:"right"}); 
+        doc.setFontSize(9); doc.setTextColor(30,41,59); doc.setFont(undefined,"bold"); doc.text("TOTAL QTY:",uw-35,fy+7,{align:"right"}); 
         doc.setTextColor(5,150,105); doc.text(String(gt),uw-8,fy+7,{align:"right"}); 
         appendNotesPDF(doc,fy); 
         doc.save("Laporan Data Sparepart Bekas.pdf"); 
@@ -1465,31 +1408,15 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         XLSX.writeFile(wb,"Data SJOB Part Bekas.xlsx"); 
         showToast("File Excel berhasil diunduh.","success"); 
     });
-    
     $("#pdfBtn3").addEventListener("click", function() { 
         if(!data3.length){showToast("Tidak ada data.","danger");return;} 
         var doc=new jsPDF({orientation:"l",unit:"mm",format:"a4"}),pw=doc.internal.pageSize.getWidth(),mg={left:8,right:8},uw=pw-mg.left-mg.right,col=["No","Part Demand / Part","Lot","Attribute","QTY","QTY Konv.","UM Konv.","Remarks 1","Remarks 2","No. Svc Job"],rows=[]; 
-        for(var i=0;i<data3.length;i++){
-            var r=data3[i]; 
-            rows.push([String(i+1),String(r["Part Demand / Part"]||""),String(r["Lot"]||""),String(r["Attribute"]||""),String(r["QTY / Qty Transaksi"]||""),String(r["QTY Konversi"]||""),String(r["UM Konversi"]||""),String(r["Remarks 1"]||""),String(r["Remarks 2"]||""),String(r["Nomor Service Job / Catatan"]||"")]);
-        } 
+        for(var i=0;i<data3.length;i++){var r=data3[i]; rows.push([String(i+1),String(r["Part Demand / Part"]||""),String(r["Lot"]||""),String(r["Attribute"]||""),String(r["QTY / Qty Transaksi"]||""),String(r["QTY Konversi"]||""),String(r["UM Konversi"]||""),String(r["Remarks 1"]||""),String(r["Remarks 2"]||""),String(r["Nomor Service Job / Catatan"]||"")]);} 
         doc.setFontSize(16); doc.setTextColor(30,41,59); doc.text("Data SJOB Part Bekas",mg.left,16); 
-        doc.setFontSize(8); doc.setTextColor(100,116,139); 
-        doc.text("Dicetak: "+new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"}),mg.left,22); 
-        doc.autoTable({
-            head:[col],
-            body:rows,
-            startY:26,
-            margin:mg,
-            styles:{font:"helvetica",fontStyle:"normal",fontSize:6.5,lineColor:[226,232,240],lineWidth:0.3,textColor:[51,65,85],cellPadding:2.5,overflow:"linebreak"},
-            headStyles:{fillColor:[248,250,252],textColor:[30,41,59],fontStyle:"bold",fontSize:7,lineColor:[203,213,225],lineWidth:0.4,halign:"center",valign:"middle"},
-            columnStyles:{0:{halign:"center",cellWidth:8},4:{halign:"center",cellWidth:14},5:{halign:"center",cellWidth:14}},
-            alternateRowStyles:{fillColor:[248,250,252]},
-            theme:"grid"
-        }); 
+        doc.setFontSize(8); doc.setTextColor(100,116,139); doc.text("Dicetak: "+new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"}),mg.left,22); 
+        doc.autoTable({head:[col],body:rows,startY:26,margin:mg,styles:{font:"helvetica",fontStyle:"normal",fontSize:6.5,lineColor:[226,232,240],lineWidth:0.3,textColor:[51,65,85],cellPadding:2.5,overflow:"linebreak"},headStyles:{fillColor:[248,250,252],textColor:[30,41,59],fontStyle:"bold",fontSize:7,lineColor:[203,213,225],lineWidth:0.4,halign:"center",valign:"middle"},columnStyles:{0:{halign:"center",cellWidth:8},4:{halign:"center",cellWidth:14},5:{halign:"center",cellWidth:14}},alternateRowStyles:{fillColor:[248,250,252]},theme:"grid"}); 
         var fy=doc.lastAutoTable.finalY,gtA=calcTotal(data3,"QTY / Qty Transaksi"),gtB=calcTotal(data3,"QTY Konversi"); 
-        doc.setFontSize(8); doc.setTextColor(30,41,59); doc.setFont(undefined,"bold"); 
-        doc.text("TOTAL QTY:",uw-80,fy+7,{align:"right"}); 
+        doc.setFontSize(8); doc.setTextColor(30,41,59); doc.setFont(undefined,"bold"); doc.text("TOTAL QTY:",uw-80,fy+7,{align:"right"}); 
         doc.setTextColor(5,150,105); doc.text(String(gtA),uw-60,fy+7,{align:"left"}); 
         doc.setTextColor(30,41,59); doc.text("TOTAL KONV.:",uw-30,fy+7,{align:"right"}); 
         doc.setTextColor(37,99,235); doc.text(String(gtB),uw-10,fy+7,{align:"left"}); 
@@ -1511,15 +1438,10 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         wsData.push(["KEL. FATULULI"]);
         wsData.push(["KEC. OEBOBO - KOTA KUPANG"]);
         wsData.push(["TELP. +62 813 2816 2259"]);
-        wsData.push([]); 
-        wsData.push(["Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"})]); 
-        wsData.push([]);
+        wsData.push([]); wsData.push(["Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"})]); wsData.push([]);
         wsData.push(["No", "Catatan", "Part", "Qty Reservasi", "Part Demand", "Serial Number", "Teknisi Perbaikan"]);
         var gt=calcTotal(data4,"Qty Reservasi"); 
-        for(var i=0;i<data4.length;i++){
-            var r=data4[i]; 
-            wsData.push([i+1, r["Catatan"]||"", r["Part"]||"", r["Qty Reservasi"]||"", r["Part Demand"]||"", r["Serial Number"]||"", r["Teknisi Perbaikan"]||""]);
-        }
+        for(var i=0;i<data4.length;i++){var r=data4[i]; wsData.push([i+1, r["Catatan"]||"", r["Part"]||"", r["Qty Reservasi"]||"", r["Part Demand"]||"", r["Serial Number"]||"", r["Teknisi Perbaikan"]||""]);}
         wsData.push(["", "", "TOTAL QTY", gt, "", "", ""]); wsData.push([]); 
         wsData.push(["", "Dibuat oleh,", "Mengetahui,", "Expedisi,", "Diterima,"]);
         wsData.push([]); wsData.push([]); wsData.push([]); 
@@ -1546,20 +1468,8 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         doc.setFontSize(10); doc.text("Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"}), pw - mg.right, 66, {align: "right"});
         doc.setDrawColor(200,200,200); doc.line(mg.left, 71, pw-mg.right, 71);
         
-        for(var i=0;i<data4.length;i++){
-            var r=data4[i]; 
-            rows.push([String(i+1),String(r["Catatan"]||""),String(r["Part"]||""),String(r["Qty Reservasi"]||""),String(r["Part Demand"]||""),String(r["Serial Number"]||""),String(r["Teknisi Perbaikan"]||"")]);
-        } 
-        doc.autoTable({
-            head:[col],
-            body:rows,
-            startY:74,
-            margin:mg,
-            styles:{font:"helvetica",fontStyle:"normal",fontSize:7,lineColor:[226,232,240],lineWidth:0.3,textColor:[51,65,85],cellPadding:2,overflow:"linebreak"},
-            headStyles:{fillColor:[240,240,240],textColor:[0,0,0],fontStyle:"bold",fontSize:8,lineColor:[200,200,200],halign:"center",valign:"middle"},
-            columnStyles:{0:{halign:"center",cellWidth:8},3:{halign:"center",cellWidth:14}},
-            theme:"grid"
-        }); 
+        for(var i=0;i<data4.length;i++){var r=data4[i]; rows.push([String(i+1),String(r["Catatan"]||""),String(r["Part"]||""),String(r["Qty Reservasi"]||""),String(r["Part Demand"]||""),String(r["Serial Number"]||""),String(r["Teknisi Perbaikan"]||"")]);} 
+        doc.autoTable({head:[col], body:rows, startY:74, margin:mg, styles:{font:"helvetica",fontStyle:"normal",fontSize:7,lineColor:[226,232,240],lineWidth:0.3,textColor:[51,65,85],cellPadding:2,overflow:"linebreak"}, headStyles:{fillColor:[240,240,240],textColor:[0,0,0],fontStyle:"bold",fontSize:8,lineColor:[200,200,200],halign:"center",valign:"middle"}, columnStyles:{0:{halign:"center",cellWidth:8},3:{halign:"center",cellWidth:14}}, theme:"grid"}); 
         
         var fy=doc.lastAutoTable.finalY, gt=calcTotal(data4,"Qty Reservasi"); 
         var totX = mg.left + 58; 
@@ -1773,24 +1683,15 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             if(t)exp.push({"No":(i+1)+".","Catatan":t,"Part":"","Qty Transaksi":"","Part Demand":"","Serial Number":"","Teknisi Perbaikan":""});
         } 
     }
-    
     function appendNotesPDF(doc,fy){
         var n=$$("#manualNotesContainer .note-input"),nc=[];
-        for(var i=0;i<n.length;i++){
-            var t=n[i].innerText.trim();
-            if(t)nc.push((i+1)+". "+t);
-        } 
+        for(var i=0;i<n.length;i++){var t=n[i].innerText.trim();if(t)nc.push((i+1)+". "+t);} 
         if(!nc.length)return;
         var cy=fy+18;
         if(cy>260){doc.addPage();cy=20;} 
-        doc.setFontSize(10);doc.setTextColor(100,116,139);doc.setFont(undefined,"bold");
-        doc.text("Keterangan Tambahan:",10,cy);
+        doc.setFontSize(10);doc.setTextColor(100,116,139);doc.setFont(undefined,"bold");doc.text("Keterangan Tambahan:",10,cy);
         doc.setFontSize(8);doc.setTextColor(51,65,85);doc.setFont(undefined,"normal");
-        for(var i=0;i<nc.length;i++){
-            cy+=6;
-            if(cy>280){doc.addPage();cy=20;}
-            doc.text(nc[i],10,cy);
-        }
+        for(var i=0;i<nc.length;i++){cy+=6;if(cy>280){doc.addPage();cy=20;}doc.text(nc[i],10,cy);}
     }
 
     renderTable1(); renderTable2(); renderTable3(); renderTable4(); renderTable5();
