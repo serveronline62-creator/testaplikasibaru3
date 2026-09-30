@@ -203,7 +203,7 @@ input[type="text"]::placeholder { color: var(--border-light); }
 
 .filter-grid { 
     display: grid; 
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr auto; 
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr; 
     gap: 12px; 
     margin-bottom: 16px; 
     align-items: center;
@@ -321,7 +321,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
 .empty-state i { font-size: 40px; margin-bottom: 12px; opacity: 0.3; display: block; }
 .empty-state p { font-size: 13px; margin: 0; }
 
-/* Info banner untuk filter aktif */
 .filter-info-banner {
     display: none;
     background: var(--primary-subtle);
@@ -398,7 +397,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" aria-label="Upload file Excel atau CSV">
             </div>
 
-            <!-- BANNER INFO FILTER AKTIF -->
             <div class="filter-info-banner" id="filterInfoBanner">
                 <i class="fas fa-info-circle"></i>
                 <span id="filterInfoText">Filter aktif</span>
@@ -439,7 +437,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                     </select>
                 </div>
                 
-                <!-- FILTER PERIODE -->
                 <div class="period-filter-label">
                     <i class="fas fa-calendar-alt"></i> Filter Periode (Berdasarkan Kolom "Disetujui Pada")
                 </div>
@@ -451,23 +448,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                     <label for="filterEndDate" class="sr-only">Sampai Tanggal</label>
                     <input type="date" id="filterEndDate" style="margin-bottom:0; width:100%;" title="Sampai Tanggal (Disetujui Pada)">
                 </div>
-                <button class="btn-secondary" id="resetDateFilter" title="Reset filter tanggal" style="margin-bottom:0; padding:9px 14px; white-space:nowrap;">
-                    <i class="fas fa-times"></i> Reset Tanggal
-                </button>
-                <button class="btn-primary" id="applyQuickFilter" title="Terapkan filter periode cepat" style="margin-bottom:0; padding:9px 14px; white-space:nowrap;">
-                    <i class="fas fa-bolt"></i> Cepat
-                </button>
-            </div>
-
-            <!-- QUICK FILTER PERIODE -->
-            <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
-                <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;">Filter Cepat:</span>
-                <button class="btn-secondary" data-quick="today" style="padding:6px 12px; font-size:11px;"><i class="fas fa-calendar-day"></i> Hari Ini</button>
-                <button class="btn-secondary" data-quick="7days" style="padding:6px 12px; font-size:11px;"><i class="fas fa-calendar-week"></i> 7 Hari</button>
-                <button class="btn-secondary" data-quick="30days" style="padding:6px 12px; font-size:11px;"><i class="fas fa-calendar-alt"></i> 30 Hari</button>
-                <button class="btn-secondary" data-quick="thisMonth" style="padding:6px 12px; font-size:11px;"><i class="fas fa-calendar"></i> Bulan Ini</button>
-                <button class="btn-secondary" data-quick="lastMonth" style="padding:6px 12px; font-size:11px;"><i class="fas fa-calendar-minus"></i> Bulan Lalu</button>
-                <button class="btn-secondary" data-quick="thisYear" style="padding:6px 12px; font-size:11px;"><i class="fas fa-calendar-check"></i> Tahun Ini</button>
             </div>
 
             <div class="table-container">
@@ -582,7 +562,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     const fileInput = $("#fileInput"), 
           search1 = $("#search1"), search2 = $("#search2"), search3 = $("#search3"), search4 = $("#search4"), search5 = $("#search5");
     const filterTeknisi = $("#filterTeknisi"), filterReturn = $("#filterReturn"), filterClaim = $("#filterClaim"), filterPengiriman = $("#filterPengiriman");
-    const filterStartDate = $("#filterStartDate"), filterEndDate = $("#filterEndDate"), resetDateFilter = $("#resetDateFilter");
+    const filterStartDate = $("#filterStartDate"), filterEndDate = $("#filterEndDate");
     const filterInfoBanner = $("#filterInfoBanner"), filterInfoText = $("#filterInfoText"), clearFilterInfo = $("#clearFilterInfo");
     const addRowBtn = $("#addRowBtn"), addRowBtn3 = $("#addRowBtn3"), addRowBtn4 = $("#addRowBtn4");
     const resetBtn = $("#resetBtn"), checkAllCb = $("#checkAll"), deleteSelectedBtn = $("#deleteSelectedBtn");
@@ -646,7 +626,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         return diffDays >= 0 ? diffDays : 0;
     }
 
-    // Parser tanggal fleksibel: DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD
     function parseDateToYMD(dateStr) {
         if (!dateStr) return null;
         dateStr = String(dateStr).trim();
@@ -835,68 +814,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     filterClaim.addEventListener("change", function() { filterClaimVal = filterClaim.value; renderTable1(); updateFilterInfoBanner(); });
     filterStartDate.addEventListener("change", function() { filterStartDateVal = filterStartDate.value; renderTable1(); updateFilterInfoBanner(); });
     filterEndDate.addEventListener("change", function() { filterEndDateVal = filterEndDate.value; renderTable1(); updateFilterInfoBanner(); });
-    
-    resetDateFilter.addEventListener("click", function() {
-        filterStartDate.value = "";
-        filterEndDate.value = "";
-        filterStartDateVal = "";
-        filterEndDateVal = "";
-        renderTable1();
-        updateFilterInfoBanner();
-        showToast("Filter tanggal direset.", "info");
-    });
-
-    // ========== QUICK FILTER PERIODE ==========
-    $$("[data-quick]").forEach(btn => {
-        btn.addEventListener("click", function() {
-            var today = new Date();
-            today.setHours(0,0,0,0);
-            var start, end;
-            var q = btn.dataset.quick;
-            
-            if (q === "today") {
-                start = new Date(today);
-                end = new Date(today);
-            } else if (q === "7days") {
-                end = new Date(today);
-                start = new Date(today);
-                start.setDate(start.getDate() - 6);
-            } else if (q === "30days") {
-                end = new Date(today);
-                start = new Date(today);
-                start.setDate(start.getDate() - 29);
-            } else if (q === "thisMonth") {
-                start = new Date(today.getFullYear(), today.getMonth(), 1);
-                end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            } else if (q === "lastMonth") {
-                start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                end = new Date(today.getFullYear(), today.getMonth(), 0);
-            } else if (q === "thisYear") {
-                start = new Date(today.getFullYear(), 0, 1);
-                end = new Date(today.getFullYear(), 11, 31);
-            }
-            
-            filterStartDateVal = formatYMD(start);
-            filterEndDateVal = formatYMD(end);
-            filterStartDate.value = filterStartDateVal;
-            filterEndDate.value = filterEndDateVal;
-            renderTable1();
-            updateFilterInfoBanner();
-            showToast("Filter periode cepat diterapkan.", "success");
-        });
-    });
-
-    // Tombol "Cepat" — fokus ke input tanggal pertama
-    $("#applyQuickFilter").addEventListener("click", function() {
-        if (!filterStartDateVal && !filterEndDateVal) {
-            showToast("Silakan pilih tanggal mulai dan/atau tanggal akhir.", "info");
-            filterStartDate.focus();
-            return;
-        }
-        renderTable1();
-        updateFilterInfoBanner();
-        showToast("Filter periode diterapkan.", "success");
-    });
 
     search2.addEventListener("input", debounce(function() { currentFilter2 = search2.value.toLowerCase(); renderTable2(); }, 300));
     search3.addEventListener("input", debounce(function() { currentFilter3 = search3.value.toLowerCase(); renderTable3(); }, 300));
@@ -947,7 +864,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             var matchRet = true; if (fRet) matchRet = checkYesNo(row["Return To Factory"], fRet); if(!matchRet) continue;
             var matchClm = true; if (fClm) matchClm = checkYesNo(row["Claim To Factory"], fClm); if(!matchClm) continue;
             
-            // Filter Periode berdasarkan "Disetujui Pada"
             if (fStart || fEnd) {
                 var tgl = parseDateToYMD(row["Disetujui Pada"]);
                 if (!tgl) continue;
@@ -994,18 +910,13 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 for (var ki=0; ki<KEYS_TAB1.length; ki++) { 
                     var td=document.createElement("td"); 
                     var key = KEYS_TAB1[ki];
+                    td.contentEditable="true"; 
+                    td.dataset.key=key; 
+                    td.dataset.idx=origIdx; 
+                    td.textContent=row[key]||""; 
                     if (key === "Disetujui Pada") {
-                        td.contentEditable="true"; 
-                        td.dataset.key=key; 
-                        td.dataset.idx=origIdx; 
-                        td.textContent=row[key]||""; 
                         td.style.fontWeight = "600";
                         td.style.color = "var(--primary-dark)";
-                    } else {
-                        td.contentEditable="true"; 
-                        td.dataset.key=key; 
-                        td.dataset.idx=origIdx; 
-                        td.textContent=row[key]||""; 
                     }
                     tr.appendChild(td); 
                 } 
@@ -1045,7 +956,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 } 
                 if(key==="Return To Factory"||key==="Claim To Factory"){ renderTable1(); } 
                 if(key==="Disetujui Pada"){ 
-                    // Update Tab 5 (karena "Lamanya Hari" dihitung dari tanggal ini)
                     if(selectedIndexes.has(idx)){ syncToTab5(); }
                 }
             } 
