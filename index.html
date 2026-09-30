@@ -197,7 +197,7 @@ input[type="text"]::placeholder { color: var(--border-light); }
 
 /* Input tanggal format DD/MM/YYYY */
 input.date-input {
-    padding: 10px 12px !important;
+    padding: 10px 12px;
     width: 100%;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -206,21 +206,18 @@ input.date-input {
     background: var(--card-bg);
     color: var(--text-main);
     transition: border-color 0.2s, box-shadow 0.2s;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: 12px center !important;
-    padding-left: 34px !important;
     letter-spacing: 0.5px;
-    font-weight: 500;
 }
 input.date-input:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
 }
-input.date-input::placeholder { color: var(--border-light); font-weight: 400; letter-spacing: 0; }
-input.date-input.invalid { border-color: var(--danger); background: #fef2f2; }
-input.date-input.valid { border-color: var(--success); }
+input.date-input::placeholder { color: var(--border-light); }
+input.date-input.invalid {
+    border-color: var(--danger);
+    background: #fef2f2;
+}
 
 .filter-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 
@@ -229,7 +226,9 @@ input.date-input.valid { border-color: var(--success); }
 @media (max-width: 500px) { .filter-grid { grid-template-columns: 1fr; } }
 .filter-grid > * { margin-bottom: 0 !important; min-width: 0; }
 
-#dateRangeContainer { margin-bottom: 16px; }
+#dateRangeContainer {
+    margin-bottom: 16px;
+}
 #dateRangeContainer .date-range-inner {
     display: flex;
     gap: 10px;
@@ -241,7 +240,6 @@ input.date-input.valid { border-color: var(--success); }
     font-size: 12px;
     font-weight: 600;
     flex-shrink: 0;
-    padding: 0 4px;
 }
 #dateRangeContainer .date-hint {
     font-size: 11px;
@@ -251,6 +249,7 @@ input.date-input.valid { border-color: var(--success); }
     align-items: center;
     gap: 5px;
 }
+#dateRangeContainer .date-hint i { color: var(--primary); }
 
 .file-upload-wrapper { position: relative; margin-bottom: 16px; }
 .file-upload-wrapper input[type="file"] {
@@ -288,8 +287,8 @@ td[contenteditable]:hover { border-color: var(--border-light); }
 td[contenteditable]:focus { background: var(--primary-subtle); border-color: var(--primary); }
 
 td.read-only-cell {
-    background: transparent;
-    cursor: default;
+    background: transparent; 
+    cursor: default; 
 }
 
 td.no-urut {
@@ -443,12 +442,12 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             <div id="dateRangeContainer" style="display:none;">
                 <label class="sr-only">Rentang Tanggal (Hari/Bulan/Tahun)</label>
                 <div class="date-range-inner">
-                    <input type="text" id="dateFrom" class="date-input" placeholder="DD/MM/YYYY" maxlength="10" aria-label="Tanggal dari (DD/MM/YYYY)" autocomplete="off">
+                    <input type="text" id="dateFrom" class="date-input" placeholder="DD/MM/YYYY" maxlength="10" inputmode="numeric" aria-label="Tanggal dari (DD/MM/YYYY)">
                     <span class="date-sep">s/d</span>
-                    <input type="text" id="dateTo" class="date-input" placeholder="DD/MM/YYYY" maxlength="10" aria-label="Tanggal sampai (DD/MM/YYYY)" autocomplete="off">
+                    <input type="text" id="dateTo" class="date-input" placeholder="DD/MM/YYYY" maxlength="10" inputmode="numeric" aria-label="Tanggal sampai (DD/MM/YYYY)">
                 </div>
                 <div class="date-hint">
-                    <i class="fas fa-info-circle"></i> Format: <strong>Hari/Bulan/Tahun</strong> (contoh: 25/12/2025)
+                    <i class="fas fa-info-circle"></i> Format: Hari/Bulan/Tahun (contoh: 25/12/2025)
                 </div>
             </div>
 
@@ -595,7 +594,49 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         toastContainer.appendChild(t); setTimeout(()=>{ if(t.parentNode) t.remove(); }, 3200);
     }
 
-    // ========== FUNGSI TANGGAL (DD/MM/YYYY) ==========
+    function calculateDays(dateStr) {
+        if (!dateStr) return "";
+        var date = parseDateValue(dateStr);
+        if (!date) return "";
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var diffTime = today - date;
+        var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays >= 0 ? diffDays : 0;
+    }
+
+    // ========== PARSING TANGGAL (MULTI FORMAT) ==========
+    function parseDateValue(val) {
+        if (!val) return null;
+        val = String(val).trim();
+        var d = null;
+        // Format DD/MM/YYYY (hari/bulan/tahun)
+        if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)) {
+            var p = val.split('/');
+            var dd = parseInt(p[0], 10), mm = parseInt(p[1], 10), yy = parseInt(p[2], 10);
+            if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+            d = new Date(yy, mm - 1, dd);
+            if (d.getFullYear() !== yy || d.getMonth() !== mm - 1 || d.getDate() !== dd) return null;
+        }
+        // Format YYYY-MM-DD
+        else if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(val)) {
+            var p = val.split('-');
+            d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+        }
+        // Format DD-MM-YYYY
+        else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(val)) {
+            var p = val.split('-');
+            d = new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+        }
+        else {
+            d = new Date(val);
+        }
+        if (!d || isNaN(d.getTime())) return null;
+        d.setHours(0, 0, 0, 0);
+        return d;
+    }
+
+    // ========== FORMAT TANGGAL DD/MM/YYYY ==========
     function formatDateToDDMMYYYY(date) {
         if (!date || isNaN(date.getTime())) return "";
         var d = String(date.getDate()).padStart(2, "0");
@@ -620,52 +661,6 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         return date;
     }
 
-    // Parser umum untuk berbagai format (termasuk DD/MM/YYYY)
-    function parseDateValue(val) {
-        if (!val) return null;
-        if (val instanceof Date) {
-            if (isNaN(val.getTime())) return null;
-            var dd = new Date(val);
-            dd.setHours(0, 0, 0, 0);
-            return dd;
-        }
-        var s = String(val).trim();
-        if (!s) return null;
-        // DD/MM/YYYY
-        var m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        if (m1) {
-            return parseDateDDMMYYYY(s);
-        }
-        // YYYY-MM-DD
-        var m2 = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-        if (m2) {
-            var y2 = parseInt(m2[1],10), mo2 = parseInt(m2[2],10), d2 = parseInt(m2[3],10);
-            var date2 = new Date(y2, mo2-1, d2);
-            if (date2.getFullYear()===y2 && date2.getMonth()===mo2-1 && date2.getDate()===d2) {
-                date2.setHours(0,0,0,0);
-                return date2;
-            }
-            return null;
-        }
-        // DD-MM-YYYY
-        var m3 = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-        if (m3) {
-            var y3 = parseInt(m3[3],10), mo3 = parseInt(m3[2],10), d3 = parseInt(m3[1],10);
-            var date3 = new Date(y3, mo3-1, d3);
-            if (date3.getFullYear()===y3 && date3.getMonth()===mo3-1 && date3.getDate()===d3) {
-                date3.setHours(0,0,0,0);
-                return date3;
-            }
-            return null;
-        }
-        // Fallback ke Date() bawaan
-        var d = new Date(s);
-        if (!d || isNaN(d.getTime())) return null;
-        d.setHours(0, 0, 0, 0);
-        return d;
-    }
-
-    // Auto-format input tanggal: tambah "/" otomatis
     function attachDateMask(input) {
         input.addEventListener("input", function() {
             var v = this.value.replace(/[^\d]/g, "");
@@ -675,37 +670,17 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 v = v.substring(0, 2) + "/" + v.substring(2);
             }
             this.value = v;
-            
             if (v.length === 10) {
-                if (parseDateDDMMYYYY(v)) {
-                    this.classList.remove("invalid");
-                    this.classList.add("valid");
-                } else {
-                    this.classList.add("invalid");
-                    this.classList.remove("valid");
-                }
+                if (parseDateDDMMYYYY(v)) this.classList.remove("invalid");
+                else this.classList.add("invalid");
             } else {
-                this.classList.remove("invalid", "valid");
+                this.classList.remove("invalid");
             }
         });
-        
         input.addEventListener("blur", function() {
             var v = this.value.trim();
-            if (v && !parseDateDDMMYYYY(v)) {
-                this.classList.add("invalid");
-                this.classList.remove("valid");
-            } else if (v && parseDateDDMMYYYY(v)) {
-                this.classList.remove("invalid");
-                this.classList.add("valid");
-            } else {
-                this.classList.remove("invalid", "valid");
-            }
-        });
-        
-        // Hanya izinkan angka dan "/" saat keypress
-        input.addEventListener("keypress", function(e) {
-            var c = String.fromCharCode(e.which);
-            if (!/[\d\/]/.test(c)) e.preventDefault();
+            if (v && !parseDateDDMMYYYY(v)) this.classList.add("invalid");
+            else this.classList.remove("invalid");
         });
     }
 
@@ -720,22 +695,11 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         for (var k in row) {
             if (k.charAt(0) === "_") continue;
             if (/tanggal|date|tgl/i.test(k) && row[k]) {
-                var d2 = parseDateValue(row[k]);
-                if (d2) return d2;
+                var d = parseDateValue(row[k]);
+                if (d) return d;
             }
         }
         return null;
-    }
-
-    function calculateDays(dateStr) {
-        if (!dateStr) return "";
-        var date = parseDateValue(dateStr);
-        if (!date) return "";
-        var today = new Date();
-        today.setHours(0, 0, 0, 0);
-        var diffTime = today - date;
-        var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays >= 0 ? diffDays : 0;
     }
 
     document.addEventListener("keydown", function(e) {
@@ -762,14 +726,9 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         tbody1.innerHTML=""; tbody2.innerHTML=""; tbody3.innerHTML=""; tbody4.innerHTML=""; tbody5.innerHTML="";
         totalQty1El.textContent="0"; totalQty2El.textContent="0"; totalQty3aEl.textContent="0"; totalQty4El.textContent="0"; totalQty5El.textContent="0";
         fileInput.value=""; search1.value=""; search2.value=""; search3.value=""; search4.value=""; search5.value="";
-        filterTeknisi.innerHTML = '<option value="">Semua Teknisi</option>';
-        filterReturn.value=""; filterClaim.value="";
-        filterPengiriman.innerHTML = '<option value="">Semua Status Pengiriman</option>';
-        filterPeriode.value="";
-        dateFromInput.value=""; dateToInput.value="";
-        dateFromInput.classList.remove("invalid","valid");
-        dateToInput.classList.remove("invalid","valid");
-        dateRangeContainer.style.display="none";
+        filterTeknisi.innerHTML = '<option value="">Semua Teknisi</option>'; filterReturn.value=""; filterClaim.value=""; filterPengiriman.innerHTML = '<option value="">Semua Status Pengiriman</option>';
+        filterPeriode.value=""; dateFromInput.value=""; dateToInput.value=""; dateRangeContainer.style.display="none";
+        dateFromInput.classList.remove("invalid"); dateToInput.classList.remove("invalid");
         checkAllCb.checked=false; checkAllCb.indeterminate=false;
         countBadge.textContent="0"; selectedBadge.textContent="0"; demandBadge.textContent="0"; stockBadge.textContent="0"; stockBadge5.textContent="0";
         $$(".note-input").forEach(el => el.innerText="");
@@ -786,15 +745,11 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
                 var parsed = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
                 if (!parsed.length) { showToast("File kosong atau format tidak dikenali.", "danger"); return; }
                 data1 = parsed; selectedIndexes.clear();
-                checkAllCb.checked=false; checkAllCb.indeterminate=false;
-                currentFilter1=""; search1.value=""; 
+                checkAllCb.checked=false; checkAllCb.indeterminate=false; currentFilter1=""; search1.value=""; 
                 filterTeknisiVal=""; filterReturnVal=""; filterClaimVal=""; filterPengirimanVal="";
                 filterTeknisi.value=""; filterReturn.value=""; filterClaim.value=""; filterPengiriman.value="";
-                filterPeriodeVal=""; filterPeriode.value="";
-                dateFromInput.value=""; dateToInput.value="";
-                dateFromInput.classList.remove("invalid","valid");
-                dateToInput.classList.remove("invalid","valid");
-                dateRangeContainer.style.display="none";
+                filterPeriodeVal=""; filterPeriode.value=""; dateFromInput.value=""; dateToInput.value=""; dateRangeContainer.style.display="none";
+                dateFromInput.classList.remove("invalid"); dateToInput.classList.remove("invalid");
                 populateTeknisiDropdown(data1);
                 populatePengirimanDropdown(data1);
                 renderTable1(); syncToTab2(); syncToTab3(); syncToTab4(); syncToTab5();
@@ -852,7 +807,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
     filterReturn.addEventListener("change", function() { filterReturnVal = filterReturn.value; renderTable1(); });
     filterClaim.addEventListener("change", function() { filterClaimVal = filterClaim.value; renderTable1(); });
     
-    // ========== FILTER PERIODE ==========
+    // Filter Periode
     attachDateMask(dateFromInput);
     attachDateMask(dateToInput);
 
@@ -864,8 +819,8 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
             dateRangeContainer.style.display = "none";
             filterDateFrom = ""; filterDateTo = "";
             dateFromInput.value = ""; dateToInput.value = "";
-            dateFromInput.classList.remove("invalid","valid");
-            dateToInput.classList.remove("invalid","valid");
+            dateFromInput.classList.remove("invalid");
+            dateToInput.classList.remove("invalid");
         }
         renderTable1();
     });
@@ -1125,7 +1080,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         wsData.push(["KEL. FATULULI"]);
         wsData.push(["KEC. OEBOBO - KOTA KUPANG"]);
         wsData.push(["TELP. +62 813 2816 2259"]);
-        wsData.push([]); wsData.push(["Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"})]); wsData.push([]);
+        wsData.push([]); wsData.push(["Tanggal: " + formatDateToDDMMYYYY(new Date())]); wsData.push([]);
         wsData.push(["No", "Catatan", "Part", "Qty Reservasi", "Part Demand", "Serial Number", "Teknisi Perbaikan"]);
         var gt=calcTotal(data4,"Qty Reservasi"); 
         for(var i=0;i<data4.length;i++){var r=data4[i]; wsData.push([i+1, r["Catatan"]||"", r["Part"]||"", r["Qty Reservasi"]||"", r["Part Demand"]||"", r["Serial Number"]||"", r["Teknisi Perbaikan"]||""]);}
@@ -1152,7 +1107,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         doc.text("JL. FRANS SEDA NO. 08 KOMPLEK RUKO ( RUKOKU )", mg.left, 51);
         doc.text("KEL. FATULULI", mg.left, 56); doc.text("KEC. OEBOBO - KOTA KUPANG", mg.left, 61);
         doc.text("TELP. +62 813 2816 2259", mg.left, 66);
-        doc.setFontSize(10); doc.text("Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"}), pw - mg.right, 66, {align: "right"});
+        doc.setFontSize(10); doc.text("Tanggal: " + formatDateToDDMMYYYY(new Date()), pw - mg.right, 66, {align: "right"});
         doc.setDrawColor(200,200,200); doc.line(mg.left, 71, pw-mg.right, 71);
         
         for(var i=0;i<data4.length;i++){var r=data4[i]; rows.push([String(i+1),String(r["Catatan"]||""),String(r["Part"]||""),String(r["Qty Reservasi"]||""),String(r["Part Demand"]||""),String(r["Serial Number"]||""),String(r["Teknisi Perbaikan"]||"")]);} 
@@ -1203,7 +1158,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         
         wsData.push(["Tagihan SOB OPEN Sparepart Bekas"]); 
         wsData.push([]);
-        wsData.push(["Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"})]); 
+        wsData.push(["Tanggal: " + formatDateToDDMMYYYY(new Date())]); 
         wsData.push([]);
         
         wsData.push(["No", "Catatan", "Part", "Qty Reservasi", "Part Demand", "Serial Number", "Teknisi Perbaikan", "Lamanya Hari"]);
@@ -1242,7 +1197,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         doc.setFontSize(18); doc.setTextColor(30,41,59); doc.setFont(undefined,"bold"); doc.text("Tagihan SOB OPEN Sparepart Bekas", pw/2, 20, {align: "center"});
         
         doc.setFontSize(10); doc.setTextColor(100,116,139); doc.setFont(undefined,"normal");
-        doc.text("Tanggal: " + new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"}), pw - mg.right, 20, {align: "right"});
+        doc.text("Tanggal: " + formatDateToDDMMYYYY(new Date()), pw - mg.right, 20, {align: "right"});
         
         doc.setDrawColor(200,200,200); doc.line(mg.left, 26, pw-mg.right, 26);
         
@@ -1299,7 +1254,7 @@ tfoot td { padding: 12px; border-bottom: none; border-top: 2px solid var(--borde
         header.style.marginBottom = '30px';
         header.innerHTML = `
             <h2 style="margin:0; font-size:32px; color:#1e293b; text-align:center; font-weight:800;">Tagihan SOB OPEN Sparepart Bekas</h2>
-            <p style="margin:10px 0 0 0; font-size:16px; color:#64748b; text-align:right;">Tanggal: ${new Date().toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"})}</p>
+            <p style="margin:10px 0 0 0; font-size:16px; color:#64748b; text-align:right;">Tanggal: ${formatDateToDDMMYYYY(new Date())}</p>
             <hr style="border:0; border-top:2px solid #e2e8f0; margin-top:15px;">
         `;
         container.appendChild(header);
