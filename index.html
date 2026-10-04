@@ -6,6 +6,9 @@
 <title>KUB App — Sistem Informasi Kelompok Umat Basis</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛪</text></svg>" />
 <style>
   body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
@@ -14,18 +17,35 @@
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   .modal-mask { background: rgba(15,23,42,.55); backdrop-filter: blur(2px); }
+  .spinner { border: 4px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .dot-online { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+  .dot-offline { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: inline-block; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-<!-- ==================== LOGIN ==================== -->
-<div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4">
+<!-- ==================== LOADING OVERLAY ==================== -->
+<div id="loadingScreen" class="fixed inset-0 z-[100] bg-white flex items-center justify-center flex-col gap-4">
+  <div class="text-5xl">⛪</div>
+  <div class="spinner"></div>
+  <p class="text-sm text-gray-500" id="loadingText">Menghubungkan ke Firebase...</p>
+</div>
+
+<!-- ==================== LOGIN / REGISTER ==================== -->
+<div id="loginScreen" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
     <div class="text-center mb-6">
       <div class="text-5xl mb-2">⛪</div>
       <h1 class="text-2xl font-bold text-blue-700">KUB App</h1>
       <p class="text-sm text-gray-500">Sistem Informasi Kelompok Umat Basis</p>
+      <p class="text-xs text-gray-400 mt-1 flex items-center justify-center gap-1">
+        <span id="loginConnDot" class="dot-offline"></span> <span id="loginConnText">Memeriksa koneksi...</span>
+      </p>
     </div>
+
+    <!-- === FORM LOGIN === -->
     <form id="loginForm" class="space-y-4">
       <div>
         <label class="text-sm font-medium">Email</label>
@@ -42,7 +62,48 @@
         class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition">
         Masuk
       </button>
-      <p class="text-xs text-gray-400 text-center">Demo: admin@kub.id / admin123</p>
+      <p class="text-xs text-gray-400 text-center">Demo Admin KUB: admin@kub.id / admin123</p>
+      <p class="text-sm text-center text-gray-600 pt-2 border-t">
+        Belum punya akun?
+        <a href="#" onclick="showRegister();return false;" class="text-blue-600 hover:underline font-medium">
+          Daftar sebagai Umat
+        </a>
+      </p>
+    </form>
+
+    <!-- === FORM REGISTER UMAT === -->
+    <form id="registerForm" class="space-y-4 hidden">
+      <h2 class="text-lg font-semibold text-center text-blue-700">Daftar Akun Umat</h2>
+      <div>
+        <label class="text-sm font-medium">Pilih Nama Anda</label>
+        <select id="regUmat" required
+          class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></select>
+        <p class="text-xs text-gray-400 mt-1">Nama diambil dari data umat yang belum punya akun.</p>
+      </div>
+      <div>
+        <label class="text-sm font-medium">Email</label>
+        <input type="email" id="regEmail" required placeholder="nama@email.com"
+          class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+      </div>
+      <div>
+        <label class="text-sm font-medium">Password</label>
+        <input type="password" id="regPassword" required minlength="6"
+          class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+      </div>
+      <div>
+        <label class="text-sm font-medium">Konfirmasi Password</label>
+        <input type="password" id="regPassword2" required minlength="6"
+          class="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+      </div>
+      <div id="regError" class="hidden text-sm text-red-600 bg-red-50 p-2 rounded"></div>
+      <button type="submit"
+        class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 rounded-lg transition">
+        Daftar
+      </button>
+      <p class="text-sm text-center text-gray-600 pt-2 border-t">
+        Sudah punya akun?
+        <a href="#" onclick="showLogin();return false;" class="text-blue-600 hover:underline font-medium">Masuk</a>
+      </p>
     </form>
   </div>
 </div>
@@ -57,7 +118,10 @@
         <span class="text-2xl">⛪</span>
         <div>
           <h1 class="font-bold text-lg text-blue-700 leading-none">KUB App</h1>
-          <p class="text-[10px] text-gray-500 mt-1">Kelompok Umat Basis</p>
+          <p class="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
+            <span id="connDot" class="dot-offline"></span>
+            <span id="connText">Connecting...</span>
+          </p>
         </div>
       </div>
     </div>
@@ -67,7 +131,7 @@
         <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold" id="userAvatar">A</div>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-medium truncate" id="userName">Admin</p>
-          <p class="text-xs text-gray-500 truncate" id="userRole">Admin Paroki</p>
+          <p class="text-xs text-gray-500 truncate" id="userRole">Admin KUB</p>
         </div>
       </div>
       <button onclick="logout()" class="w-full mt-2 text-sm text-red-600 hover:bg-red-50 py-2 rounded-lg transition">
@@ -101,14 +165,33 @@
 
 <script>
 /* ============================================================
-   STORAGE LAYER (localStorage sebagai database)
+   FIREBASE INIT
    ============================================================ */
-const DB_KEY = 'kub_app_db_v1';
+const firebaseConfig = {
+  apiKey: "AIzaSyBIIq8VrSFfWm-il1mdxjWwos4tB5kHDA4",
+  authDomain: "aplikasi-rt-442f0.firebaseapp.com",
+  databaseURL: "https://aplikasi-rt-442f0-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "aplikasi-rt-442f0",
+  storageBucket: "aplikasi-rt-442f0.firebasestorage.app",
+  messagingSenderId: "619193954122",
+  appId: "1:619193954122:web:85eaf9d6d0c6f70064dbb3"
+};
+
+firebase.initializeApp(firebaseConfig);
+const rtdb = firebase.database();
+const DB_REF = rtdb.ref('kub_app');
+const CONN_REF = rtdb.ref('.info/connected');
+
+/* ============================================================
+   STORAGE LAYER — Firebase Realtime Database
+   ============================================================ */
 const SESSION_KEY = 'kub_app_session';
+let isFirebaseReady = false;
+let isOnline = false;
 
 const defaultDB = {
   users: [
-    { id: 'u1', nama: 'Admin Paroki', email: 'admin@kub.id', password: 'admin123', role: 'admin_paroki', kub_id: null }
+    { id: 'u1', nama: 'Admin KUB', email: 'admin@kub.id', password: 'admin123', role: 'admin_kub', kub_id: null }
   ],
   kub: [
     { id: 'k1', kode: 'KUB-01', nama: 'KUB St. Yosef', wilayah: 'RW 01', alamat: 'Jl. Melati No. 1', ketua: 'Bpk. Anton', jumlah_kk: 0 }
@@ -139,18 +222,32 @@ const defaultDB = {
 };
 
 function todayStr() { return new Date().toISOString().slice(0,10); }
-
-function loadDB() {
-  try {
-    const raw = localStorage.getItem(DB_KEY);
-    if (!raw) { localStorage.setItem(DB_KEY, JSON.stringify(defaultDB)); return structuredClone(defaultDB); }
-    return JSON.parse(raw);
-  } catch { return structuredClone(defaultDB); }
-}
-function saveDB() { localStorage.setItem(DB_KEY, JSON.stringify(DB)); }
 function uid(prefix='id') { return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
-let DB = loadDB();
+/* ---- Firebase load & save ---- */
+async function loadDBFromFirebase() {
+  const snap = await DB_REF.once('value');
+  const data = snap.val();
+  if (!data) {
+    // Pertama kali — inisialisasi dengan default
+    await DB_REF.set(structuredClone(defaultDB));
+    return structuredClone(defaultDB);
+  }
+  return data;
+}
+
+function saveDB() {
+  if (!isFirebaseReady) {
+    console.warn('Firebase belum siap, menyimpan secara lokal sementara');
+    return;
+  }
+  DB_REF.set(DB).catch(err => {
+    console.error('saveDB error:', err);
+    toast('Gagal sinkron ke cloud: ' + err.message, 'error');
+  });
+}
+
+let DB = structuredClone(defaultDB);
 let SESSION = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
 
 /* ============================================================
@@ -188,28 +285,53 @@ function fmtDate(d) {
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 /* ============================================================
-   ROUTER / MENU
+   CONNECTION STATUS
+   ============================================================ */
+function setConnectionStatus(online) {
+  isOnline = online;
+  const dot = document.getElementById('connDot');
+  const txt = document.getElementById('connText');
+  const ldot = document.getElementById('loginConnDot');
+  const ltxt = document.getElementById('loginConnText');
+  if (dot) dot.className = online ? 'dot-online' : 'dot-offline';
+  if (txt) txt.textContent = online ? 'Online' : 'Offline';
+  if (ldot) ldot.className = online ? 'dot-online' : 'dot-offline';
+  if (ltxt) ltxt.textContent = online ? 'Terhubung ke Firebase' : 'Tidak terhubung';
+}
+
+CONN_REF.on('value', (snap) => {
+  setConnectionStatus(!!snap.val());
+});
+
+/* ============================================================
+   ROUTER / MENU (dengan role akses)
    ============================================================ */
 const MENU = [
-  { id: 'dashboard', label: 'Dashboard',     icon: '📊' },
-  { id: 'kub',       label: 'Data KUB',      icon: '🏠' },
-  { id: 'keluarga',  label: 'Keluarga',      icon: '👨‍👩‍👧' },
-  { id: 'umat',      label: 'Umat',          icon: '👥' },
-  { id: 'kegiatan',  label: 'Kegiatan',      icon: '📅' },
-  { id: 'presensi',  label: 'Presensi',      icon: '✅' },
-  { id: 'iuran',     label: 'Iuran',         icon: '💰' },
-  { id: 'kas',       label: 'Kas',           icon: '💵' },
-  { id: 'jadwal',    label: 'Jadwal Petugas',icon: '📋' },
-  { id: 'pengumuman',label: 'Pengumuman',    icon: '📢' },
-  { id: 'dokumen',   label: 'Dokumen',       icon: '📁' },
-  { id: 'laporan',   label: 'Laporan',       icon: '📈' },
-  { id: 'pengaturan',label: 'Pengaturan',    icon: '⚙️' },
+  { id: 'dashboard', label: 'Dashboard',      icon: '📊', roles: ['admin_kub','umat'] },
+  { id: 'kub',       label: 'Data KUB',       icon: '🏠', roles: ['admin_kub'] },
+  { id: 'keluarga',  label: 'Keluarga',       icon: '👨‍👩‍👧', roles: ['admin_kub'] },
+  { id: 'umat',      label: 'Umat',           icon: '👥', roles: ['admin_kub'] },
+  { id: 'kegiatan',  label: 'Kegiatan',       icon: '📅', roles: ['admin_kub','umat'] },
+  { id: 'presensi',  label: 'Presensi',       icon: '✅', roles: ['admin_kub','umat'] },
+  { id: 'iuran',     label: 'Iuran',          icon: '💰', roles: ['admin_kub','umat'] },
+  { id: 'kas',       label: 'Kas',            icon: '💵', roles: ['admin_kub','umat'] },
+  { id: 'jadwal',    label: 'Jadwal Petugas', icon: '📋', roles: ['admin_kub','umat'] },
+  { id: 'pengumuman',label: 'Pengumuman',     icon: '📢', roles: ['admin_kub','umat'] },
+  { id: 'dokumen',   label: 'Dokumen',        icon: '📁', roles: ['admin_kub','umat'] },
+  { id: 'laporan',   label: 'Laporan',        icon: '📈', roles: ['admin_kub'] },
+  { id: 'pengaturan',label: 'Pengaturan',     icon: '⚙️', roles: ['admin_kub','umat'] },
 ];
 
 let currentPage = 'dashboard';
+let currentUser = null;
+
+function menuForRole(role) { return MENU.filter(m => m.roles.includes(role || 'admin_kub')); }
+function isUmat() { return currentUser?.role === 'umat'; }
+function roleLabel(role) { return role === 'admin_kub' ? 'Admin KUB' : 'Umat'; }
 
 function renderMenu() {
-  document.getElementById('navMenu').innerHTML = MENU.map(m => `
+  const items = menuForRole(currentUser?.role);
+  document.getElementById('navMenu').innerHTML = items.map(m => `
     <a onclick="go('${m.id}')" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition ${
       currentPage === m.id ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
     }">
@@ -219,6 +341,8 @@ function renderMenu() {
 }
 
 function go(page) {
+  const allowed = menuForRole(currentUser?.role).map(m => m.id);
+  if (!allowed.includes(page)) page = 'dashboard';
   currentPage = page;
   renderMenu();
   document.getElementById('pageTitle').textContent = MENU.find(m => m.id === page)?.label || 'Dashboard';
@@ -241,13 +365,13 @@ function toggleSidebar() {
 }
 
 /* ============================================================
-   AUTH
+   AUTH — LOGIN
    ============================================================ */
 document.getElementById('loginForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  const email = document.getElementById('loginEmail').value.trim();
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const pass = document.getElementById('loginPassword').value;
-  const user = DB.users.find(u => u.email === email && u.password === pass);
+  const user = DB.users.find(u => u.email.toLowerCase() === email && u.password === pass);
   const errEl = document.getElementById('loginError');
   if (!user) {
     errEl.textContent = 'Email atau password salah.';
@@ -269,17 +393,125 @@ function showApp() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   const u = DB.users.find(x => x.id === SESSION.user_id) || DB.users[0];
+  currentUser = u;
   document.getElementById('userName').textContent = u.nama;
-  document.getElementById('userRole').textContent = u.role.replace('_',' ');
+  document.getElementById('userRole').textContent = roleLabel(u.role);
   document.getElementById('userAvatar').textContent = u.nama.charAt(0).toUpperCase();
   renderMenu();
   go('dashboard');
 }
 
 /* ============================================================
+   AUTH — REGISTER UMAT
+   ============================================================ */
+function showRegister() {
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('registerForm').classList.remove('hidden');
+  document.getElementById('regError').classList.add('hidden');
+  const sel = document.getElementById('regUmat');
+  const registeredIds = DB.users.filter(u => u.umat_id).map(u => u.umat_id);
+  const available = DB.umat.filter(u => !registeredIds.includes(u.id));
+  sel.innerHTML = available.length
+    ? available.map(u => `<option value="${u.id}">${esc(u.nama_lengkap)}</option>`).join('')
+    : '<option value="">-- Tidak ada umat yang bisa didaftarkan --</option>';
+}
+function showLogin() {
+  document.getElementById('registerForm').classList.add('hidden');
+  document.getElementById('loginForm').classList.remove('hidden');
+  document.getElementById('loginError').classList.add('hidden');
+}
+function showRegErr(msg) {
+  const e = document.getElementById('regError');
+  e.textContent = msg; e.classList.remove('hidden');
+}
+
+document.getElementById('registerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const umatId = document.getElementById('regUmat').value;
+  const email  = document.getElementById('regEmail').value.trim().toLowerCase();
+  const p1     = document.getElementById('regPassword').value;
+  const p2     = document.getElementById('regPassword2').value;
+
+  if (!umatId) return showRegErr('Tidak ada umat yang tersedia untuk didaftarkan. Hubungi admin.');
+  if (DB.users.some(u => u.email.toLowerCase() === email)) return showRegErr('Email sudah terdaftar.');
+  if (p1.length < 6) return showRegErr('Password minimal 6 karakter.');
+  if (p1 !== p2) return showRegErr('Konfirmasi password tidak cocok.');
+
+  const umat = DB.umat.find(u => u.id === umatId);
+  const newUser = {
+    id: uid('u'),
+    nama: umat.nama_lengkap,
+    email,
+    password: p1,
+    role: 'umat',
+    umat_id: umatId,
+    keluarga_id: umat.keluarga_id,
+  };
+  DB.users.push(newUser);
+  saveDB();
+
+  SESSION = { user_id: newUser.id, ts: Date.now() };
+  localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION));
+  toast('Pendaftaran berhasil. Selamat datang, ' + umat.nama_lengkap + '!');
+  showApp();
+});
+
+/* ============================================================
    PAGE: DASHBOARD
    ============================================================ */
 function pageDashboard(el) {
+  /* ---------- Dashboard khusus UMAT ---------- */
+  if (isUmat()) {
+    const me = DB.umat.find(u => u.id === currentUser.umat_id);
+    const kk = DB.keluarga.find(k => k.id === me?.keluarga_id);
+    const kub = DB.kub.find(k => k.id === kk?.kub_id);
+    const hadirSaya = DB.presensi.filter(p => p.umat_id === me?.id && p.status === 'hadir').length;
+    const iuranSaya = DB.iuran.filter(i => i.keluarga_id === kk?.id);
+    const totalIuran = iuranSaya.filter(i => i.status === 'lunas')
+                                .reduce((a,i) => a + Number(i.jumlah||0), 0);
+    const pengumumanKub = DB.pengumuman.filter(p => !p.kub_id || p.kub_id === kub?.id);
+
+    el.innerHTML = `
+      <div class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl p-6 mb-6 shadow">
+        <p class="text-sm opacity-80">Selamat datang,</p>
+        <h2 class="text-2xl font-bold">${esc(me?.nama_lengkap || currentUser.nama)}</h2>
+        <p class="text-sm opacity-90 mt-1">${esc(kub?.nama || '-')} • ${esc(kk?.kepala_keluarga || '-')}</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+        ${statCard('✅','Kehadiran Saya', hadirSaya, 'bg-green-500')}
+        ${statCard('💰','Iuran Lunas', fmtRp(totalIuran), 'bg-purple-500')}
+        ${statCard('📅','Kegiatan KUB', DB.kegiatan.length, 'bg-orange-500')}
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <h3 class="font-semibold mb-3">👤 Data Saya</h3>
+          <div class="text-sm space-y-2">
+            <div class="flex justify-between"><span class="text-gray-500">Nama</span><b>${esc(me?.nama_lengkap||'-')}</b></div>
+            <div class="flex justify-between"><span class="text-gray-500">Jenis Kelamin</span><b>${me?.jenis_kelamin==='L'?'Laki-laki':'Perempuan'}</b></div>
+            <div class="flex justify-between"><span class="text-gray-500">Tanggal Lahir</span><b>${fmtDate(me?.tanggal_lahir)}</b></div>
+            <div class="flex justify-between"><span class="text-gray-500">Status</span><b>${esc(me?.status_hubungan||'-')}</b></div>
+            <div class="flex justify-between"><span class="text-gray-500">Pekerjaan</span><b>${esc(me?.pekerjaan||'-')}</b></div>
+            <div class="flex justify-between"><span class="text-gray-500">Telepon</span><b>${esc(me?.telepon||'-')}</b></div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <h3 class="font-semibold mb-3">📢 Pengumuman Terbaru</h3>
+          <ul class="space-y-2 text-sm">
+            ${pengumumanKub.slice(-5).reverse().map(p=>`
+              <li class="border-l-2 ${p.penting?'border-red-500':'border-gray-300'} pl-3">
+                <b>${esc(p.judul)}</b>
+                <p class="text-gray-500 text-xs line-clamp-2">${esc(p.isi)}</p>
+              </li>`).join('') || '<li class="text-gray-400">Belum ada pengumuman</li>'}
+          </ul>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  /* ---------- Dashboard ADMIN KUB ---------- */
   const totalKeluarga = DB.keluarga.length;
   const totalUmat = DB.umat.length;
   const kegiatanAktif = DB.kegiatan.filter(k => k.status !== 'selesai').length;
@@ -337,7 +569,6 @@ function pageDashboard(el) {
     </div>
   `;
 
-  // Chart: umat per keluarga
   const labels = DB.keluarga.map(k => k.kepala_keluarga);
   const dataKK = DB.keluarga.map(k => DB.umat.filter(u => u.keluarga_id === k.id).length);
   new Chart(document.getElementById('chartKeluarga'), {
@@ -365,7 +596,7 @@ function statCard(icon, label, value, color) {
 }
 
 /* ============================================================
-   PAGE: KUB
+   PAGE: KUB (admin_kub only)
    ============================================================ */
 function pageKub(el) {
   el.innerHTML = `
@@ -420,13 +651,9 @@ function formKub(id) {
 
 function simpanKub(e, id) {
   e.preventDefault();
-  const f = new FormData(e.target);
-  const data = Object.fromEntries(f);
-  if (id) {
-    Object.assign(DB.kub.find(x=>x.id===id), data);
-  } else {
-    DB.kub.push({ id: uid('k'), ...data });
-  }
+  const data = Object.fromEntries(new FormData(e.target));
+  if (id) Object.assign(DB.kub.find(x=>x.id===id), data);
+  else DB.kub.push({ id: uid('k'), ...data });
   saveDB(); closeModal(); toast('KUB tersimpan'); go('kub');
 }
 
@@ -437,7 +664,7 @@ function hapusKub(id) {
 }
 
 /* ============================================================
-   PAGE: KELUARGA
+   PAGE: KELUARGA (admin_kub only)
    ============================================================ */
 function pageKeluarga(el) {
   el.innerHTML = `
@@ -528,7 +755,7 @@ function hapusKeluarga(id) {
 }
 
 /* ============================================================
-   PAGE: UMAT
+   PAGE: UMAT (admin_kub only)
    ============================================================ */
 function pageUmat(el) {
   el.innerHTML = `
@@ -546,6 +773,7 @@ function pageUmat(el) {
             <th class="px-4 py-3">Tgl Lahir</th>
             <th class="px-4 py-3">Keluarga</th>
             <th class="px-4 py-3">Telepon</th>
+            <th class="px-4 py-3">Akun</th>
             <th class="px-4 py-3 text-right">Aksi</th>
           </tr>
         </thead>
@@ -561,18 +789,22 @@ function renderUmatTable() {
   const list = DB.umat.filter(u => u.nama_lengkap.toLowerCase().includes(q));
   document.getElementById('umatTableBody').innerHTML = list.map(u => {
     const kk = DB.keluarga.find(x=>x.id===u.keluarga_id);
+    const hasAcc = DB.users.some(x => x.umat_id === u.id);
     return `<tr class="border-t hover:bg-gray-50">
       <td class="px-4 py-3 font-medium">${esc(u.nama_lengkap)}</td>
       <td class="px-4 py-3">${u.jenis_kelamin==='L'?'👨 L':'👩 P'}</td>
       <td class="px-4 py-3">${fmtDate(u.tanggal_lahir)}</td>
       <td class="px-4 py-3">${esc(kk?.kepala_keluarga||'-')}</td>
       <td class="px-4 py-3">${esc(u.telepon||'-')}</td>
+      <td class="px-4 py-3">${hasAcc
+        ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Terdaftar</span>'
+        : '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Belum daftar</span>'}</td>
       <td class="px-4 py-3 text-right whitespace-nowrap">
         <button onclick="formUmat('${u.id}')" class="text-blue-600 hover:underline mr-2">Edit</button>
         <button onclick="hapusUmat('${u.id}')" class="text-red-600 hover:underline">Hapus</button>
       </td>
     </tr>`;
-  }).join('') || `<tr><td colspan="6" class="text-center py-8 text-gray-400">Belum ada data umat</td></tr>`;
+  }).join('') || `<tr><td colspan="7" class="text-center py-8 text-gray-400">Belum ada data umat</td></tr>`;
 }
 
 function formUmat(id) {
@@ -635,7 +867,7 @@ function pageKegiatan(el) {
   el.innerHTML = `
     <div class="flex justify-between items-center mb-4">
       <p class="text-gray-500 text-sm">Total: ${DB.kegiatan.length} kegiatan</p>
-      <button onclick="formKegiatan()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Buat Kegiatan</button>
+      ${isUmat() ? '' : `<button onclick="formKegiatan()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Buat Kegiatan</button>`}
     </div>
     <div class="grid md:grid-cols-3 gap-4">
       ${DB.kegiatan.map(k => `
@@ -653,9 +885,13 @@ function pageKegiatan(el) {
             ${k.tuan_rumah?`<p>🏠 ${esc(k.tuan_rumah)}</p>`:''}
           </div>
           <div class="mt-3 flex gap-2 text-sm">
-            <button onclick="formKegiatan('${k.id}')" class="text-blue-600 hover:underline">Edit</button>
-            <button onclick="presensiKegiatan('${k.id}')" class="text-green-600 hover:underline">Presensi</button>
-            <button onclick="hapusKegiatan('${k.id}')" class="text-red-600 hover:underline">Hapus</button>
+            ${isUmat() ? `
+              <button onclick="presensiKegiatan('${k.id}')" class="text-green-600 hover:underline">Lihat Presensi</button>
+            ` : `
+              <button onclick="formKegiatan('${k.id}')" class="text-blue-600 hover:underline">Edit</button>
+              <button onclick="presensiKegiatan('${k.id}')" class="text-green-600 hover:underline">Presensi</button>
+              <button onclick="hapusKegiatan('${k.id}')" class="text-red-600 hover:underline">Hapus</button>
+            `}
           </div>
         </div>
       `).join('') || '<p class="text-gray-400">Belum ada kegiatan</p>'}
@@ -716,6 +952,35 @@ function hapusKegiatan(id) {
    PAGE: PRESENSI
    ============================================================ */
 function pagePresensi(el) {
+  if (isUmat()) {
+    const rows = DB.presensi.filter(p => p.umat_id === currentUser.umat_id);
+    el.innerHTML = `
+      <p class="text-gray-500 text-sm mb-4">Riwayat presensi Anda:</p>
+      <div class="bg-white rounded-xl shadow-sm border overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-500 text-left">
+            <tr><th class="px-4 py-3">Kegiatan</th><th class="px-4 py-3">Tanggal</th><th class="px-4 py-3">Status</th></tr>
+          </thead>
+          <tbody>
+            ${rows.map(r => {
+              const k = DB.kegiatan.find(x=>x.id===r.kegiatan_id);
+              const badge = r.status==='hadir'?'bg-green-100 text-green-700'
+                          : r.status==='izin'?'bg-yellow-100 text-yellow-700'
+                          : r.status==='sakit'?'bg-blue-100 text-blue-700'
+                          : 'bg-gray-100 text-gray-700';
+              return `<tr class="border-t">
+                <td class="px-4 py-3">${esc(k?.judul||'-')}</td>
+                <td class="px-4 py-3">${fmtDate(k?.tanggal)}</td>
+                <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full ${badge}">${r.status}</span></td>
+              </tr>`;
+            }).join('') || '<tr><td colspan="3" class="text-center py-8 text-gray-400">Belum ada presensi</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    `;
+    return;
+  }
+
   el.innerHTML = `
     <p class="text-gray-500 text-sm mb-4">Pilih kegiatan untuk mengelola presensi:</p>
     <div class="grid md:grid-cols-3 gap-4">
@@ -736,6 +1001,30 @@ function pagePresensi(el) {
 function presensiKegiatan(kegiatanId) {
   const kg = DB.kegiatan.find(k => k.id === kegiatanId);
   if (!kg) return;
+
+  if (isUmat()) {
+    const my = DB.presensi.find(p => p.kegiatan_id === kegiatanId && p.umat_id === currentUser.umat_id);
+    openModal(`
+      <div class="p-6">
+        <h2 class="text-xl font-bold mb-1">Detail Kegiatan</h2>
+        <p class="text-sm text-gray-500 mb-4">${esc(kg.judul)} — ${fmtDate(kg.tanggal)}</p>
+        <div class="space-y-2 text-sm bg-gray-50 rounded-lg p-4">
+          <div class="flex justify-between"><span class="text-gray-500">Tanggal</span><b>${fmtDate(kg.tanggal)}</b></div>
+          <div class="flex justify-between"><span class="text-gray-500">Waktu</span><b>${esc(kg.waktu_mulai||'-')}</b></div>
+          <div class="flex justify-between"><span class="text-gray-500">Lokasi</span><b>${esc(kg.lokasi||'-')}</b></div>
+          <div class="flex justify-between"><span class="text-gray-500">Tuan Rumah</span><b>${esc(kg.tuan_rumah||'-')}</b></div>
+          <div class="flex justify-between"><span class="text-gray-500">Status Kehadiran Anda</span>
+            <b>${my ? my.status : 'belum tercatat'}</b></div>
+        </div>
+        ${kg.agenda ? `<p class="text-sm mt-3 text-gray-700"><b>Agenda:</b> ${esc(kg.agenda)}</p>` : ''}
+        <div class="flex gap-2 pt-4">
+          <button onclick="closeModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Tutup</button>
+        </div>
+      </div>
+    `, 'max-w-xl');
+    return;
+  }
+
   const umatList = DB.umat;
   const getStatus = (uid) => DB.presensi.find(p => p.kegiatan_id===kegiatanId && p.umat_id===uid)?.status || 'alpa';
 
@@ -781,13 +1070,18 @@ function setPresensi(kegiatanId, umatId, status) {
    PAGE: IURAN
    ============================================================ */
 function pageIuran(el) {
-  const masuk = DB.iuran.reduce((a,i)=>a+Number(i.jumlah||0),0);
+  let listIuran = DB.iuran;
+  if (isUmat()) listIuran = listIuran.filter(i => i.keluarga_id === currentUser.keluarga_id);
+
+  const masuk = listIuran.filter(i => i.status === 'lunas')
+                         .reduce((a,i)=>a+Number(i.jumlah||0),0);
+
   el.innerHTML = `
     <div class="flex justify-between items-center mb-4">
       <div>
-        <p class="text-gray-500 text-sm">Total terkumpul: <b class="text-green-600">${fmtRp(masuk)}</b></p>
+        <p class="text-gray-500 text-sm">${isUmat()?'Total iuran keluarga Anda':'Total terkumpul'}: <b class="text-green-600">${fmtRp(masuk)}</b></p>
       </div>
-      <button onclick="formIuran()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Catat Iuran</button>
+      ${isUmat() ? '' : `<button onclick="formIuran()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Catat Iuran</button>`}
     </div>
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
       <table class="w-full text-sm">
@@ -798,11 +1092,11 @@ function pageIuran(el) {
             <th class="px-4 py-3">Periode</th>
             <th class="px-4 py-3">Jumlah</th>
             <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3 text-right">Aksi</th>
+            ${isUmat()?'':'<th class="px-4 py-3 text-right">Aksi</th>'}
           </tr>
         </thead>
         <tbody>
-          ${DB.iuran.map(i => {
+          ${listIuran.map(i => {
             const kk = DB.keluarga.find(x=>x.id===i.keluarga_id);
             return `<tr class="border-t hover:bg-gray-50">
               <td class="px-4 py-3 font-medium">${esc(kk?.kepala_keluarga||'-')}</td>
@@ -814,11 +1108,11 @@ function pageIuran(el) {
                   i.status==='lunas'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'
                 }">${esc(i.status)}</span>
               </td>
-              <td class="px-4 py-3 text-right">
+              ${isUmat()?'':`<td class="px-4 py-3 text-right">
                 <button onclick="hapusIuran('${i.id}')" class="text-red-600 hover:underline">Hapus</button>
-              </td>
+              </td>`}
             </tr>`;
-          }).join('') || `<tr><td colspan="6" class="text-center py-8 text-gray-400">Belum ada iuran</td></tr>`}
+          }).join('') || `<tr><td colspan="${isUmat()?5:6}" class="text-center py-8 text-gray-400">Belum ada iuran</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -904,9 +1198,10 @@ function pageKas(el) {
         <p class="text-2xl font-bold text-blue-600">${fmtRp(saldo)}</p>
       </div>
     </div>
-    <div class="flex justify-end mb-4">
-      <button onclick="formKas()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Catat Transaksi</button>
-    </div>
+    ${isUmat() ? '' : `
+      <div class="flex justify-end mb-4">
+        <button onclick="formKas()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Catat Transaksi</button>
+      </div>`}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="bg-gray-50 text-gray-500 text-left">
@@ -915,7 +1210,7 @@ function pageKas(el) {
             <th class="px-4 py-3">Kategori</th>
             <th class="px-4 py-3">Keterangan</th>
             <th class="px-4 py-3 text-right">Jumlah</th>
-            <th class="px-4 py-3 text-right">Aksi</th>
+            ${isUmat()?'':'<th class="px-4 py-3 text-right">Aksi</th>'}
           </tr>
         </thead>
         <tbody>
@@ -927,10 +1222,10 @@ function pageKas(el) {
               <td class="px-4 py-3 text-right font-medium ${t.jenis==='masuk'?'text-green-600':'text-red-600'}">
                 ${t.jenis==='masuk'?'+':'-'} ${fmtRp(t.jumlah)}
               </td>
-              <td class="px-4 py-3 text-right">
+              ${isUmat()?'':`<td class="px-4 py-3 text-right">
                 <button onclick="hapusKas('${t.id}')" class="text-red-600 hover:underline">Hapus</button>
-              </td>
-            </tr>`).join('') || `<tr><td colspan="5" class="text-center py-8 text-gray-400">Belum ada transaksi</td></tr>`}
+              </td>`}
+            </tr>`).join('') || `<tr><td colspan="${isUmat()?4:5}" class="text-center py-8 text-gray-400">Belum ada transaksi</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -993,7 +1288,7 @@ function pageJadwal(el) {
   el.innerHTML = `
     <div class="flex justify-between items-center mb-4">
       <p class="text-gray-500 text-sm">Jadwal petugas liturgi KUB</p>
-      <button onclick="formJadwal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Tambah Jadwal</button>
+      ${isUmat() ? '' : `<button onclick="formJadwal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Tambah Jadwal</button>`}
     </div>
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
       <table class="w-full text-sm">
@@ -1003,22 +1298,23 @@ function pageJadwal(el) {
             <th class="px-4 py-3">Jenis</th>
             <th class="px-4 py-3">Peran</th>
             <th class="px-4 py-3">Petugas</th>
-            <th class="px-4 py-3 text-right">Aksi</th>
+            ${isUmat()?'':'<th class="px-4 py-3 text-right">Aksi</th>'}
           </tr>
         </thead>
         <tbody>
           ${DB.jadwal.map(j => {
             const u = DB.umat.find(x=>x.id===j.umat_id);
-            return `<tr class="border-t hover:bg-gray-50">
+            const isMe = isUmat() && u?.id === currentUser.umat_id;
+            return `<tr class="border-t hover:bg-gray-50 ${isMe?'bg-blue-50':''}">
               <td class="px-4 py-3">${fmtDate(j.tanggal)}</td>
               <td class="px-4 py-3">${esc(j.jenis)}</td>
               <td class="px-4 py-3">${esc(j.peran)}</td>
-              <td class="px-4 py-3 font-medium">${esc(u?.nama_lengkap||'-')}</td>
-              <td class="px-4 py-3 text-right">
+              <td class="px-4 py-3 font-medium">${esc(u?.nama_lengkap||'-')} ${isMe?'<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full ml-1">Anda</span>':''}</td>
+              ${isUmat()?'':`<td class="px-4 py-3 text-right">
                 <button onclick="hapusJadwal('${j.id}')" class="text-red-600 hover:underline">Hapus</button>
-              </td>
+              </td>`}
             </tr>`;
-          }).join('') || `<tr><td colspan="5" class="text-center py-8 text-gray-400">Belum ada jadwal</td></tr>`}
+          }).join('') || `<tr><td colspan="${isUmat()?4:5}" class="text-center py-8 text-gray-400">Belum ada jadwal</td></tr>`}
         </tbody>
       </table>
     </div>
@@ -1080,7 +1376,7 @@ function pagePengumuman(el) {
   el.innerHTML = `
     <div class="flex justify-between items-center mb-4">
       <p class="text-gray-500 text-sm">${DB.pengumuman.length} pengumuman</p>
-      <button onclick="formPengumuman()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Buat Pengumuman</button>
+      ${isUmat() ? '' : `<button onclick="formPengumuman()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Buat Pengumuman</button>`}
     </div>
     <div class="space-y-3">
       ${DB.pengumuman.slice().reverse().map(p=>`
@@ -1090,7 +1386,7 @@ function pagePengumuman(el) {
               <h3 class="font-semibold">${p.penting?'🔴 ':''}${esc(p.judul)}</h3>
               <p class="text-xs text-gray-500 mt-0.5">${fmtDate(p.created_at)} • target: ${esc(p.target)}</p>
             </div>
-            <button onclick="hapusPengumuman('${p.id}')" class="text-red-600 text-sm hover:underline">Hapus</button>
+            ${isUmat() ? '' : `<button onclick="hapusPengumuman('${p.id}')" class="text-red-600 text-sm hover:underline">Hapus</button>`}
           </div>
           <p class="text-sm text-gray-700 mt-2">${esc(p.isi)}</p>
         </div>
@@ -1152,13 +1448,13 @@ function hapusPengumuman(id) {
 }
 
 /* ============================================================
-   PAGE: DOKUMEN (Simulasi — hanya mencatat metadata)
+   PAGE: DOKUMEN
    ============================================================ */
 function pageDokumen(el) {
   el.innerHTML = `
     <div class="flex justify-between items-center mb-4">
       <p class="text-gray-500 text-sm">${DB.dokumen.length} dokumen tersimpan</p>
-      <button onclick="formDokumen()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Tambah Dokumen</button>
+      ${isUmat() ? '' : `<button onclick="formDokumen()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">+ Tambah Dokumen</button>`}
     </div>
     <div class="grid md:grid-cols-3 gap-4">
       ${DB.dokumen.map(d=>`
@@ -1167,7 +1463,7 @@ function pageDokumen(el) {
           <h3 class="font-semibold truncate">${esc(d.nama)}</h3>
           <p class="text-xs text-gray-500">${esc(d.jenis)} • ${fmtDate(d.created_at)}</p>
           ${d.link?`<a href="${esc(d.link)}" target="_blank" class="text-blue-600 text-sm hover:underline mt-2 inline-block">Buka →</a>`:''}
-          <div class="mt-2"><button onclick="hapusDokumen('${d.id}')" class="text-red-600 text-sm hover:underline">Hapus</button></div>
+          ${isUmat() ? '' : `<div class="mt-2"><button onclick="hapusDokumen('${d.id}')" class="text-red-600 text-sm hover:underline">Hapus</button></div>`}
         </div>
       `).join('') || '<p class="text-gray-400 col-span-3">Belum ada dokumen</p>'}
     </div>
@@ -1213,7 +1509,7 @@ function hapusDokumen(id) {
 }
 
 /* ============================================================
-   PAGE: LAPORAN
+   PAGE: LAPORAN (admin_kub only)
    ============================================================ */
 function pageLaporan(el) {
   const masuk = DB.kas.filter(t=>t.jenis==='masuk').reduce((a,t)=>a+Number(t.jumlah),0);
@@ -1273,7 +1569,6 @@ function pageLaporan(el) {
     </div>
   `;
 
-  // Chart
   const months = {};
   DB.kas.forEach(t => {
     const m = t.tanggal.slice(0,7);
@@ -1320,10 +1615,43 @@ function exportLaporanCSV() {
    PAGE: PENGATURAN
    ============================================================ */
 function pagePengaturan(el) {
+  if (isUmat()) {
+    const me = DB.users.find(u => u.id === currentUser.id);
+    el.innerHTML = `
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl p-5 shadow-sm border">
+          <h3 class="font-semibold mb-3">👤 Profil Saya</h3>
+          <form onsubmit="simpanProfilSaya(event)" class="space-y-3">
+            <div><label class="text-sm">Nama</label>
+              <input value="${esc(me.nama)}" disabled class="w-full px-3 py-2 border rounded-lg bg-gray-100"/>
+            </div>
+            <div><label class="text-sm">Email</label>
+              <input name="email" type="email" required value="${esc(me.email)}" class="w-full px-3 py-2 border rounded-lg"/>
+            </div>
+            <div><label class="text-sm">Password Lama</label>
+              <input name="oldpass" type="password" placeholder="Untuk ganti password" class="w-full px-3 py-2 border rounded-lg"/>
+            </div>
+            <div><label class="text-sm">Password Baru (kosongkan bila tidak diubah)</label>
+              <input name="password" type="password" class="w-full px-3 py-2 border rounded-lg"/>
+            </div>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Simpan</button>
+          </form>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border">
+          <h3 class="font-semibold mb-3">ℹ️ Tentang Akun</h3>
+          <p class="text-sm text-gray-600">
+            Anda login sebagai <b>Umat</b>. Data disinkronkan ke Firebase Cloud. Untuk mengubah data pribadi (tanggal lahir, pekerjaan, dll.) silakan hubungi Admin KUB.
+          </p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   el.innerHTML = `
     <div class="grid md:grid-cols-2 gap-4">
       <div class="bg-white rounded-xl p-5 shadow-sm border">
-        <h3 class="font-semibold mb-3">👤 Profil Pengguna</h3>
+        <h3 class="font-semibold mb-3">👤 Profil Admin KUB</h3>
         <form onsubmit="simpanProfil(event)" class="space-y-3">
           <div><label class="text-sm">Nama</label>
             <input name="nama" required value="${esc(DB.users[0].nama)}" class="w-full px-3 py-2 border rounded-lg"/>
@@ -1339,11 +1667,20 @@ function pagePengaturan(el) {
       </div>
 
       <div class="bg-white rounded-xl p-5 shadow-sm border">
-        <h3 class="font-semibold mb-3">💾 Backup & Restore Data</h3>
-        <p class="text-sm text-gray-500 mb-3">Data tersimpan di browser (localStorage). Backup rutin dianjurkan.</p>
-        <div class="flex flex-wrap gap-2">
+        <h3 class="font-semibold mb-3">☁️ Firebase Realtime Database</h3>
+        <p class="text-sm text-gray-500 mb-3">Status koneksi & informasi cloud.</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-500">Koneksi</span>
+            <span class="flex items-center gap-2"><span id="connDot2" class="dot-offline"></span> <b id="connText2">-</b></span>
+          </div>
+          <div class="flex justify-between"><span class="text-gray-500">Project</span><b>aplikasi-rt-442f0</b></div>
+          <div class="flex justify-between"><span class="text-gray-500">Path</span><b class="font-mono text-xs">/kub_app</b></div>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <button onclick="forceRefresh()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">🔄 Refresh Data</button>
           <button onclick="exportData()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">📥 Export JSON</button>
-          <label class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm cursor-pointer">
+          <label class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm cursor-pointer">
             📤 Import JSON
             <input type="file" accept=".json" onchange="importData(event)" class="hidden"/>
           </label>
@@ -1352,15 +1689,52 @@ function pagePengaturan(el) {
       </div>
 
       <div class="bg-white rounded-xl p-5 shadow-sm border md:col-span-2">
+        <h3 class="font-semibold mb-3">👥 Akun Umat Terdaftar</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-gray-500 text-left">
+              <tr>
+                <th class="px-3 py-2">Nama</th>
+                <th class="px-3 py-2">Email</th>
+                <th class="px-3 py-2">Role</th>
+                <th class="px-3 py-2 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${DB.users.map(u=>`
+                <tr class="border-t">
+                  <td class="px-3 py-2 font-medium">${esc(u.nama)}</td>
+                  <td class="px-3 py-2">${esc(u.email)}</td>
+                  <td class="px-3 py-2"><span class="text-xs px-2 py-0.5 rounded-full ${
+                    u.role==='admin_kub'?'bg-blue-100 text-blue-700':'bg-green-100 text-green-700'}">${esc(roleLabel(u.role))}</span></td>
+                  <td class="px-3 py-2 text-right">
+                    ${u.role==='umat'?`<button onclick="hapusUser('${u.id}')" class="text-red-600 hover:underline">Hapus</button>`:'-'}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-5 shadow-sm border md:col-span-2">
         <h3 class="font-semibold mb-3">ℹ️ Tentang Aplikasi</h3>
         <p class="text-sm text-gray-600">
-          <b>KUB App</b> — Sistem Informasi Kelompok Umat Basis v1.0<br/>
-          Aplikasi single-file HTML untuk mengelola data KUB: keluarga, umat, kegiatan, presensi, iuran, kas, jadwal petugas, pengumuman, dan laporan.
-          Data disimpan secara lokal di browser Anda. Untuk penggunaan multi-user & multi-paroki, migrasikan ke backend (Supabase/MySQL + Next.js).
+          <b>KUB App</b> — Sistem Informasi Kelompok Umat Basis v1.0 (Firebase Edition)<br/>
+          Data tersimpan di <b>Firebase Realtime Database</b> — dapat diakses dari berbagai perangkat secara real-time.
+          Setiap perubahan dari satu perangkat akan langsung ter-sinkron ke perangkat lain.
         </p>
       </div>
     </div>
   `;
+
+  // Update indikator koneksi di halaman pengaturan
+  const d2 = document.getElementById('connDot2');
+  const t2 = document.getElementById('connText2');
+  if (d2 && t2) {
+    d2.className = isOnline ? 'dot-online' : 'dot-offline';
+    t2.textContent = isOnline ? 'Online' : 'Offline';
+  }
 }
 
 function simpanProfil(e) {
@@ -1372,6 +1746,45 @@ function simpanProfil(e) {
   saveDB(); toast('Profil tersimpan');
   document.getElementById('userName').textContent = DB.users[0].nama;
   document.getElementById('userAvatar').textContent = DB.users[0].nama.charAt(0).toUpperCase();
+}
+
+function simpanProfilSaya(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const me = DB.users.find(u => u.id === currentUser.id);
+  const email = f.get('email').trim().toLowerCase();
+  const oldpass = f.get('oldpass');
+  const newpass = f.get('password');
+
+  if (DB.users.some(u => u.id !== me.id && u.email.toLowerCase() === email)) {
+    return toast('Email sudah digunakan akun lain','error');
+  }
+  if (newpass) {
+    if (oldpass !== me.password) return toast('Password lama salah','error');
+    if (newpass.length < 6) return toast('Password minimal 6 karakter','error');
+    me.password = newpass;
+  }
+  me.email = email;
+  saveDB(); toast('Profil tersimpan');
+}
+
+function hapusUser(id) {
+  const u = DB.users.find(x => x.id === id);
+  if (!u || u.role === 'admin_kub') return;
+  if (!confirm(`Hapus akun "${u.nama}"? Umat bisa mendaftar lagi dengan nama yang sama.`)) return;
+  DB.users = DB.users.filter(x => x.id !== id);
+  saveDB(); toast('Akun dihapus','info'); go('pengaturan');
+}
+
+function forceRefresh() {
+  DB_REF.once('value').then(snap => {
+    const data = snap.val();
+    if (data) {
+      DB = data;
+      toast('Data berhasil di-refresh dari cloud');
+      go(currentPage);
+    }
+  }).catch(err => toast('Gagal refresh: ' + err.message, 'error'));
 }
 
 function exportData() {
@@ -1391,21 +1804,27 @@ function importData(e) {
     try {
       const data = JSON.parse(r.result);
       if (!data.users || !data.kub) throw new Error('Format tidak valid');
-      DB = data; saveDB(); toast('Data berhasil diimport'); location.reload();
+      DB = data;
+      DB_REF.set(DB).then(() => {
+        toast('Data berhasil diimport ke Firebase');
+        setTimeout(() => location.reload(), 800);
+      }).catch(err => toast('Gagal upload: ' + err.message, 'error'));
     } catch (err) { toast('File tidak valid: ' + err.message, 'error'); }
   };
   r.readAsText(file);
 }
 
 function resetData() {
-  if (!confirm('Yakin reset semua data? Data akan kembali ke awal.')) return;
-  localStorage.removeItem(DB_KEY);
-  localStorage.removeItem(SESSION_KEY);
-  location.reload();
+  if (!confirm('Yakin reset semua data di Firebase? Data akan kembali ke default.')) return;
+  DB_REF.set(structuredClone(defaultDB)).then(() => {
+    localStorage.removeItem(SESSION_KEY);
+    toast('Data berhasil direset');
+    setTimeout(() => location.reload(), 800);
+  }).catch(err => toast('Gagal reset: ' + err.message, 'error'));
 }
 
 /* ============================================================
-   INIT
+   INIT — Load dari Firebase dulu, baru tampilkan UI
    ============================================================ */
 function updateClock() {
   const el = document.getElementById('clock');
@@ -1415,15 +1834,62 @@ function updateClock() {
 }
 setInterval(updateClock, 1000); updateClock();
 
-if (SESSION) {
-  showApp();
-} else {
-  document.getElementById('loginScreen').classList.remove('hidden');
+async function initApp() {
+  try {
+    const loadingText = document.getElementById('loadingText');
+    loadingText.textContent = 'Memuat data dari Firebase...';
+
+    DB = await loadDBFromFirebase();
+    isFirebaseReady = true;
+
+    // Aktifkan real-time listener
+    DB_REF.on('value', (snap) => {
+      const data = snap.val();
+      if (data) {
+        DB = data;
+        // Update header info user yang sedang login
+        if (currentUser) {
+          const updated = DB.users.find(u => u.id === currentUser.id);
+          if (updated) {
+            currentUser = updated;
+            document.getElementById('userName').textContent = updated.nama;
+            document.getElementById('userRole').textContent = roleLabel(updated.role);
+            document.getElementById('userAvatar').textContent = updated.nama.charAt(0).toUpperCase();
+          }
+        }
+      }
+    });
+
+    // Sembunyikan loading
+    document.getElementById('loadingScreen').classList.add('hidden');
+
+    // Tampilkan app atau login
+    if (SESSION && DB.users.find(u => u.id === SESSION.user_id)) {
+      showApp();
+    } else {
+      if (SESSION) localStorage.removeItem(SESSION_KEY);
+      document.getElementById('loginScreen').classList.remove('hidden');
+    }
+  } catch (err) {
+    console.error('Init error:', err);
+    document.getElementById('loadingText').innerHTML =
+      '<span class="text-red-600">❌ Gagal terhubung ke Firebase.<br/>Periksa koneksi internet & rules database.<br/><br/>' +
+      'Error: ' + esc(err.message) + '</span>';
+    // Fallback: tetap tampilkan login dengan data default
+    setTimeout(() => {
+      document.getElementById('loadingScreen').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      toast('Gagal memuat cloud. Beberapa fitur mungkin tidak tersedia.', 'error');
+    }, 3000);
+  }
 }
+
+initApp();
 
 // expose ke global (untuk onclick di HTML)
 Object.assign(window, {
   go, logout, toggleSidebar, closeModal, openModal,
+  showRegister, showLogin,
   formKub, simpanKub, hapusKub,
   formKeluarga, simpanKeluarga, hapusKeluarga,
   formUmat, simpanUmat, hapusUmat, renderUmatTable,
@@ -1434,7 +1900,8 @@ Object.assign(window, {
   formJadwal, simpanJadwal, hapusJadwal,
   formPengumuman, simpanPengumuman, hapusPengumuman,
   formDokumen, simpanDokumen, hapusDokumen,
-  exportLaporanCSV, simpanProfil, exportData, importData, resetData,
+  exportLaporanCSV, simpanProfil, simpanProfilSaya, hapusUser,
+  exportData, importData, resetData, forceRefresh,
 });
 </script>
 </body>
