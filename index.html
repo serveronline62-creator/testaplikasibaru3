@@ -1,1 +1,1900 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web OBS Lite — Anti-Gema</title>
+<style>
+  :root {
+    --bg: #1e1e1e; --panel: #252526; --panel2: #2d2d30;
+    --border: #3e3e42; --text: #cccccc; --muted: #858585;
+    --accent: #007acc; --danger: #f14c4c; --ok: #4ec9b0;
+    --warn: #d7ba7d;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--text); height: 100vh;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  header {
+    height: 52px; display: flex; align-items: center; gap: 8px;
+    padding: 0 12px; background: var(--panel);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+    overflow-x: auto;
+  }
+  header h1 { font-size: 15px; font-weight: 600; margin: 0 12px 0 0; color: #fff; white-space: nowrap; }
+  main {
+    flex: 1; display: grid;
+    grid-template-columns: 260px 1fr 320px; min-height: 0;
+  }
+  .panel {
+    background: var(--panel); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; min-height: 0;
+  }
+  .panel:last-child { border-right: none; border-left: 1px solid var(--border); }
+  .panel-header {
+    padding: 6px 10px; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--muted);
+    border-bottom: 1px solid var(--border); display: flex;
+    justify-content: space-between; align-items: center; flex-shrink: 0;
+  }
+  .panel-header small { font-size: 9px; text-transform: none; letter-spacing: 0; opacity: .8; }
+  .scroll { overflow-y: auto; flex: 1; min-height: 60px; }
+  .scene-item, .source-item, .audio-item {
+    padding: 6px 10px; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .scene-item.active, .source-item.active { background: var(--accent); color: #fff; }
+  .source-item button, .audio-item button {
+    padding: 1px 5px; font-size: 11px; line-height: 1;
+  }
+  .zoom-badge {
+    font-size: 10px; padding: 1px 6px; border-radius: 3px;
+    background: var(--warn); color: #1e1e1e; border: none;
+    cursor: pointer; font-weight: 600; line-height: 1.4;
+  }
+  .zoom-badge:hover { opacity: .8; }
 
+  .preview-area {
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at center, #141414 0%, #0a0a0a 100%);
+    padding: 32px 24px 44px;
+    min-width: 0; overflow: hidden;
+    position: relative;
+  }
+  .canvas-wrap {
+    position: relative; background: #000; border-radius: 3px;
+    box-shadow: 0 0 0 1px #000, 0 0 0 2px #3a3a3d, 0 0 0 4px #1a1a1a, 0 16px 48px rgba(0,0,0,.75);
+    transition: width 0.28s cubic-bezier(.4,0,.2,1), height 0.28s cubic-bezier(.4,0,.2,1);
+    flex-shrink: 0;
+  }
+  .canvas-wrap::after {
+    content: attr(data-dim);
+    position: absolute; bottom: -26px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    color: #7a7a7a; letter-spacing: 0.8px; white-space: nowrap; pointer-events: none;
+    background: #0a0a0a; padding: 2px 10px; border-radius: 10px; border: 1px solid #2a2a2a;
+  }
+  canvas { width: 100%; height: 100%; display: block; touch-action: none; border-radius: 2px; }
+
+  button {
+    background: var(--panel2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 5px 10px; font-size: 12px; cursor: pointer;
+    white-space: nowrap;
+  }
+  button:hover { background: #3a3a3d; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+  button.warn { background: var(--warn); border-color: var(--warn); color: #1e1e1e; }
+  select, input[type="range"] {
+    background: var(--panel2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 4px 6px; font-size: 12px;
+  }
+  .add-row {
+    display: flex; gap: 6px; padding: 8px;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .add-row select { flex: 1; min-width: 0; }
+  #status {
+    height: 26px; background: var(--panel);
+    border-top: 1px solid var(--border); font-size: 11px;
+    color: var(--muted); display: flex; align-items: center;
+    padding: 0 12px; flex-shrink: 0; gap: 12px;
+    overflow-x: auto; white-space: nowrap;
+  }
+  #media-pool {
+    position: fixed; left: -9999px; top: -9999px;
+    width: 1px; height: 1px; overflow: hidden;
+    opacity: 0; pointer-events: none;
+  }
+  .audio-item input[type="range"] { width: 55px; }
+  .audio-meter {
+    width: 40px; height: 6px; background: #1a1a1a;
+    border-radius: 3px; overflow: hidden; flex-shrink: 0;
+    border: 1px solid #333;
+  }
+  .audio-meter-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--ok), var(--warn), var(--danger));
+    transition: width 0.08s linear;
+  }
+  .mon-btn {
+    font-size: 9px !important; padding: 2px 5px !important;
+    font-weight: 700 !important; letter-spacing: 0.5px;
+  }
+  .empty-hint { padding: 10px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+  .rec-controls {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 10px; border-left: 1px solid var(--border); margin-left: 8px;
+  }
+  #rec-timer {
+    font-family: ui-monospace, monospace; font-size: 13px;
+    color: var(--danger); min-width: 68px; font-weight: 600;
+  }
+  #rec-size {
+    font-family: ui-monospace, monospace; font-size: 11px;
+    color: var(--muted); min-width: 60px;
+  }
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.7);
+    display: flex; align-items: center; justify-content: center; z-index: 1000;
+  }
+  .modal.hidden { display: none; }
+  .modal-box {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 20px; min-width: 340px;
+    max-width: 90vw; max-height: 90vh; overflow: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .modal-box h3 { margin: 0 0 16px; font-size: 15px; color: #fff; }
+  .form-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .form-row label { flex: 0 0 90px; font-size: 12px; color: var(--muted); }
+  .form-row select { flex: 1; }
+  .recording-item { padding: 8px 10px; border-bottom: 1px solid #2a2a2a; font-size: 12px; }
+  .recording-item .rec-title {
+    font-weight: 600; color: #fff; margin-bottom: 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .recording-item .rec-meta { color: var(--muted); font-size: 11px; margin-bottom: 6px; }
+  .recording-item .rec-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+  .recording-item .rec-actions button { padding: 2px 8px; font-size: 11px; }
+  .ratio-select { font-weight: 600; background: var(--accent); color: #fff; border-color: var(--accent); }
+  .info-badge {
+    font-size: 10px; padding: 1px 6px; border-radius: 3px;
+    background: #3a3a3d; color: var(--muted);
+  }
+  #audio-banner {
+    background: linear-gradient(90deg, #7a5a00, #d7ba7d);
+    color: #1e1e1e; padding: 8px 12px; font-size: 12px;
+    font-weight: 600; text-align: center; flex-shrink: 0;
+    cursor: pointer; border-bottom: 1px solid #000;
+  }
+  #audio-banner.hidden { display: none; }
+  #toast-container {
+    position: fixed; top: 66px; left: 50%; transform: translateX(-50%);
+    z-index: 2000; display: flex; flex-direction: column; gap: 8px;
+    pointer-events: none; max-width: 90vw;
+  }
+  .toast {
+    background: #2d2d30; color: #fff; border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px; padding: 10px 16px;
+    font-size: 13px; line-height: 1.4;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    animation: toastIn .25s ease;
+    max-width: 480px; pointer-events: auto;
+  }
+  .toast.warn { border-left-color: var(--warn); }
+  .toast.success { border-left-color: var(--ok); }
+  .toast.error { border-left-color: var(--danger); }
+  .toast.fadeout { animation: toastOut .3s ease forwards; }
+  @keyframes toastIn {
+    from { transform: translateY(-12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes toastOut {
+    to { transform: translateY(-12px); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎬 Web OBS Lite</h1>
+
+  <select id="canvas-ratio" class="ratio-select" title="Pilih rasio kanvas">
+    <option value="original">📐 Original</option>
+    <option value="16:9" selected>📺 16:9</option>
+    <option value="9:16">📱 9:16</option>
+  </select>
+
+  <div class="rec-controls">
+    <button id="record-btn" class="primary">● Rekam</button>
+    <button id="pause-btn" style="display:none">⏸ Jeda</button>
+    <button id="stop-btn" style="display:none" class="danger">■ Stop</button>
+    <span id="rec-timer"></span>
+    <span id="rec-size"></span>
+  </div>
+
+  <button id="rec-settings-btn" title="Pengaturan rekaman">⚙</button>
+  <button id="live-btn">🌐 Siaran</button>
+  <span style="flex:1"></span>
+  <span class="info-badge" id="mime-support">Cek format…</span>
+</header>
+
+<div id="audio-banner" class="hidden">
+  🔊 Klik di sini untuk mengaktifkan audio
+</div>
+
+<main>
+  <aside class="panel">
+    <div class="panel-header">
+      <span>Scenes</span>
+      <button id="add-scene-btn">+</button>
+    </div>
+    <div id="scenes-list" class="scroll" style="flex:1"></div>
+  </aside>
+
+  <section class="preview-area">
+    <div class="canvas-wrap" id="canvas-wrap" data-dim="1280 × 720">
+      <canvas id="preview" width="1280" height="720"></canvas>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="panel-header">
+      <span>Sources</span>
+      <small>🖱 scroll = zoom · dblclick = reset</small>
+    </div>
+    <div class="add-row">
+      <select id="source-type-select">
+        <option value="webcam">Webcam</option>
+        <option value="screen">Screen Capture</option>
+        <option value="videofile">Video File (MP4/WebM)</option>
+        <option value="image">Gambar (URL)</option>
+        <option value="text">Teks</option>
+        <option value="color">Warna Solid</option>
+        <option value="mic">Mikrofon</option>
+      </select>
+      <button id="add-source-btn" class="primary">Tambah</button>
+    </div>
+    <div id="sources-list" class="scroll" style="flex:1.2"></div>
+
+    <div class="panel-header">
+      <span>Audio Mixer</span>
+      <small style="color:var(--muted)">🔊 mute · MON monitor</small>
+    </div>
+    <div id="audio-list" class="scroll" style="flex:1"></div>
+
+    <div class="panel-header">
+      <span>Rekaman</span>
+      <span id="rec-count" style="color:var(--accent)">0</span>
+    </div>
+    <div id="recordings-list" class="scroll" style="flex:1.2"></div>
+  </aside>
+</main>
+
+<div id="status"></div>
+<div id="media-pool"></div>
+<div id="toast-container"></div>
+
+<div id="settings-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3>⚙ Pengaturan Rekaman</h3>
+    <div class="form-row">
+      <label>Format</label>
+      <select id="cfg-mime">
+        <option value="auto">Otomatis (prioritas MP4 + Audio)</option>
+        <option value="video/mp4;codecs=avc1.42E01E">MP4 H.264</option>
+        <option value="video/webm;codecs=vp9">WebM VP9</option>
+        <option value="video/webm;codecs=vp8">WebM VP8</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Kualitas</label>
+      <select id="cfg-quality">
+        <option value="2000000">Rendah — 2 Mbps</option>
+        <option value="4000000">Sedang — 4 Mbps</option>
+        <option value="6000000" selected>Tinggi — 6 Mbps</option>
+        <option value="12000000">Ultra — 12 Mbps</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>FPS</label>
+      <select id="cfg-fps">
+        <option value="24">24 FPS</option>
+        <option value="30" selected>30 FPS</option>
+        <option value="60">60 FPS</option>
+      </select>
+    </div>
+    <div id="mime-info" style="font-size:11px;color:var(--muted);margin:12px 0;line-height:1.6"></div>
+    <div style="text-align:right">
+      <button id="settings-close" class="primary">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div id="preview-modal" class="modal hidden">
+  <div class="modal-box" style="min-width:600px">
+    <video id="preview-video" controls playsinline style="width:100%;max-height:60vh;background:#000;border-radius:4px"></video>
+    <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+      <span id="preview-info" style="font-size:12px;color:var(--muted)"></span>
+      <button id="preview-close" class="primary">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   STATE
+   ========================================================= */
+const state = {
+  scenes: [],
+  activeSceneId: null,
+  selectedSourceId: null,
+  audioContext: null,
+  masterGain: null,       // recording path only
+  monitorGain: null,      // monitor path only
+  monitorOn: true,
+  audioDestination: null,
+  canvasRatio: '16:9',
+  recording: false,
+  recPaused: false,
+  recStartTime: 0,
+  recPausedTotal: 0,
+  recPausedAt: 0,
+  recTimerInterval: null,
+  currentRecSize: 0,
+  mediaRecorder: null,
+  recordedChunks: [],
+  recMime: 'auto',
+  recBitrate: 6_000_000,
+  recFps: 30,
+  whipPc: null,
+  isLive: false,
+  drawTimer: null,
+  audioLevelInterval: null,
+};
+
+const recordings = [];
+let _id = 0;
+const uid = (p = 'id') => `${p}-${++_id}-${Date.now().toString(36)}`;
+
+/* =========================================================
+   DOM
+   ========================================================= */
+const canvas = document.getElementById('preview');
+const ctx = canvas.getContext('2d');
+const canvasWrap = document.getElementById('canvas-wrap');
+const canvasRatioSelect = document.getElementById('canvas-ratio');
+const scenesListEl = document.getElementById('scenes-list');
+const sourcesListEl = document.getElementById('sources-list');
+const audioListEl = document.getElementById('audio-list');
+const recordingsListEl = document.getElementById('recordings-list');
+const recCountEl = document.getElementById('rec-count');
+const sourceTypeSelect = document.getElementById('source-type-select');
+const addSourceBtn = document.getElementById('add-source-btn');
+const addSceneBtn = document.getElementById('add-scene-btn');
+const recordBtn = document.getElementById('record-btn');
+const pauseBtn = document.getElementById('pause-btn');
+const stopBtn = document.getElementById('stop-btn');
+const recTimerEl = document.getElementById('rec-timer');
+const recSizeEl = document.getElementById('rec-size');
+const recSettingsBtn = document.getElementById('rec-settings-btn');
+const settingsModal = document.getElementById('settings-modal');
+const previewModal = document.getElementById('preview-modal');
+const previewVideo = document.getElementById('preview-video');
+const previewInfo = document.getElementById('preview-info');
+const liveBtn = document.getElementById('live-btn');
+const statusEl = document.getElementById('status');
+const mediaPool = document.getElementById('media-pool');
+const mimeSupportEl = document.getElementById('mime-support');
+const mimeInfoEl = document.getElementById('mime-info');
+const toastContainer = document.getElementById('toast-container');
+const audioBanner = document.getElementById('audio-banner');
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+function showToast(msg, type = 'info', duration = 4000) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  toastContainer.appendChild(t);
+  setTimeout(() => {
+    t.classList.add('fadeout');
+    setTimeout(() => t.remove(), 300);
+  }, duration);
+}
+
+/* =========================================================
+   UTILITY
+   ========================================================= */
+function formatDuration(ms) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const hh = String(Math.floor(total / 3600)).padStart(2, '0');
+  const mm = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+  const ss = String(total % 60).padStart(2, '0');
+  return `${hh}:${mm}:${ss}`;
+}
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+  return (b / (1024 * 1024)).toFixed(1) + ' MB';
+}
+function isZoomable(src) {
+  return ['webcam', 'screen', 'videofile', 'image'].includes(src.type);
+}
+function isMicLike(src) {
+  return src.type === 'mic' || src.type === 'webcam';
+}
+
+/* =========================================================
+   AUDIO GRAPH — SPLIT REC & MONITOR
+   ========================================================= */
+function ensureAudioContext() {
+  if (!state.audioContext) {
+    state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    // === RECORDING CHAIN ===
+    state.masterGain = state.audioContext.createGain();
+    state.audioDestination = state.audioContext.createMediaStreamDestination();
+    state.masterGain.connect(state.audioDestination);
+
+    // === MONITOR CHAIN (terpisah total) ===
+    state.monitorGain = state.audioContext.createGain();
+    state.monitorGain.gain.value = state.monitorOn ? 0.8 : 0;
+    state.monitorGain.connect(state.audioContext.destination);
+
+    state.audioContext.addEventListener('statechange', updateAudioBanner);
+  }
+  if (state.audioContext.state === 'suspended') state.audioContext.resume();
+}
+
+function warmUpAudio() {
+  ensureAudioContext();
+  if (state.audioContext.state === 'suspended') {
+    state.audioContext.resume().catch((e) => console.warn('[AUDIO] resume() gagal:', e));
+  }
+}
+
+async function resumeAudioContext() {
+  ensureAudioContext();
+  if (state.audioContext.state !== 'running') {
+    try { await state.audioContext.resume(); } catch (e) { console.warn(e); }
+  }
+  const t0 = Date.now();
+  while (state.audioContext.state !== 'running' && Date.now() - t0 < 1200) {
+    await new Promise(r => setTimeout(r, 40));
+  }
+  updateAudioBanner();
+  return state.audioContext.state;
+}
+
+document.addEventListener('pointerdown', warmUpAudio, { capture: true });
+document.addEventListener('keydown', warmUpAudio, { capture: true });
+
+/* =========================================================
+   BANNER (aktivasi audio + peringatan gema)
+   ========================================================= */
+async function audioBannerActivate() {
+  warmUpAudio();
+  await resumeAudioContext();
+  if (state.audioContext.state === 'running') {
+    showToast('🔊 Audio aktif', 'success', 2000);
+  } else {
+    showToast('⚠ Masih suspended — coba klik lagi', 'warn', 3000);
+  }
+}
+
+function updateAudioBanner() {
+  if (!state.audioContext) return;
+  const running = state.audioContext.state === 'running';
+
+  if (!running) {
+    audioBanner.textContent = '🔊 Klik di sini untuk mengaktifkan audio (browser butuh interaksi pengguna)';
+    audioBanner.style.background = 'linear-gradient(90deg, #7a5a00, #d7ba7d)';
+    audioBanner.style.cursor = 'pointer';
+    audioBanner.classList.remove('hidden');
+    audioBanner.onclick = audioBannerActivate;
+    return;
+  }
+
+  // === DETEKSI RISIKO GEMA ===
+  const scene = getActiveScene();
+  let feedbackRisk = false;
+  if (scene && state.monitorOn) {
+    const micLive = scene.sources.some(s =>
+      isMicLike(s) && s.audioTrack && s.audioTrack.readyState === 'live' && !s.muted
+    );
+    const anyMonitored = scene.sources.some(s =>
+      s.monGain && !s.monitorMuted && !s.muted
+    );
+    feedbackRisk = micLive && anyMonitored;
+  }
+
+  if (feedbackRisk) {
+    audioBanner.textContent = '⚠ Risiko GEMA: Mic aktif + speaker memutar audio. Gunakan headphone, atau matikan "MON" di mixer.';
+    audioBanner.style.background = 'linear-gradient(90deg, #7a1a1a, #f14c4c)';
+    audioBanner.style.cursor = 'default';
+    audioBanner.classList.remove('hidden');
+    audioBanner.onclick = null;
+    return;
+  }
+
+  audioBanner.classList.add('hidden');
+}
+
+/* =========================================================
+   AUDIO ROUTING — SPLIT per source
+   ========================================================= */
+function connectAudioTrack(src, track) {
+  ensureAudioContext();
+  if (!track || track.readyState === 'ended') {
+    src.audioTrack = track;
+    return;
+  }
+
+  const stream = new MediaStream([track]);
+  let srcNode;
+  try {
+    srcNode = state.audioContext.createMediaStreamSource(stream);
+  } catch (e) {
+    console.error('[AUDIO] createMediaStreamSource gagal:', e);
+    return;
+  }
+
+  const vol = (typeof src.volume === 'number') ? src.volume : 1;
+
+  // === REC PATH ===
+  const recGain = state.audioContext.createGain();
+  recGain.gain.value = src.muted ? 0 : vol;
+  srcNode.connect(recGain);
+  recGain.connect(state.masterGain);
+
+  // === MON PATH (terpisah) ===
+  const monGain = state.audioContext.createGain();
+  monGain.gain.value = (src.monitorMuted || src.muted) ? 0 : vol;
+  srcNode.connect(monGain);
+  monGain.connect(state.monitorGain);
+
+  // === ANALYSER (tap dari recGain — meter = level yang direkam) ===
+  const analyser = state.audioContext.createAnalyser();
+  analyser.fftSize = 128;
+  analyser.smoothingTimeConstant = 0.7;
+  recGain.connect(analyser);
+
+  src.recGain = recGain;
+  src.monGain = monGain;
+  src.gainNode = recGain;
+  src.analyser = analyser;
+  src.audioTrack = track;
+  src.audioSourceNode = srcNode;
+  src.audioLevel = 0;
+
+  track.addEventListener('ended', () => {
+    try { srcNode.disconnect(); } catch {}
+    try { recGain.disconnect(); } catch {}
+    try { monGain.disconnect(); } catch {}
+    src.recGain = null;
+    src.monGain = null;
+    src.gainNode = null;
+    src.analyser = null;
+    renderAudioMixer();
+    updateStatus();
+    updateAudioBanner();
+  });
+
+  startAudioLevelLoop();
+}
+
+function updateAllSceneAudio() {
+  state.scenes.forEach(scene => {
+    const isActive = scene.id === state.activeSceneId;
+    scene.sources.forEach(src => {
+      const vol = (typeof src.volume === 'number') ? src.volume : 1;
+      if (src.recGain) {
+        const recMuted = src.muted || !isActive;
+        src.recGain.gain.value = recMuted ? 0 : vol;
+      }
+      if (src.monGain) {
+        const monMuted = src.monitorMuted || src.muted || !isActive;
+        src.monGain.gain.value = monMuted ? 0 : vol;
+      }
+    });
+  });
+}
+
+function startAudioLevelLoop() {
+  if (state.audioLevelInterval) return;
+  const buf = new Uint8Array(128);
+  state.audioLevelInterval = setInterval(() => {
+    const scene = getActiveScene();
+    if (!scene) return;
+    scene.sources.forEach(src => {
+      if (!src.analyser) { src.audioLevel = 0; return; }
+      src.analyser.getByteFrequencyData(buf);
+      let max = 0;
+      for (let i = 0; i < buf.length; i++) if (buf[i] > max) max = buf[i];
+      src.audioLevel = max;
+    });
+    audioListEl.querySelectorAll('[data-meter-for]').forEach(el => {
+      const id = el.getAttribute('data-meter-for');
+      const s = scene.sources.find(x => x.id === id);
+      if (!s) return;
+      const pct = Math.min(100, (s.audioLevel || 0) * 1.8);
+      const fill = el.firstElementChild;
+      if (fill) fill.style.width = pct + '%';
+    });
+  }, 80);
+}
+
+/* =========================================================
+   AUDIO MIXER UI
+   ========================================================= */
+function renderAudioMixer() {
+  audioListEl.innerHTML = '';
+  const scene = getActiveScene();
+  if (!scene) return;
+  const audioSources = scene.sources.filter(s => s.recGain || s.type === 'mic');
+  if (!audioSources.length) {
+    audioListEl.innerHTML = '<div class="empty-hint">Belum ada sumber audio.<br>Tambahkan Screen Capture, Webcam, atau Mikrofon.</div>';
+    return;
+  }
+  audioSources.forEach(src => {
+    const div = document.createElement('div');
+    div.className = 'audio-item';
+
+    const name = document.createElement('span');
+    name.textContent = src.name;
+    name.style.flex = '1'; name.style.overflow = 'hidden';
+    name.style.textOverflow = 'ellipsis'; name.style.whiteSpace = 'nowrap';
+    name.style.minWidth = '0';
+
+    const meter = document.createElement('div');
+    meter.className = 'audio-meter';
+    meter.setAttribute('data-meter-for', src.id);
+    const fill = document.createElement('div');
+    fill.className = 'audio-meter-fill';
+    meter.appendChild(fill);
+
+    // Mute (rec + monitor)
+    const mute = document.createElement('button');
+    mute.textContent = src.muted ? '🔇' : '🔊';
+    mute.title = src.muted ? 'Unmute (rec + monitor)' : 'Mute (rec + monitor)';
+    mute.onclick = () => {
+      src.muted = !src.muted;
+      updateAllSceneAudio();
+      renderAudioMixer();
+      updateAudioBanner();
+    };
+
+    // Monitor toggle (terpisah — ANTI-GEMA)
+    const monBtn = document.createElement('button');
+    monBtn.className = 'mon-btn';
+    monBtn.textContent = 'MON';
+    monBtn.title = src.monitorMuted ? 'Monitor OFF (klik aktifkan)' : 'Monitor ON (klik matikan)';
+    if (!src.monitorMuted) monBtn.classList.add('primary');
+    monBtn.onclick = () => {
+      src.monitorMuted = !src.monitorMuted;
+      updateAllSceneAudio();
+      renderAudioMixer();
+      updateAudioBanner();
+      if (!src.monitorMuted && isMicLike(src)) {
+        showToast('⚠ Monitor mic aktif — gunakan headphone untuk hindari gema.', 'warn', 5000);
+      }
+    };
+
+    // Volume
+    const slider = document.createElement('input');
+    slider.type = 'range'; slider.min = '0'; slider.max = '1'; slider.step = '0.01';
+    slider.value = src.volume;
+    slider.oninput = () => {
+      src.volume = parseFloat(slider.value);
+      updateAllSceneAudio();
+    };
+
+    div.append(name, meter, mute, monBtn, slider);
+    audioListEl.appendChild(div);
+  });
+  startAudioLevelLoop();
+}
+
+/* =========================================================
+   CANVAS RATIO & DISPLAY
+   ========================================================= */
+function getRatioDimensions(ratio) {
+  if (ratio === '9:16') return { width: 720, height: 1280 };
+  return { width: 1280, height: 720 };
+}
+function resizeCanvasDisplay() {
+  const area = document.querySelector('.preview-area');
+  if (!area) return;
+  const styles = getComputedStyle(area);
+  const padX = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
+  const padY = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
+  const availW = Math.max(100, area.clientWidth - padX);
+  const availH = Math.max(100, area.clientHeight - padY);
+  const ratio = canvas.width / canvas.height;
+  let w, h;
+  if (availW / availH > ratio) { h = availH; w = Math.round(h * ratio); }
+  else { w = availW; h = Math.round(w / ratio); }
+  canvasWrap.style.width = w + 'px';
+  canvasWrap.style.height = h + 'px';
+  canvasWrap.setAttribute('data-dim', `${canvas.width} × ${canvas.height}`);
+}
+window.addEventListener('resize', () => {
+  clearTimeout(window.__canvasResizeT);
+  window.__canvasResizeT = setTimeout(resizeCanvasDisplay, 80);
+});
+function applyCanvasRatio(ratio) {
+  const oldW = canvas.width, oldH = canvas.height;
+  const { width, height } = getRatioDimensions(ratio);
+  if (oldW === width && oldH === height) {
+    state.canvasRatio = ratio; resizeCanvasDisplay(); updateStatus(); return;
+  }
+  canvas.width = width; canvas.height = height;
+  const scaleX = width / oldW, scaleY = height / oldH;
+  const scale = Math.min(scaleX, scaleY);
+  state.scenes.forEach(scene => {
+    scene.sources.forEach(src => {
+      if (src.type === 'mic') return;
+      src.x = Math.round(src.x * scaleX);
+      src.y = Math.round(src.y * scaleY);
+      src.width = Math.round(src.width * scale);
+      src.height = Math.round(src.height * scale);
+    });
+  });
+  state.canvasRatio = ratio;
+  resizeCanvasDisplay(); renderSources(); drawFrame(); updateStatus();
+}
+canvasRatioSelect.onchange = (e) => applyCanvasRatio(e.target.value);
+
+/* =========================================================
+   SCENES
+   ========================================================= */
+function createScene(name) {
+  return { id: uid('scene'), name, background: '#000000', sources: [] };
+}
+function getActiveScene() {
+  return state.scenes.find(s => s.id === state.activeSceneId);
+}
+function renderScenes() {
+  scenesListEl.innerHTML = '';
+  state.scenes.forEach(scene => {
+    const div = document.createElement('div');
+    div.className = 'scene-item' + (scene.id === state.activeSceneId ? ' active' : '');
+    div.textContent = scene.name;
+    div.onclick = () => {
+      state.activeSceneId = scene.id;
+      state.selectedSourceId = null;
+      renderScenes(); renderSources(); renderAudioMixer();
+      updateAllSceneAudio(); updateAudioBanner();
+    };
+    scenesListEl.appendChild(div);
+  });
+}
+addSceneBtn.onclick = () => {
+  warmUpAudio();
+  const name = prompt('Nama scene baru:', `Scene ${state.scenes.length + 1}`);
+  if (!name || !name.trim()) return;
+  const scene = createScene(name.trim());
+  state.scenes.push(scene);
+  state.activeSceneId = scene.id;
+  state.selectedSourceId = null;
+  renderScenes(); renderSources(); renderAudioMixer();
+  updateAllSceneAudio(); updateAudioBanner();
+};
+
+/* =========================================================
+   SOURCES
+   ========================================================= */
+async function createWebcamSource() {
+  // Anti-gema: minta echoCancellation dari getUserMedia
+  const audioConstraints = {
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+  };
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: audioConstraints });
+  } catch {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    } catch {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    }
+  }
+  await resumeAudioContext();
+
+  const video = document.createElement('video');
+  video.srcObject = stream; video.muted = true;
+  video.playsInline = true; video.autoplay = true;
+  mediaPool.appendChild(video);
+  await video.play();
+
+  const vw = video.videoWidth || 640;
+  const vh = video.videoHeight || 360;
+  const maxW = 640, maxH = 360;
+  const ratio = Math.min(maxW / vw, maxH / vh, 1);
+
+  const src = {
+    id: uid('src'), type: 'webcam', name: '📷 Webcam',
+    visible: true, x: 40, y: 40,
+    width: Math.round(vw * ratio), height: Math.round(vh * ratio),
+    zoom: 1, panX: 0, panY: 0,
+    videoEl: video, stream, recGain: null, monGain: null, analyser: null,
+    volume: 1, muted: false,
+    monitorMuted: true,  // ★ ANTI-GEMA: webcam punya mic → default tidak dimonitor
+  };
+  const audioTracks = stream.getAudioTracks();
+  if (audioTracks.length) {
+    connectAudioTrack(src, audioTracks[0]);
+  }
+  return src;
+}
+
+async function createScreenSource() {
+  warmUpAudio();
+  let stream = null;
+
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { displaySurface: 'monitor' },
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      systemAudio: 'include',
+      selfBrowserSurface: 'exclude',
+      surfaceSwitching: 'include',
+    });
+  } catch (e1) { console.warn('[SCREEN] Attempt 1 gagal:', e1?.name); }
+
+  if (!stream) {
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true, audio: true, systemAudio: 'include',
+      });
+    } catch (e2) { console.warn('[SCREEN] Attempt 2 gagal:', e2?.name); }
+  }
+  if (!stream) {
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+    } catch (e3) { console.error('[SCREEN] Semua attempt gagal:', e3); throw e3; }
+  }
+
+  await resumeAudioContext();
+
+  const audioTracks = stream.getAudioTracks();
+  const hasAudio = audioTracks.length > 0;
+  const platform = (navigator.platform || '').toLowerCase();
+  const isMac = platform.includes('mac');
+  const isLinux = platform.includes('linux');
+  const isWin = platform.includes('win');
+
+  if (!hasAudio) {
+    if (isMac || isLinux) {
+      showToast(
+        '⚠ Screen capture TANPA audio. Audio sistem hanya didukung Windows/ChromeOS.\n' +
+        'Untuk audio: bagikan TAB browser, atau tambahkan Mikrofon.',
+        'warn', 10000
+      );
+    } else {
+      showToast(
+        '⚠ Screen capture TANPA audio. Centang "Bagikan audio tab/sistem".' +
+        (isWin ? ' Jika tidak muncul, coba share tab.' : ''),
+        'warn', 9000
+      );
+    }
+  } else {
+    showToast('🖥 Screen capture + audio siap', 'success', 3000);
+  }
+
+  return buildDisplaySource(stream, '🖥 Screen Capture');
+}
+
+function buildDisplaySource(stream, name) {
+  const video = document.createElement('video');
+  video.srcObject = stream; video.muted = true;
+  video.playsInline = true; video.autoplay = true;
+  mediaPool.appendChild(video);
+  video.play().catch(() => {});
+
+  const vw = video.videoWidth || 1280;
+  const vh = video.videoHeight || 720;
+  const maxW = 960, maxH = 540;
+  const ratio = Math.min(maxW / vw, maxH / vh, 1);
+  const width = Math.round(vw * ratio);
+  const height = Math.round(vh * ratio);
+
+  const src = {
+    id: uid('src'), type: 'screen', name,
+    visible: true,
+    x: Math.round((canvas.width - width) / 2),
+    y: Math.round((canvas.height - height) / 2),
+    width, height,
+    zoom: 1, panX: 0, panY: 0,
+    videoEl: video, stream, recGain: null, monGain: null, analyser: null,
+    volume: 1, muted: false,
+    monitorMuted: false,  // ★ Screen audio: monitor ON default (user mau dengar)
+  };
+
+  const audioTracks = stream.getAudioTracks();
+  if (audioTracks.length) connectAudioTrack(src, audioTracks[0]);
+
+  video.addEventListener('loadedmetadata', () => {
+    if (video.videoWidth && video.videoHeight) {
+      const vw2 = video.videoWidth, vh2 = video.videoHeight;
+      const r2 = Math.min(maxW / vw2, maxH / vh2, 1);
+      src.width = Math.round(vw2 * r2);
+      src.height = Math.round(vh2 * r2);
+      src.x = Math.round((canvas.width - src.width) / 2);
+      src.y = Math.round((canvas.height - src.height) / 2);
+    }
+  });
+
+  const videoTrack = stream.getVideoTracks()[0];
+  if (videoTrack) {
+    videoTrack.addEventListener('ended', () => {
+      src.visible = false;
+      renderSources();
+      showToast('🖥 Screen capture dihentikan', 'warn', 3000);
+    });
+  }
+  audioTracks.forEach(t => {
+    t.addEventListener('ended', () => {
+      console.warn('[SCREEN] Audio track ended');
+      renderAudioMixer();
+      updateAudioBanner();
+    });
+  });
+
+  return src;
+}
+
+function pickVideoFile() {
+  return new Promise(resolve => {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'video/*';
+    input.onchange = () => {
+      if (input.files[0]) resolve({ file: input.files[0], url: URL.createObjectURL(input.files[0]) });
+      else resolve(null);
+    };
+    input.click();
+  });
+}
+
+async function createVideoFileSource() {
+  let videoUrl, fileName;
+  const useFile = confirm('OK = pilih file dari komputer\nCancel = masukkan URL video');
+  if (useFile) {
+    const picked = await pickVideoFile();
+    if (!picked) return null;
+    videoUrl = picked.url; fileName = picked.file.name;
+  } else {
+    videoUrl = prompt('URL video (MP4/WebM):');
+    if (!videoUrl) return null;
+    fileName = videoUrl.split('/').pop().split('?')[0] || 'video';
+  }
+
+  const video = document.createElement('video');
+  video.src = videoUrl;
+  video.loop = true;
+  video.playsInline = true;
+  video.crossOrigin = 'anonymous';
+  video.muted = false;
+  video.volume = 1;
+  mediaPool.appendChild(video);
+
+  await resumeAudioContext();
+  await new Promise((resolve) => {
+    video.onloadedmetadata = resolve;
+    video.onerror = resolve;
+    setTimeout(resolve, 5000);
+  });
+
+  const vw = video.videoWidth || 640, vh = video.videoHeight || 360;
+  const maxW = 800, maxH = 450;
+  const ratio = Math.min(maxW / vw, maxH / vh, 1);
+  const width = Math.round(vw * ratio), height = Math.round(vh * ratio);
+
+  const src = {
+    id: uid('src'), type: 'videofile',
+    name: '📹 ' + fileName.slice(0, 22),
+    visible: true,
+    x: Math.round((canvas.width - width) / 2),
+    y: Math.round((canvas.height - height) / 2),
+    width, height,
+    zoom: 1, panX: 0, panY: 0,
+    videoEl: video, recGain: null, monGain: null, analyser: null,
+    volume: 1, muted: false,
+    monitorMuted: false,  // ★ Video: monitor ON default
+    url: videoUrl,
+  };
+
+  // Route ke rec & monitor terpisah
+  try {
+    const srcNode = state.audioContext.createMediaElementSource(video);
+    const recGain = state.audioContext.createGain();
+    const monGain = state.audioContext.createGain();
+    const analyser = state.audioContext.createAnalyser();
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.7;
+
+    srcNode.connect(recGain);
+    recGain.connect(state.masterGain);
+    recGain.connect(analyser);
+
+    srcNode.connect(monGain);
+    monGain.connect(state.monitorGain);
+
+    src.recGain = recGain;
+    src.monGain = monGain;
+    src.gainNode = recGain;
+    src.analyser = analyser;
+    src.audioSourceNode = srcNode;
+    startAudioLevelLoop();
+  } catch (e) {
+    console.warn('[VIDEO] Web Audio routing gagal:', e);
+  }
+
+  try { await video.play(); } catch (e) { console.warn('Autoplay gagal:', e); }
+
+  video.addEventListener('play', () => renderSources());
+  video.addEventListener('pause', () => renderSources());
+  return src;
+}
+
+function createImageSource() {
+  const url = prompt('URL gambar (harus CORS-enabled):');
+  if (!url) return null;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = url;
+  const src = {
+    id: uid('src'), type: 'image', name: '🖼 Gambar',
+    visible: true, x: 100, y: 100, width: 400, height: 300,
+    zoom: 1, panX: 0, panY: 0,
+    imgEl: img, volume: 1, muted: false, monitorMuted: true,
+  };
+  img.onload = () => {
+    const maxW = 640, maxH = 360;
+    const ratio = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+    src.width = Math.round(img.naturalWidth * ratio);
+    src.height = Math.round(img.naturalHeight * ratio);
+  };
+  return src;
+}
+
+function createTextSource() {
+  const text = prompt('Isi teks:', 'Teks OBS Web');
+  if (!text) return null;
+  return {
+    id: uid('src'), type: 'text', name: '📝 ' + text.slice(0, 20),
+    visible: true, x: 80, y: 80, width: 400, height: 100,
+    text, color: '#ffffff', font: '48px sans-serif',
+    volume: 1, muted: false, monitorMuted: true,
+  };
+}
+
+function createColorSource() {
+  const color = prompt('Warna (hex):', '#ff0000');
+  if (!color) return null;
+  return {
+    id: uid('src'), type: 'color', name: '🎨 Warna ' + color,
+    visible: true, x: 200, y: 150, width: 400, height: 300,
+    color, volume: 1, muted: false, monitorMuted: true,
+  };
+}
+
+async function createMicSource() {
+  // Anti-gema: echoCancellation dari getUserMedia
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+    });
+  } catch {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  }
+  await resumeAudioContext();
+  const src = {
+    id: uid('src'), type: 'mic', name: '🎤 Mikrofon',
+    visible: true, x: 0, y: 0, width: 0, height: 0,
+    stream, recGain: null, monGain: null, analyser: null,
+    volume: 1, muted: false,
+    monitorMuted: true,  // ★ ANTI-GEMA: mic default TIDAK dimonitor
+  };
+  connectAudioTrack(src, stream.getAudioTracks()[0]);
+  return src;
+}
+
+async function addSource(type) {
+  const scene = getActiveScene();
+  if (!scene) return;
+  let src;
+  if (type === 'webcam') src = await createWebcamSource();
+  else if (type === 'screen') src = await createScreenSource();
+  else if (type === 'videofile') src = await createVideoFileSource();
+  else if (type === 'image') src = createImageSource();
+  else if (type === 'text') src = createTextSource();
+  else if (type === 'color') src = createColorSource();
+  else if (type === 'mic') src = await createMicSource();
+  if (!src) return;
+
+  scene.sources.push(src);
+  state.selectedSourceId = src.id;
+
+  // Info anti-gema untuk mic/webcam
+  if (isMicLike(src) && src.audioTrack) {
+    if (state.monitorOn) {
+      showToast(
+        '🔕 Monitor untuk ' + (src.type === 'mic' ? 'mikrofon' : 'webcam') +
+        ' dimatikan otomatis (anti-gema).\n' +
+        'Klik tombol MON di Audio Mixer jika memakai headphone.',
+        'info', 7000
+      );
+    } else {
+      showToast('🎤 ' + (src.type === 'mic' ? 'Mikrofon' : 'Webcam + audio') + ' ditambah (monitor mati)', 'success', 2500);
+    }
+  } else if (src.type === 'screen' && src.audioTrack) {
+    showToast('🖥 Screen capture + audio — monitor & rekaman siap', 'success', 3000);
+  }
+
+  renderSources(); renderAudioMixer();
+  updateAllSceneAudio(); updateAudioBanner();
+}
+
+addSourceBtn.onclick = async () => {
+  warmUpAudio();
+  try { await addSource(sourceTypeSelect.value); }
+  catch (err) { alert('Gagal menambahkan sumber: ' + err.message); }
+};
+
+/* =========================================================
+   SOURCE MANAGEMENT
+   ========================================================= */
+function cleanupSource(src) {
+  if (src.stream) src.stream.getTracks().forEach(t => t.stop());
+  if (src.audioSourceNode) { try { src.audioSourceNode.disconnect(); } catch {} }
+  if (src.recGain) { try { src.recGain.disconnect(); } catch {} }
+  if (src.monGain) { try { src.monGain.disconnect(); } catch {} }
+  if (src.videoEl) {
+    try {
+      src.videoEl.pause();
+      src.videoEl.srcObject = null;
+      src.videoEl.removeAttribute('src');
+      src.videoEl.load();
+    } catch {}
+    src.videoEl.remove();
+  }
+  if (src.type === 'videofile' && src.url && src.url.startsWith('blob:')) {
+    try { URL.revokeObjectURL(src.url); } catch {}
+  }
+}
+
+function removeSource(id) {
+  const scene = getActiveScene();
+  if (!scene) return;
+  const idx = scene.sources.findIndex(s => s.id === id);
+  if (idx === -1) return;
+  cleanupSource(scene.sources[idx]);
+  scene.sources.splice(idx, 1);
+  if (state.selectedSourceId === id) state.selectedSourceId = null;
+  renderSources(); renderAudioMixer();
+  updateAllSceneAudio(); updateAudioBanner();
+}
+
+function moveSource(index, delta) {
+  const scene = getActiveScene();
+  if (!scene) return;
+  const newIndex = index + delta;
+  if (newIndex < 0 || newIndex >= scene.sources.length) return;
+  const [item] = scene.sources.splice(index, 1);
+  scene.sources.splice(newIndex, 0, item);
+  renderSources();
+}
+
+function resetZoom(src) {
+  src.zoom = 1; src.panX = 0; src.panY = 0;
+  renderSources(); updateStatus();
+}
+
+function renderSources() {
+  sourcesListEl.innerHTML = '';
+  const scene = getActiveScene();
+  if (!scene) return;
+  if (!scene.sources.length) {
+    sourcesListEl.innerHTML = '<div class="empty-hint">Belum ada source.<br>Pilih dari dropdown di atas.</div>';
+    return;
+  }
+  scene.sources.forEach((src, idx) => {
+    const div = document.createElement('div');
+    div.className = 'source-item' + (src.id === state.selectedSourceId ? ' active' : '');
+
+    const eye = document.createElement('button');
+    eye.textContent = src.visible ? '👁' : '🚫';
+    eye.title = 'Visibilitas';
+    eye.onclick = (e) => { e.stopPropagation(); src.visible = !src.visible; renderSources(); };
+
+    const label = document.createElement('span');
+    label.textContent = src.name;
+    label.style.flex = '1'; label.style.overflow = 'hidden';
+    label.style.textOverflow = 'ellipsis'; label.style.whiteSpace = 'nowrap';
+
+    div.append(eye, label);
+
+    if (isZoomable(src) && src.zoom && Math.abs(src.zoom - 1) > 0.01) {
+      const zb = document.createElement('button');
+      zb.className = 'zoom-badge';
+      zb.textContent = Math.round(src.zoom * 100) + '%';
+      zb.title = 'Klik untuk reset zoom';
+      zb.onclick = (e) => { e.stopPropagation(); resetZoom(src); };
+      div.appendChild(zb);
+    }
+
+    if (src.type === 'videofile') {
+      const playBtn = document.createElement('button');
+      playBtn.textContent = src.videoEl.paused ? '▶' : '⏸';
+      playBtn.title = 'Play/Pause';
+      playBtn.onclick = (e) => {
+        e.stopPropagation();
+        warmUpAudio();
+        if (src.videoEl.paused) src.videoEl.play().catch(()=>{});
+        else src.videoEl.pause();
+      };
+      div.appendChild(playBtn);
+    }
+
+    const up = document.createElement('button');
+    up.textContent = '▲'; up.title = 'Naik';
+    up.onclick = (e) => { e.stopPropagation(); moveSource(idx, -1); };
+    const down = document.createElement('button');
+    down.textContent = '▼'; down.title = 'Turun';
+    down.onclick = (e) => { e.stopPropagation(); moveSource(idx, 1); };
+    const del = document.createElement('button');
+    del.textContent = '✕'; del.title = 'Hapus';
+    del.onclick = (e) => { e.stopPropagation(); removeSource(src.id); };
+
+    div.append(up, down, del);
+    div.onclick = () => { state.selectedSourceId = src.id; renderSources(); };
+    sourcesListEl.appendChild(div);
+  });
+}
+
+/* =========================================================
+   CANVAS RENDER
+   ========================================================= */
+function drawZoomedImage(src, media) {
+  const z = src.zoom || 1;
+  const panX = src.panX || 0, panY = src.panY || 0;
+  if (z === 1 && panX === 0 && panY === 0) {
+    ctx.drawImage(media, src.x, src.y, src.width, src.height);
+    return;
+  }
+  const dw = src.width * z, dh = src.height * z;
+  const cx = src.x + src.width / 2 + panX;
+  const cy = src.y + src.height / 2 + panY;
+  const drawX = cx - dw / 2, drawY = cy - dh / 2;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(src.x, src.y, src.width, src.height);
+  ctx.clip();
+  ctx.drawImage(media, drawX, drawY, dw, dh);
+  ctx.restore();
+}
+
+function drawFrame() {
+  const scene = getActiveScene();
+  ctx.fillStyle = scene ? scene.background : '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (!scene) return;
+  for (const src of scene.sources) {
+    if (!src.visible) continue;
+    ctx.save();
+    if (src.type === 'webcam' || src.type === 'screen' || src.type === 'videofile') {
+      if (src.videoEl && src.videoEl.readyState >= 2 && src.videoEl.videoWidth > 0) {
+        try { drawZoomedImage(src, src.videoEl); } catch {}
+      }
+    } else if (src.type === 'image') {
+      if (src.imgEl && src.imgEl.complete && src.imgEl.naturalWidth) {
+        try { drawZoomedImage(src, src.imgEl); } catch {}
+      }
+    } else if (src.type === 'text') {
+      ctx.font = src.font; ctx.fillStyle = src.color; ctx.textBaseline = 'top';
+      ctx.fillText(src.text, src.x, src.y, src.width);
+    } else if (src.type === 'color') {
+      ctx.fillStyle = src.color;
+      ctx.fillRect(src.x, src.y, src.width, src.height);
+    }
+    ctx.restore();
+  }
+  drawSelection();
+}
+
+function drawSelection() {
+  const scene = getActiveScene();
+  if (!scene || !state.selectedSourceId) return;
+  const src = scene.sources.find(s => s.id === state.selectedSourceId);
+  if (!src || !src.visible || src.type === 'mic') return;
+  ctx.save();
+  ctx.strokeStyle = '#00aaff'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+  ctx.strokeRect(src.x, src.y, src.width, src.height);
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#00aaff';
+  ctx.fillRect(src.x + src.width - 8, src.y + src.height - 8, 12, 12);
+  if (isZoomable(src) && src.zoom && Math.abs(src.zoom - 1) > 0.01) {
+    const text = Math.round(src.zoom * 100) + '%';
+    ctx.fillStyle = 'rgba(0,170,255,.9)';
+    ctx.fillRect(src.x, src.y - 20, 44, 16);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px ui-monospace, monospace';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, src.x + 6, src.y - 12);
+  }
+  ctx.restore();
+}
+
+/* =========================================================
+   DRAG & RESIZE
+   ========================================================= */
+let interaction = null;
+function getCanvasPoint(e) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (canvas.width / rect.width),
+    y: (e.clientY - rect.top) * (canvas.height / rect.height),
+  };
+}
+function isInsideSource(pt, src) {
+  return pt.x >= src.x && pt.x <= src.x + src.width &&
+         pt.y >= src.y && pt.y <= src.y + src.height;
+}
+function isNearResizeHandle(pt, src) {
+  const hx = src.x + src.width, hy = src.y + src.height;
+  return Math.abs(pt.x - hx) <= 14 && Math.abs(pt.y - hy) <= 14;
+}
+canvas.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return;
+  const pt = getCanvasPoint(e);
+  const scene = getActiveScene();
+  if (!scene) return;
+  for (let i = scene.sources.length - 1; i >= 0; i--) {
+    const src = scene.sources[i];
+    if (!src.visible || src.type === 'mic') continue;
+    if (isNearResizeHandle(pt, src)) {
+      state.selectedSourceId = src.id;
+      interaction = { type: 'resize', src, start: pt, origW: src.width, origH: src.height };
+      renderSources(); e.preventDefault(); return;
+    }
+    if (isInsideSource(pt, src)) {
+      state.selectedSourceId = src.id;
+      interaction = { type: 'drag', src, start: pt, origX: src.x, origY: src.y };
+      renderSources(); e.preventDefault(); return;
+    }
+  }
+  state.selectedSourceId = null;
+  renderSources();
+});
+window.addEventListener('pointermove', (e) => {
+  if (!interaction) return;
+  const pt = getCanvasPoint(e);
+  const src = interaction.src;
+  if (interaction.type === 'drag') {
+    src.x = Math.round(interaction.origX + (pt.x - interaction.start.x));
+    src.y = Math.round(interaction.origY + (pt.y - interaction.start.y));
+    src.x = Math.max(-src.width + 20, Math.min(canvas.width - 20, src.x));
+    src.y = Math.max(-src.height + 20, Math.min(canvas.height - 20, src.y));
+  } else if (interaction.type === 'resize') {
+    src.width = Math.max(40, Math.round(interaction.origW + (pt.x - interaction.start.x)));
+    src.height = Math.max(40, Math.round(interaction.origH + (pt.y - interaction.start.y)));
+  }
+});
+window.addEventListener('pointerup', () => { interaction = null; });
+
+/* =========================================================
+   ZOOM
+   ========================================================= */
+const ZOOM_MIN = 0.5, ZOOM_MAX = 5;
+function findTopSourceAt(pt) {
+  const scene = getActiveScene();
+  if (!scene) return null;
+  for (let i = scene.sources.length - 1; i >= 0; i--) {
+    const src = scene.sources[i];
+    if (!src.visible || !isZoomable(src)) continue;
+    if (isInsideSource(pt, src)) return src;
+  }
+  return null;
+}
+function applyZoomAt(src, newZoom, anchorX, anchorY) {
+  newZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, newZoom));
+  const oldZoom = src.zoom || 1;
+  if (Math.abs(newZoom - oldZoom) < 1e-6) return;
+  const panX = src.panX || 0, panY = src.panY || 0;
+  const cx = src.x + src.width / 2, cy = src.y + src.height / 2;
+  const dx = anchorX - cx, dy = anchorY - cy;
+  const ratio = newZoom / oldZoom;
+  src.panX = dx - (dx - panX) * ratio;
+  src.panY = dy - (dy - panY) * ratio;
+  src.zoom = newZoom;
+}
+canvas.addEventListener('wheel', (e) => {
+  const pt = getCanvasPoint(e);
+  const src = findTopSourceAt(pt);
+  if (!src) return;
+  e.preventDefault();
+  const wheelDelta = -e.deltaY;
+  const step = Math.sign(wheelDelta) * Math.min(0.2, Math.abs(wheelDelta) * 0.0025);
+  if (step === 0) return;
+  applyZoomAt(src, (src.zoom || 1) + step, pt.x, pt.y);
+  state.selectedSourceId = src.id;
+  renderSources(); updateStatus();
+}, { passive: false });
+canvas.addEventListener('dblclick', (e) => {
+  const pt = getCanvasPoint(e);
+  const src = findTopSourceAt(pt);
+  if (src) { resetZoom(src); e.preventDefault(); }
+});
+
+/* =========================================================
+   RECORDING
+   ========================================================= */
+function detectMimeSupport() {
+  const checks = {
+    'MP4 H.264 + AAC': 'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+    'MP4 H.264 (video saja)': 'video/mp4;codecs=avc1.42E01E',
+    'WebM VP9 + Opus': 'video/webm;codecs=vp9,opus',
+    'WebM VP8 + Opus': 'video/webm;codecs=vp8,opus',
+    'WebM VP9 (video saja)': 'video/webm;codecs=vp9',
+  };
+  const results = {};
+  for (const [k, v] of Object.entries(checks)) {
+    try { results[k] = MediaRecorder.isTypeSupported(v); } catch { results[k] = false; }
+  }
+  return results;
+}
+function refreshMimeInfo() {
+  const results = detectMimeSupport();
+  const hasMp4Audio = results['MP4 H.264 + AAC'];
+  const hasWebmAudio = results['WebM VP9 + Opus'] || results['WebM VP8 + Opus'];
+  if (hasMp4Audio) {
+    mimeSupportEl.textContent = '✔ MP4 + Audio';
+    mimeSupportEl.style.color = 'var(--ok)';
+  } else if (hasWebmAudio) {
+    mimeSupportEl.textContent = '✔ WebM + Audio';
+    mimeSupportEl.style.color = 'var(--ok)';
+  } else {
+    mimeSupportEl.textContent = '⚠ Audio codec terbatas';
+    mimeSupportEl.style.color = 'var(--warn)';
+  }
+  mimeInfoEl.innerHTML = Object.entries(results)
+    .map(([k, v]) => `<div>${v ? '✔' : '✕'} ${k}</div>`).join('');
+}
+function pickSupportedMime(pref, withAudio = true) {
+  const list = [];
+  if (pref === 'auto') {
+    if (withAudio) {
+      list.push(
+        'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+        'video/mp4;codecs=avc1,mp4a.40.2',
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm',
+        'video/mp4;codecs=avc1.42E01E',
+        'video/mp4'
+      );
+    } else {
+      list.push(
+        'video/mp4;codecs=avc1.42E01E',
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm',
+        'video/mp4'
+      );
+    }
+  } else {
+    if (withAudio) {
+      if (/mp4/i.test(pref) && !/mp4a/i.test(pref) && /codecs=/.test(pref)) {
+        list.push(pref.replace(/(codecs=[^,;]+)/i, '$1,mp4a.40.2'));
+      }
+      if (/webm/i.test(pref) && !/opus/i.test(pref) && /codecs=/.test(pref)) {
+        list.push(pref.replace(/(codecs=[^,;]+)/i, '$1,opus'));
+      }
+    }
+    list.push(pref);
+    list.push(
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm;codecs=vp9',
+      'video/webm;codecs=vp8',
+      'video/webm'
+    );
+  }
+  for (const m of list) {
+    try { if (MediaRecorder.isTypeSupported(m)) return m; } catch {}
+  }
+  return 'video/webm';
+}
+
+function getRecordingStream() {
+  const canvasStream = canvas.captureStream(state.recFps);
+  const videoTracks = [...canvasStream.getVideoTracks()];
+  let audioTracks = [];
+
+  if (state.audioDestination) {
+    audioTracks = state.audioDestination.stream.getAudioTracks().filter(t => {
+      if (!t || t.readyState === 'ended') return false;
+      t.enabled = true;
+      return true;
+    });
+  }
+
+  const scene = getActiveScene();
+  let hasActiveAudio = false;
+  if (scene) {
+    hasActiveAudio = scene.sources.some(s =>
+      s.audioTrack && s.audioTrack.readyState === 'live' && !s.muted
+    );
+  }
+  if (audioTracks.length === 0 && scene) {
+    for (const src of scene.sources) {
+      if (src.audioTrack && src.audioTrack.readyState === 'live') {
+        audioTracks.push(src.audioTrack);
+      }
+    }
+  }
+  const stream = new MediaStream([...videoTracks, ...audioTracks]);
+  return { stream, hasAudio: audioTracks.length > 0 && hasActiveAudio };
+}
+
+function updateRecTimerDisplay() {
+  let elapsed = Date.now() - state.recStartTime - state.recPausedTotal;
+  if (state.recPausedAt) elapsed -= (Date.now() - state.recPausedAt);
+  recTimerEl.textContent = formatDuration(elapsed);
+  recSizeEl.textContent = formatBytes(state.currentRecSize);
+}
+function startRecTimer() {
+  state.recStartTime = Date.now();
+  state.recPausedTotal = 0; state.recPausedAt = 0;
+  state.currentRecSize = 0;
+  state.recTimerInterval = setInterval(updateRecTimerDisplay, 200);
+  updateRecTimerDisplay();
+}
+function stopRecTimer() {
+  if (state.recTimerInterval) { clearInterval(state.recTimerInterval); state.recTimerInterval = null; }
+  recTimerEl.textContent = ''; recSizeEl.textContent = '';
+}
+function updateRecButtons() {
+  if (!state.recording) {
+    recordBtn.style.display = ''; pauseBtn.style.display = 'none'; stopBtn.style.display = 'none';
+    recordBtn.textContent = '● Rekam'; recordBtn.classList.add('primary');
+    recordBtn.classList.remove('danger'); recordBtn.disabled = false;
+  } else {
+    recordBtn.style.display = 'none'; pauseBtn.style.display = ''; stopBtn.style.display = '';
+    pauseBtn.textContent = state.recPaused ? '▶ Lanjut' : '⏸ Jeda';
+    pauseBtn.classList.toggle('primary', state.recPaused);
+  }
+}
+
+async function startRecording() {
+  if (state.recording) return;
+  if (!canvas.captureStream) {
+    alert('Browser tidak mendukung canvas.captureStream().');
+    return;
+  }
+  warmUpAudio();
+  const ctxState = await resumeAudioContext();
+  if (ctxState !== 'running') {
+    showToast('⚠ AudioContext belum running — audio mungkin tidak terekam.', 'warn', 5000);
+  }
+  updateAllSceneAudio();
+
+  const { stream, hasAudio } = getRecordingStream();
+  if (!hasAudio) {
+    showToast('⚠ Tidak ada audio aktif — rekaman tanpa suara.', 'warn', 5000);
+  }
+
+  const mime = pickSupportedMime(state.recMime, hasAudio);
+  console.log('[REC] mime =', mime, '| audio tracks =', stream.getAudioTracks().length);
+
+  let recorder;
+  try {
+    recorder = new MediaRecorder(stream, {
+      mimeType: mime,
+      videoBitsPerSecond: state.recBitrate,
+      audioBitsPerSecond: 128000,
+    });
+  } catch (err) {
+    console.error('[REC] MediaRecorder error:', err);
+    alert('MediaRecorder gagal: ' + err.message);
+    return;
+  }
+
+  state.mediaRecorder = recorder;
+  state.recordedChunks = [];
+  state.currentRecSize = 0;
+
+  recorder.ondataavailable = (e) => {
+    if (e.data && e.data.size > 0) {
+      state.recordedChunks.push(e.data);
+      state.currentRecSize += e.data.size;
+    }
+  };
+
+  recorder.onstop = () => {
+    const duration = Date.now() - state.recStartTime - state.recPausedTotal;
+    const blob = new Blob(state.recordedChunks, { type: mime.split(';')[0] });
+    const url = URL.createObjectURL(blob);
+    const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const name = `rekaman-${stamp}.${ext}`;
+
+    const rec = { id: uid('rec'), name, blob, url, size: blob.size, duration, timestamp: Date.now(), mime };
+    recordings.push(rec);
+    renderRecordings();
+
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+
+    state.recording = false; state.recPaused = false; state.currentRecSize = 0;
+    stopRecTimer(); updateRecButtons(); updateStatus();
+    showToast('✅ Rekaman selesai: ' + name, 'success', 4000);
+  };
+
+  recorder.start(1000);
+  state.recording = true; state.recPaused = false;
+  startRecTimer(); updateRecButtons(); updateStatus();
+}
+function pauseRecording() {
+  if (!state.mediaRecorder || state.mediaRecorder.state !== 'recording') return;
+  try {
+    state.mediaRecorder.pause();
+    state.recPausedAt = Date.now();
+    state.recPaused = true;
+    updateRecButtons(); updateStatus();
+  } catch (e) { console.warn(e); }
+}
+function resumeRecording() {
+  if (!state.mediaRecorder || state.mediaRecorder.state !== 'paused') return;
+  try {
+    state.mediaRecorder.resume();
+    if (state.recPausedAt) {
+      state.recPausedTotal += Date.now() - state.recPausedAt;
+      state.recPausedAt = 0;
+    }
+    state.recPaused = false;
+    updateRecButtons(); updateStatus();
+  } catch (e) { console.warn(e); }
+}
+function stopRecording() {
+  if (!state.mediaRecorder) return;
+  if (state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop();
+}
+
+/* =========================================================
+   RECORDINGS LIBRARY
+   ========================================================= */
+function renderRecordings() {
+  recordingsListEl.innerHTML = '';
+  recCountEl.textContent = recordings.length;
+  if (!recordings.length) {
+    recordingsListEl.innerHTML = '<div class="empty-hint">Belum ada rekaman.<br>Klik <b>● Rekam</b>.</div>';
+    return;
+  }
+  [...recordings].reverse().forEach(rec => {
+    const div = document.createElement('div');
+    div.className = 'recording-item';
+
+    const title = document.createElement('div');
+    title.className = 'rec-title';
+    title.textContent = '📹 ' + rec.name;
+
+    const meta = document.createElement('div');
+    meta.className = 'rec-meta';
+    const formatLabel = rec.mime.includes('mp4') ? 'MP4' : 'WebM';
+    meta.textContent = `${formatDuration(rec.duration)} • ${formatBytes(rec.size)} • ${formatLabel}`;
+
+    const actions = document.createElement('div');
+    actions.className = 'rec-actions';
+
+    const playBtn = document.createElement('button');
+    playBtn.textContent = '▶ Preview'; playBtn.classList.add('primary');
+    playBtn.onclick = () => openPreview(rec);
+
+    const dlBtn = document.createElement('button');
+    dlBtn.textContent = '⬇ Download';
+    dlBtn.onclick = () => downloadRecording(rec);
+
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '✕'; delBtn.classList.add('danger'); delBtn.title = 'Hapus';
+    delBtn.onclick = () => deleteRecording(rec.id);
+
+    actions.append(playBtn, dlBtn, delBtn);
+    div.append(title, meta, actions);
+    recordingsListEl.appendChild(div);
+  });
+}
+function openPreview(rec) {
+  warmUpAudio();
+  previewVideo.src = rec.url;
+  previewVideo.load();
+  previewInfo.textContent = `${rec.name} • ${formatDuration(rec.duration)} • ${formatBytes(rec.size)}`;
+  previewModal.classList.remove('hidden');
+  previewVideo.play().catch(()=>{});
+}
+function downloadRecording(rec) {
+  const a = document.createElement('a');
+  a.href = rec.url; a.download = rec.name; a.click();
+}
+function deleteRecording(id) {
+  const idx = recordings.findIndex(r => r.id === id);
+  if (idx === -1) return;
+  if (!confirm('Hapus rekaman ini?')) return;
+  try { URL.revokeObjectURL(recordings[idx].url); } catch {}
+  recordings.splice(idx, 1); renderRecordings();
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+recordBtn.onclick = () => { if (!state.recording) startRecording(); };
+pauseBtn.onclick = () => { if (state.recPaused) resumeRecording(); else pauseRecording(); };
+stopBtn.onclick = () => { stopRecording(); };
+
+recSettingsBtn.onclick = () => {
+  warmUpAudio();
+  refreshMimeInfo();
+  settingsModal.classList.remove('hidden');
+};
+document.getElementById('settings-close').onclick = () => settingsModal.classList.add('hidden');
+document.getElementById('cfg-mime').onchange = (e) => { state.recMime = e.target.value; };
+document.getElementById('cfg-quality').onchange = (e) => { state.recBitrate = parseInt(e.target.value); };
+document.getElementById('cfg-fps').onchange = (e) => { state.recFps = parseInt(e.target.value); };
+
+document.getElementById('preview-close').onclick = () => {
+  previewVideo.pause(); previewVideo.removeAttribute('src');
+  previewModal.classList.add('hidden');
+};
+previewModal.addEventListener('click', (e) => {
+  if (e.target === previewModal) {
+    previewVideo.pause(); previewModal.classList.add('hidden');
+  }
+});
+
+/* =========================================================
+   WHIP
+   ========================================================= */
+async function startWHIP(endpoint) {
+  if (state.whipPc) { alert('Siaran sudah aktif.'); return; }
+  warmUpAudio();
+  await resumeAudioContext();
+  updateAllSceneAudio();
+  const { stream } = getRecordingStream();
+  const pc = new RTCPeerConnection();
+  stream.getTracks().forEach(track => pc.addTrack(track, stream));
+  state.whipPc = pc;
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  await new Promise(resolve => {
+    if (pc.iceGatheringState === 'complete') return resolve();
+    const check = () => {
+      if (pc.iceGatheringState === 'complete') {
+        pc.removeEventListener('icegatheringstatechange', check);
+        resolve();
+      }
+    };
+    pc.addEventListener('icegatheringstatechange', check);
+    setTimeout(resolve, 5000);
+  });
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/sdp' },
+    body: pc.localDescription.sdp,
+  });
+  if (!res.ok) throw new Error('WHIP endpoint menolak: ' + res.status);
+  const answer = await res.text();
+  await pc.setRemoteDescription({ type: 'answer', sdp: answer });
+  state.isLive = true;
+  liveBtn.textContent = '■ Stop Siaran';
+  liveBtn.classList.add('danger');
+}
+function stopWHIP() {
+  if (state.whipPc) { try { state.whipPc.close(); } catch {} state.whipPc = null; }
+  state.isLive = false;
+  liveBtn.textContent = '🌐 Siaran';
+  liveBtn.classList.remove('danger');
+}
+liveBtn.onclick = async () => {
+  if (state.isLive) { stopWHIP(); return; }
+  warmUpAudio();
+  const endpoint = prompt('WHIP endpoint:');
+  if (!endpoint) return;
+  try { await startWHIP(endpoint); }
+  catch (err) { alert('Gagal siaran: ' + err.message); stopWHIP(); }
+};
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+function updateStatus() {
+  const scene = getActiveScene();
+  const audioCount = scene ? scene.sources.filter(s => s.recGain || s.type === 'mic').length : 0;
+  let recText = '';
+  if (state.recording) recText = state.recPaused ? ' | ⏸ REC PAUSED' : ' | ● REC';
+
+  let zoomText = '';
+  if (scene && state.selectedSourceId) {
+    const sel = scene.sources.find(s => s.id === state.selectedSourceId);
+    if (sel && isZoomable(sel) && sel.zoom && Math.abs(sel.zoom - 1) > 0.01) {
+      zoomText = `  |  🔍 Zoom: ${Math.round(sel.zoom * 100)}%`;
+    }
+  }
+
+  const monText = state.monitorOn ? '🔊 Monitor ON' : '🔇 Monitor OFF';
+  const ctxState = state.audioContext ? state.audioContext.state : '-';
+
+  statusEl.textContent =
+    `${monText}  |  AudioCtx: ${ctxState}  |  Scene: ${scene?.name || '-'}  |  ${canvas.width}×${canvas.height} @${state.recFps}fps  |  Audio: ${audioCount}  |  Rekaman: ${recordings.length}${recText}${zoomText}`;
+
+  updateAudioBanner();
+}
+setInterval(updateStatus, 1000);
+
+/* =========================================================
+   INIT
+   ========================================================= */
+function init() {
+  const scene = createScene('Scene 1');
+  state.scenes.push(scene);
+  state.activeSceneId = scene.id;
+
+  const { width, height } = getRatioDimensions(state.canvasRatio);
+  canvas.width = width;
+  canvas.height = height;
+  canvasRatioSelect.value = state.canvasRatio;
+
+  ensureAudioContext();
+  renderScenes();
+  renderSources();
+  renderAudioMixer();
+  renderRecordings();
+  refreshMimeInfo();
+  drawFrame();
+  state.drawTimer = setInterval(drawFrame, 1000 / 30);
+  updateStatus();
+  resizeCanvasDisplay();
+  updateAudioBanner();
+
+  if (window.ResizeObserver) {
+    new ResizeObserver(() => resizeCanvasDisplay())
+      .observe(document.querySelector('.preview-area'));
+  }
+
+  setTimeout(() => {
+    if (state.audioContext.state !== 'running') {
+      showToast('⚠ Klik di mana saja untuk mengaktifkan audio', 'warn', 8000);
+    } else {
+      showToast('🔊 Audio siap. Mic otomatis anti-gema (tidak dimonitor).', 'info', 6000);
+    }
+  }, 500);
+}
+
+window.addEventListener('beforeunload', () => {
+  state.scenes.forEach(s => s.sources.forEach(cleanupSource));
+  if (state.whipPc) { try { state.whipPc.close(); } catch {} }
+  if (state.audioContext) { try { state.audioContext.close(); } catch {} }
+  recordings.forEach(r => { try { URL.revokeObjectURL(r.url); } catch {} });
+});
+
+init();
+</script>
+</body>
+</html>
